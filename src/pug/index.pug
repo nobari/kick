@@ -1,0 +1,153 @@
+doctype html
+html(lang='en')
+- var features={"sync":["sync","havij mavij"],"kudos":["kudos","havij mavij"],"pick":["pick","havij mavij"],"help":["help","havij mavij"]}
+    head
+
+        meta(charset='utf-8')
+        meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
+        meta(name='description', content='Kick Bot site')
+        meta(name='author', content='Kick Bot')
+        meta(rel="apple-touch-startup-image", href="assets/img/logo.png")
+        meta(rel="apple-touch-icon", href="assets/img/logo.png")
+        meta(name="apple-mobile-web-app-capable", content="yes")
+        meta(name="apple-mobile-web-app-status-bar-style", content="black-translucent")
+        meta(property="og:image", href="assets/img/logo.png")
+        meta(property="twitter:image", href="assets/img/logo.png")
+
+        title Kick Productivity Bot
+
+        // Favicon
+        link(rel='icon', type='image/png', href='assets/img/logo.png')
+
+        script(src='https://use.fontawesome.com/releases/v6.1.1/js/all.js', crossorigin='anonymous')
+
+        // Google fonts
+        link(href='https://fonts.googleapis.com/css?family=Montserrat:400,700', rel='stylesheet', type='text/css')
+        link(href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic', rel='stylesheet', type='text/css')
+
+        // Core theme CSS (includes Bootstrap)
+        link(href='css/styles.css', rel='stylesheet')
+
+    body#page-top
+
+        // Navigation
+        nav#mainNav.navbar.navbar-expand.bg-primary.fixed-top
+            .container
+                a.navbar-brand(href='#page-top')
+                    img.logo-header(src='assets/img/logo.png')
+                    | Kick Bot
+                button.navbar-toggler.text-uppercase.font-weight-bold.bg-primary.text-white.rounded(type='button', data-bs-toggle='collapse', data-bs-target='#navbarResponsive', aria-controls='navbarResponsive', aria-expanded='false', aria-label='Toggle navigation')
+                    | Menu 
+                    i.fas.fa-bars
+                #navbarResponsive.collapse.navbar-collapse
+                    ul.navbar-nav.ms-auto
+                        li.nav-item.mx-1
+                            a.nav-link.rounded(href='#features') Features
+                        li.nav-item.mx-1
+                            a.nav-link.rounded(href='#about') About
+
+        // Masthead
+        header.masthead.bg-primary.text-white.text-center
+            .head-container
+                .header-torch 
+                    .header-torch-back 
+                        img#torch(src='assets/img/header/0.png',alt='Kick Light')
+                .header-text-container
+                    .header-text
+                        // Masthead Heading
+                        h1.masthead-heading
+                            | 👋 Hello, I'm 
+                            a(href='assets/KickBot.pdf' target='__blank')
+                                b Kick Bot
+                            | .
+                        p.masthead-subheading
+                            | I work for productivity, to improve it by
+                            br
+                            del myself
+                            |  
+                            i the team
+                            | .
+
+        // Features Section
+        section#features.page-section.features
+            .container
+                // Features Section Heading
+                h2.page-section-heading.text-center.text-secondary.mb-0 Selected Features
+                // Icon Divider
+                .divider-custom
+                    .divider-custom-line
+                    .divider-custom-icon
+                        i.fas.fa-microscope
+                    .divider-custom-line
+                // features Grid Items
+                each num, feature in features
+                    .row.justify-content-center.mb-4
+                        h2.text-center #{num[0]}
+                        .row.mb-2
+                            .col-8
+                                img.img-fluid(src='assets/img/features/'+feature+'.png', alt=feature+'-cover')
+                            .col-4
+                                p.lead
+                                | #{num[1]}
+                            
+        // About Section
+        section#about.page-section
+            .container
+                // About Section Heading
+                h2.page-section-heading.text-center.text-secondary.mb-0 About
+                // Icon Divider
+                .divider-custom
+                    .divider-custom-line
+                    .divider-custom-icon
+                        i.fas.fa-face-smile-beam
+                    .divider-custom-line
+                // About Section Content
+                .row
+                    .col-lg-4.ms-auto.avatar-div
+                        img(src='assets/img/logo.png', alt='KickBot Logo')
+                    .col-lg-4.ms-auto
+                        p.lead
+                            | Kick Bot.
+                            br
+                            br
+                            | Kick Bot
+                            |.
+                            br
+                            br
+                            | Kick Bot
+                    .col-lg-4.me-auto
+                        p.lead
+                            | Kick Bot
+                            br
+                            br
+                            | Kick Bot
+                            |, Kick Bot
+                            br
+                            br
+                            | Kick Bot
+                            a(href='https://patents.google.com/patent/US9923846B2/en',target='__blank') patented
+                            |  Kick Bot
+        // Footer
+        footer.footer.text-center.bg-primary
+            .container
+                .row
+                    // Footer Location
+                    .col-lg-4.mb-5.mb-lg-0
+                        h4.text-uppercase.mb-4 Location
+                        p.lead.mb-0
+                            | Japan, Tokyo
+                    // Footer Social Icons
+                    .col-lg-4
+                        include includes/contact.pug
+                        
+
+        // Copyright Section
+        div.copyright.bg-primary.text-center.text-white
+            .container
+                small Copyright &copy; Kick Bot 2022
+        // Bootstrap core JS
+        script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js')
+
+        // Core theme JS
+        script var portfolios = !{JSON.stringify(features)};
+        script(src='js/scripts.js')

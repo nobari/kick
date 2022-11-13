@@ -1,0 +1,27 @@
+mixin portfolio(title,num)
+    .portfolio-modal.modal.modal-fullscreen.fade(id=title+"Modal",data-name=title, tabindex='-1', aria-labelledby=id, aria-hidden='true')
+        .modal-dialog.modal-xl
+            .modal-content
+                .modal-header.border-0
+                    button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                .modal-body.text-center.pb-5
+                    .container
+                        .row.justify-content-center
+                            .col-lg-8
+                                h2.portfolio-modal-title.text-secondary.text-uppercase.mb-0 #{title}
+                                .divider-custom
+                                    .divider-custom-line
+                                    .divider-custom-icon
+                                        i.fas.fa-star
+                                    .divider-custom-line
+                                img.img-fluid.rounded.mb-5(src='assets/img/portfolio/'+title+"/"+(num[3] || '/cover.png'), alt=title+'-cover')
+                                - var gif = 1;
+                                while gif <= (num[2]||0)
+                                    img.img-fluid.rounded.mb-5(src='assets/img/portfolio/'+title+'/'+(gif++)+'.gif',loading='lazy',alt=title+'-case-'+srcs)
+                                - var srcs = 1;
+                                while srcs <= num[1]
+                                    img.img-fluid.rounded.mb-5(src='assets/img/portfolio/'+title+'/'+(srcs++)+'.png',loading='lazy',alt=title+'-case-'+srcs)
+                                include contact.pug
+                                button.btn.btn-secondary(data-bs-dismiss='modal')
+                                    i.fas.fa-xmark.fa-fw
+                                    | Close Window

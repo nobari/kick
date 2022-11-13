@@ -1,0 +1,92 @@
+//
+// Navbar
+//
+
+#mainNav {
+  --bs-bg-opacity: 0.5;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-family: $headings-font-family;
+  font-weight: $headings-font-weight;
+
+  .navbar-brand {
+    color: $white;
+  }
+
+  .navbar-nav {
+    margin-top: 1rem;
+
+    li.nav-item {
+      a.nav-link {
+        color: $white;
+
+        &:hover {
+          color: $primary;
+        }
+
+        &:active,
+        &:focus {
+          color: $white;
+        }
+
+        &.active {
+          color: $primary;
+        }
+      }
+    }
+  }
+
+  .navbar-toggler {
+    font-size: 80%;
+    padding: 0.8rem;
+  }
+}
+
+// @include media-breakpoint-up(sm) {
+#mainNav {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  transition: padding-top 0.3s, padding-bottom 0.3s;
+
+  .navbar-brand {
+    font-size: 1em;
+    transition: font-size 0.3s;
+  }
+
+  .navbar-nav {
+    margin-top: 0;
+  }
+
+  .navbar-nav > li.nav-item > a.nav-link.active {
+    color: $white;
+    background: $primary;
+
+    &:active,
+    &:focus,
+    &:hover {
+      color: $white;
+      background: $primary;
+    }
+  }
+}
+.logo-header{
+  width: 50px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+#mainNav.navbar-expand {
+  .nav-link {
+    padding: 1rem;
+  }
+}
+#mainNav.navbar-shrink {
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+  .nav-link {
+    padding: 0.5rem;
+  }
+  .navbar-brand {
+    font-size: 0.75em;
+  }
+}
+// }
