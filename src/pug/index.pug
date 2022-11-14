@@ -47,6 +47,8 @@ html(lang='en')
                             a.nav-link.rounded(href='#about') About
                         li.nav-item.mx-1
                             a.nav-link.rounded(href='#contact') Contact
+                        li.nav-item.mx-1
+                            a.nav-link.rounded(href='#privacy') Privacy
 
         // Masthead
         header.masthead.bg-primary.text-white.text-center
@@ -107,13 +109,37 @@ html(lang='en')
                 .row
                     .col-lg-4.ms-auto.avatar-div
                         img(src='assets/img/logo.png' alt='KickBot Logo')
-                    .col-lg-8.ms-auto
+                    .col-lg-4.ms-auto
                         p.lead
                             | Kick Bot
                             br
                             br
                             | Kick is here to boost the team's productivity, not to mention this is exactly the mission and vision of <strong>kick</strong>
-        // Footer
+                    .col-lg-4.ms-auto
+                        a(href="https://slack.com/oauth/v2/authorize?client_id=296971191191.4147683074375&scope=app_mentions:read,channels:history,channels:read,chat:write,chat:write.customize,commands,im:history,users:read&user_scope=channels:read,chat:write")
+                            img(alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcSet="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x")
+        section#privacy.page-section
+            .container
+                h2.page-section-heading.text-center.text-secondary.mb-0 Privacy Policies
+                p Effective Date November 12, 2022
+                .row
+                    h3 What We Collect
+                    p Kick stores your Slack workspace name, workspace Id, and an authorization token on installation that grants permission to read public and private channel members.
+                    p Kick does not save any team member's email address and therefore will not contact you via email.
+                .row
+                    h3 Installation Permissions
+                    p Confirm your identity - Kick uses this permission to verify your account in Slack.
+                    p Access information about your channels - Kick uses this permission to read the member Id's in the public channel where /pick was entered. The member Ids are used to randomly choose one member to complete the task. Member Id's are not saved.
+                    p Add slash commands - Kick uses this permission to allow the /pick slash command.
+                    p Access your workspace's profile information - Kick uses this permission to determine if channel members are online and are not a bot to determine eligibility to be picked.
+                    p Send messages as @Kick - Kick uses this permission to completed scheduled picks. If a pick is scheduled for 8 AM every day, then Kick needs the permission to add a message to your channel to indicate who was picked for the task.
+                .row
+                    h3 Data Retention
+                    p To use Kick you are granting access to the data which you agree to provide, upon installation of Kick, as described during the installation process. Kick will use the data granted during install to perform its functions, including, but not limited to, viewing information about the installer, the Slack workspace, the channels and channel members where Kick is used.
+                    p Any interaction with Kick, from within Slack, may be logged for monitoring and error handling purposes.
+                    p All data will be retained for three years.
+                    p You may request a copy of your data from Kick by contacting kick-bot-help@gmail.com. We will provide an export of your data within 14 days.
+                    p You may also request that we remove all of your data from our database, after you uninstall Kick, and contact kick-bot-help@gmail.com. Include your business' name and Slack instance name, a responsible party's full name, email, and phone number associated with the business. A confirmation will be provided to you within 30 days that your data has been removed from our database.
         footer#contact.footer.text-center.bg-primary
             .container
                 .row
