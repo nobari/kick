@@ -1,32 +1,32 @@
 doctype html
 html(lang='en')
-- var features={"sync":["sync","havij mavij"],"kudos":["kudos","havij mavij"],"pick":["pick","havij mavij"],"help":["help","havij mavij"]}
+- var features={"help":["Help","To ask help any time add <em>-h</em> to any of the commands"],"sync":["Sync","For recurring meetings, this command is to collect everyone's update<br><br>• `/sync`: to collect<br>• `/sync -r 7`: to get the report of the last 7 days of the team. 7 can be replaced by any number within [1,30]"],"kudos":["Kudos","To send thanks/kudos to some member in order to appreciate them appropriately:<br><br>• `/kudos`: to submit your token of appreciation<br>• `/kudos -r 7`: to get the report of the last 7 days of the team. 7 can be replaced by any number within [1,30]"],"pick":["Pick","To randomly selecting/picking/choosing a member [and if you will ask a random :question: question]:<br><br>• `/pick`: to help you randomly select member(s)"]}
     head
 
         meta(charset='utf-8')
-        meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
-        meta(name='description', content='Kick Bot site')
-        meta(name='author', content='Kick Bot')
-        meta(rel="apple-touch-startup-image", href="assets/img/logo.png")
-        meta(rel="apple-touch-icon", href="assets/img/logo.png")
-        meta(name="apple-mobile-web-app-capable", content="yes")
-        meta(name="apple-mobile-web-app-status-bar-style", content="black-translucent")
-        meta(property="og:image", href="assets/img/logo.png")
-        meta(property="twitter:image", href="assets/img/logo.png")
+        meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no')
+        meta(name='description' content='Kick Bot site')
+        meta(name='author' content='Kick Bot')
+        meta(rel="apple-touch-startup-image" href="assets/img/logo.png")
+        meta(rel="apple-touch-icon" href="assets/img/logo.png")
+        meta(name="apple-mobile-web-app-capable" content="yes")
+        meta(name="apple-mobile-web-app-status-bar-style" content="black-translucent")
+        meta(property="og:image" href="assets/img/logo.png")
+        meta(property="twitter:image" href="assets/img/logo.png")
 
         title Kick Productivity Bot
 
         // Favicon
-        link(rel='icon', type='image/x-icon', href='assets/favicon.ico')
+        link(rel='icon' type='image/x-icon' href='assets/favicon.ico')
 
-        script(src='https://use.fontawesome.com/releases/v6.1.1/js/all.js', crossorigin='anonymous')
+        script(src='https://use.fontawesome.com/releases/v6.1.1/js/all.js' crossorigin='anonymous')
 
         // Google fonts
-        link(href='https://fonts.googleapis.com/css?family=Montserrat:400,700', rel='stylesheet', type='text/css')
-        link(href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic', rel='stylesheet', type='text/css')
+        link(href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css')
+        link(href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='stylesheet' type='text/css')
 
         // Core theme CSS (includes Bootstrap)
-        link(href='css/styles.css', rel='stylesheet')
+        link(href='css/styles.css' rel='stylesheet')
 
     body#page-top
 
@@ -36,7 +36,7 @@ html(lang='en')
                 a.navbar-brand(href='#page-top')
                     img.logo-header(src='assets/img/logo.png')
                     | Kick Bot
-                button.navbar-toggler.text-uppercase.font-weight-bold.bg-primary.text-white.rounded(type='button', data-bs-toggle='collapse', data-bs-target='#navbarResponsive', aria-controls='navbarResponsive', aria-expanded='false', aria-label='Toggle navigation')
+                button.navbar-toggler.text-uppercase.font-weight-bold.bg-primary.text-white.rounded(type='button' data-bs-toggle='collapse' data-bs-target='#navbarResponsive' aria-controls='navbarResponsive' aria-expanded='false' aria-label='Toggle navigation')
                     | Menu 
                     i.fas.fa-bars
                 #navbarResponsive.collapse.navbar-collapse
@@ -45,13 +45,15 @@ html(lang='en')
                             a.nav-link.rounded(href='#features') Features
                         li.nav-item.mx-1
                             a.nav-link.rounded(href='#about') About
+                        li.nav-item.mx-1
+                            a.nav-link.rounded(href='#contact') Contact
 
         // Masthead
         header.masthead.bg-primary.text-white.text-center
             .head-container
                 .header-torch 
                     .header-torch-back 
-                        img#torch(src='assets/img/header/0.png',alt='Kick Light')
+                        img#torch(src='assets/img/header/0.png' alt='Kick Light')
                 .header-text-container
                     .header-text
                         // Masthead Heading
@@ -85,11 +87,11 @@ html(lang='en')
                         h2.text-center #{num[0]}
                         .row.mb-2
                             .col-8
-                                img.img-fluid(src='assets/img/features/'+feature+'.png', alt=feature+'-cover')
+                                img.img-fluid.img-feat(src='assets/img/features/'+feature+'.png', alt=feature+'-cover')
                             .col-4
                                 p.lead
-                                | #{num[1]}
-                            
+                                | !{num[1]}
+
         // About Section
         section#about.page-section
             .container
@@ -104,31 +106,15 @@ html(lang='en')
                 // About Section Content
                 .row
                     .col-lg-4.ms-auto.avatar-div
-                        img(src='assets/img/logo.png', alt='KickBot Logo')
-                    .col-lg-4.ms-auto
-                        p.lead
-                            | Kick Bot.
-                            br
-                            br
-                            | Kick Bot
-                            |.
-                            br
-                            br
-                            | Kick Bot
-                    .col-lg-4.me-auto
+                        img(src='assets/img/logo.png' alt='KickBot Logo')
+                    .col-lg-8.ms-auto
                         p.lead
                             | Kick Bot
                             br
                             br
-                            | Kick Bot
-                            |, Kick Bot
-                            br
-                            br
-                            | Kick Bot
-                            a(href='https://patents.google.com/patent/US9923846B2/en',target='__blank') patented
-                            |  Kick Bot
+                            | Kick is here to boost the team's productivity, not to mention this is exactly the mission and vision of <strong>kick</strong>
         // Footer
-        footer.footer.text-center.bg-primary
+        footer#contact.footer.text-center.bg-primary
             .container
                 .row
                     // Footer Location
@@ -139,7 +125,7 @@ html(lang='en')
                     // Footer Social Icons
                     .col-lg-4
                         include includes/contact.pug
-                        
+
 
         // Copyright Section
         div.copyright.bg-primary.text-center.text-white
