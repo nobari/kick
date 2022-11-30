@@ -1,6 +1,7 @@
 doctype html
 html(lang='en')
-- var features={"help":["Help","To ask help any time add <code>-h</code> to any of the commands"],"sync":["Sync","For recurring meetings, this command is to collect everyone's update<br><br>• <code>/sync</code> : to collect<br>• <code>/sync -r 7</code> : to get the report of the last 7 days of the team. 7 can be replaced by any number within [1,30]"],"kudos":["Kudos","To send thanks/kudos to some member in order to appreciate them appropriately:<br><br>• <code>/kudos</code> : to submit your token of appreciation<br>• <code>/kudos -r 7</code> : to get the report of the last 7 days of the team. 7 can be replaced by any number within [1,30]"],"pick":["Pick","To randomly selecting/picking/choosing a member [and if you will ask a random :question: question]:<br><br>• <code>/pick</code> : to help you randomly select member(s)"]}
+- var features={"help":["Help","To ask help any time add <code>-h</code> to any of the commands"],"sync":["Sync","For recurring meetings, this command is to collect everyone's update<br><br>• <code>/sync</code> : to collect<br>• <code>/sync -r 7</code> : to get the report of the last 7 days of the team. 7 can be replaced by any number within [1,30]"],"kudos":["Kudos","To send thanks/kudos to some member in order to appreciate them appropriately:<br><br>• <code>/kudos</code> : to submit your token of appreciation<br>• <code>/kudos -r 7</code> : to get the report of the last 7 days of the team. 7 can be replaced by any number within [1,30]"],"pick":["Pick","To randomly select, pick or choose a member [and if you will ask a random :question: question]:<br><br>• <code>/pick</code> : to help you randomly select member(s)"]}
+- var slackURL="https://us-central1-slack-manage.cloudfunctions.net/s/slack/install"
     head
 
         meta(charset='utf-8')
@@ -13,6 +14,7 @@ html(lang='en')
         meta(name="apple-mobile-web-app-status-bar-style" content="black-translucent")
         meta(property="og:image" href="assets/img/logo.png")
         meta(property="twitter:image" href="assets/img/logo.png")
+        meta(name="slack-app-id" content="A044BL326B1")
 
         title Kick Productivity Bot
 
@@ -46,9 +48,11 @@ html(lang='en')
                         li.nav-item.mx-1
                             a.nav-link.rounded(href='#about') About
                         li.nav-item.mx-1
-                            a.nav-link.rounded(href='#contact') Contact
-                        li.nav-item.mx-1
                             a.nav-link.rounded(href='#privacy') Privacy
+                        li.nav-item.mx-1
+                            a.nav-link.rounded(href='#terms') Terms
+                        li.nav-item.mx-1
+                            a.nav-link.rounded(href='#contact') Contact
 
         // Masthead
         header.masthead.bg-primary.text-white.text-center
@@ -61,7 +65,7 @@ html(lang='en')
                         // Masthead Heading
                         h1.masthead-heading
                             | 👋 Hello, I'm 
-                            a(href='assets/KickBot.pdf' target='__blank')
+                            a(href=slackURL target='__blank')
                                 b Kick Bot
                             | .
                         p.masthead-subheading
@@ -71,6 +75,9 @@ html(lang='en')
                             |  
                             i the team
                             | .
+                            a(href=slackURL target='__blank')
+                                img(alt="Add to Slack" src="https://platform.slack-edge.com/img/add_to_slack.png" srcSet="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x")
+
 
         // Features Section
         section#features.page-section.features
@@ -108,20 +115,23 @@ html(lang='en')
                 // About Section Content
                 .row
                     .col-lg-4.ms-auto.avatar-div
-                        img(src='assets/img/logo.png' alt='KickBot Logo')
+                        a(href="https://slack.com/oauth/v2/authorize?client_id=296971191191.4147683074375&scope=app_mentions:read,channels:history,channels:read,chat:write,chat:write.public,commands,im:history,users:read&user_scope=")
+                            img(src='assets/img/logo.png' alt='KickBot Logo')
                     .col-lg-4.ms-auto
                         p.lead
                             | Kick Bot
                             br
                             br
                             | Kick is here to boost the team's productivity, not to mention this is exactly the mission and vision of <strong>kick</strong>
-                    .col-lg-4.ms-auto
-                        a(href="https://slack.com/oauth/v2/authorize?client_id=296971191191.4147683074375&scope=app_mentions:read,channels:history,channels:read,chat:write,chat:write.customize,commands,im:history,users:read&user_scope=channels:read,chat:write")
-                            img(alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcSet="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x")
+                    .col-lg-4.ms-auto.text-center
+                        a(class="slack-btn" href=slackURL target="__blank")
+                            <svg xmlns="http://www.w3.org/2000/svg" style="height:24px;width:24px;margin-right:12px" viewBox="0 0 122.8 122.8"><path d="M25.8 77.6c0 7.1-5.8 12.9-12.9 12.9S0 84.7 0 77.6s5.8-12.9 12.9-12.9h12.9v12.9zm6.5 0c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9v32.3c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V77.6z" fill="#e01e5a"></path><path d="M45.2 25.8c-7.1 0-12.9-5.8-12.9-12.9S38.1 0 45.2 0s12.9 5.8 12.9 12.9v12.9H45.2zm0 6.5c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9H12.9C5.8 58.1 0 52.3 0 45.2s5.8-12.9 12.9-12.9h32.3z" fill="#36c5f0"></path><path d="M97 45.2c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9-5.8 12.9-12.9 12.9H97V45.2zm-6.5 0c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V12.9C64.7 5.8 70.5 0 77.6 0s12.9 5.8 12.9 12.9v32.3z" fill="#2eb67d"></path><path d="M77.6 97c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9-12.9-5.8-12.9-12.9V97h12.9zm0-6.5c-7.1 0-12.9-5.8-12.9-12.9s5.8-12.9 12.9-12.9h32.3c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9H77.6z" fill="#ecb22e"></path></svg>
+                            | Add to Slack
+                            //- img(alt="Add to Slack" src="https://platform.slack-edge.com/img/add_to_slack.png" srcSet="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x")
         section#privacy.page-section
             .container
                 h2.page-section-heading.text-center.text-secondary.mb-0 Privacy Policies
-                p Effective Date November 12, 2022
+                p.mt-2 Effective Date November 30, 2022
                 .row
                     h3 What We Collect
                     p Kick stores your Slack workspace name, workspace Id, and an authorization token on installation that grants permission to read public and private channel members.
@@ -140,6 +150,43 @@ html(lang='en')
                     p All data will be retained for three years.
                     p You may request a copy of your data from Kick by contacting kick-bot-help@gmail.com. We will provide an export of your data within 14 days.
                     p You may also request that we remove all of your data from our database, after you uninstall Kick, and contact kick-bot-help@gmail.com. Include your business' name and Slack instance name, a responsible party's full name, email, and phone number associated with the business. A confirmation will be provided to you within 30 days that your data has been removed from our database.
+
+        section#terms.page-section
+            .container
+                h2.page-section-heading.text-center.text-secondary.mb-0 Terms of Use
+                p.mt-2 Effective Date November 30, 2022
+                .row
+                    h3 About our Terms
+                    p The following terms and conditions apply to the Kick app and website, hereafter referred to as Kick. By using Kick you are agreeing to the terms and conditions published on this web page.
+                    p Please read this page and our privacy policy carefully and let us know if you have any questions by contacting us.
+                .row
+                    h3 Free Features
+                    p Kick includes a core set of free features that are available to you when you install Kick into your Slack workspace. These features include, but are not limited to, the ability for kick to perform the predefined options, for example: Pick, Stand-up, Kudos, and more. Once a /pick command is issued Kick will then select a member(s) at random, within the channel that the /pick command was issued.
+                    p By using Kick you acknowledge that Kick reserves the right to add, augment, or remove any free feature at any given time based on the needs.
+                    p Please refer to the help menu within Slack via the "/sync -help" command for a full list of features.
+                .row
+                    h3 Your Account and Personal Data
+                    p To use Kick you are granting access to the data which you agree to provide, upon installation of Kick, as described during the installation process. Kick will use the data granted during install to perform its functions, including, but not limited to, viewing information about the installer, the Slack workspace, the channels and channel members where Kick is used.
+                    p Any interaction with Kick, from within Slack, may be logged for improvement, monitoring and error handling purposes. All data will be retained for some time and you may request a copy of your data from Kick by contacting us. We will provide an export of your data within 14 days. You may also request that we remove all of your data from our database, after you uninstall Kick, and contact us. Include your business' name and Slack instance name, a responsible party's full name, email, and phone number associated with the business. A confirmation will be provided to you within 30 days that your data has been removed from our database.
+                .row
+                    h3 Limitation of Liability
+                    p In no event will Kick be liable, with respect to anything that occurs to you while using or attempting to use Kick, including but not limited to indirect, special, incidental, or consequential loss or damages or loss of profit, business, revenue, savings, or business opportunity. Kick will have no liability for any failure or delay due to circumstances beyond its reasonable control.
+                .row
+                    h3 Your Responsibilities
+                    p You agree that your use of Kick will be in strict accordance with this agreement, including:
+                    ol.p-5.pt-1.pb-1
+                        li you will comply with the Slack Terms of Service at all times and will provide us with accurate information where required
+                        li you will not rely on Kick for emergency situations or situations where its failure could result in any kind of damages monetary or otherwise to you or your business
+                        li you will not infringe on our intellectual property rights
+                        li you will not be obscene, offensive, hateful, or inflammatory while interacting with Kick
+                        li you will not use Kick in a way to damage or overload its provided service or abuse
+                        li you will not collect or decipher any Kick messages
+                        li you agree to indemnify and hold harmless Kick and its representatives, employees, and owners
+                .row
+                    h3 Miscellaneous
+                    p This agreement between you and us does not grant you, or any Slack user associated with you, rights. We may transfer our rights and obligations and your collected data to an entity upon the sale of the Kick product. If any specific term in this agreement is deemed unlawful by a court or competent authority, then that specific term will be nullified while the remainder of this agreement will remain.
+
+
         footer#contact.footer.text-center.bg-primary
             .container
                 .row

@@ -48,7 +48,7 @@
     height: 100%;
     position: relative;
     .header-torch-back {
-      background-image: url('/assets/img/header/back.jpg');
+      background-image: url("/assets/img/header/back.jpg");
       height: 100%;
       background-size: cover;
       #torch {
@@ -66,7 +66,7 @@
   img {
     max-width: 100%;
     max-height: 400px;
-    padding-bottom: 10px;
+    border-radius: 10px;
   }
 }
 @include media-breakpoint-up(sm) {
