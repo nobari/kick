@@ -20,8 +20,12 @@
     ],
     "rewrites": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/api/**",
+        "function": "app"
+      },
+      {
+          "source": "!/@(api)/**",
+          "destination": "/index.html"
       }
     ]
   }
