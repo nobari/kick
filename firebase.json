@@ -20,11 +20,11 @@
     ],
     "rewrites": [
       {
-        "source": "/api/**",
-        "function": "app"
+        "source": "/slack/**",
+        "function": "s/slack"
       },
       {
-          "source": "!/@(api)/**",
+          "source": "!/@(slack)/**",
           "destination": "/index.html"
       }
     ]
