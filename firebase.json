@@ -21,7 +21,7 @@
     "rewrites": [
       {
         "source": "/slack/**",
-        "function": "s/slack"
+        "function": "s"
       },
       {
           "source": "!/@(slack)/**",
