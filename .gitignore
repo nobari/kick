@@ -21,6 +21,7 @@ setup.sh
 .firebase/
 
 functions/
+grun/
 # Firebase config
 
 # Uncomment this if you'd like others to create their own Firebase project.
