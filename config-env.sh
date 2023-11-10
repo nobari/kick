@@ -40,7 +40,7 @@ gcloud services enable \
     # eventarc.googleapis.com \
     # cloudscheduler.googleapis.com \
 
-export REGION=us-central1
+export REGION=asia-northeast1
 export WORKFLOW_LOCATION=$REGION
 export TRIGGER_LOCATION=$REGION
 
