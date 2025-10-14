@@ -8,4 +8,4 @@
 
 <br/>
 
-Check live demonstration <a href="https://kick.bot"><strong>here</strong></a>
+Check live demonstration <a href="https://sadeandmoji.com"><strong>here</strong></a>
