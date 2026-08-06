@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "../src/scss/styles.scss";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kick.bot";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://slack-kickbot.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@11.6.0",
   "description": "Kick Bot Slack scrum management app",
-  "homepage": "https://kick.bot",
+  "homepage": "https://slack-kickbot.vercel.app",
   "license": "UNLICENSED",
   "author": "Sadegh Nobari",
   "scripts": {
