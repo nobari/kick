@@ -8,7 +8,7 @@ export const config = {
 }
 
 export default function handler(req, res) {
-  if (!slack.isConfigured && req.url !== '/api/slack/health') {
+  if (!slack.isConfigured && !req.url.startsWith('/api/slack/health')) {
     return res.status(503).json({
       error: 'Slack service is not configured',
       missingEnvironmentVariables: slack.missingEnv

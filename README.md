@@ -21,7 +21,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-The website is available at `http://localhost:3000`. The Slack configuration health endpoint is `http://localhost:3000/api/slack/health`.
+The website is available at `http://localhost:3000`. The Slack configuration health endpoint is `http://localhost:3000/api/slack/health`; add `?deep=1` to verify Firestore connectivity.
 
 ## Environment variables
 
@@ -34,9 +34,14 @@ Copy `.env.example` to `.env.local` for local development. Configure the same va
 | `SLACK_CLIENT_SECRET` | Slack app OAuth client secret. |
 | `SLACK_SIGNING_SECRET` | Verifies incoming Slack requests. |
 | `SLACK_STATE_SECRET` | A new random secret used to sign OAuth state. |
-| `FIREBASE_SERVICE_ACCOUNT_KEY` | Complete Google service-account JSON, serialized on one line. |
+| `GCP_PROJECT_ID` | Google Cloud project containing the existing Firestore database. |
+| `GCP_PROJECT_NUMBER` | Numeric Google Cloud project identifier. |
+| `GCP_SERVICE_ACCOUNT_EMAIL` | Dedicated Firestore service-account identity. |
+| `GCP_WORKLOAD_IDENTITY_POOL_ID` | Google workload-identity pool trusted by Vercel. |
+| `GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID` | OIDC provider inside the workload-identity pool. |
+| `FIREBASE_SERVICE_ACCOUNT_KEY` | Optional local-development fallback; not needed on Vercel. |
 
-The Google service account needs access to the existing `slack-manage` Firestore database. Do not commit `.env.local`, service-account JSON, or Slack credentials.
+Vercel obtains a short-lived Google credential through OIDC and impersonates a dedicated service account with `roles/datastore.user`. No permanent Google private key is stored in Vercel. Do not commit `.env.local`, service-account JSON, or Slack credentials.
 
 Legacy Slack secrets were embedded in old local deployment files. Rotate the Slack client secret, signing secret, bot/user tokens, and test-app credentials before production cutover.
 

@@ -19,8 +19,36 @@ const APP_CONFIG = {
 }
 var _ = require('lodash')
 const { Firestore } = require('@google-cloud/firestore')
+const { ExternalAccountClient } = require('google-auth-library')
+const { getVercelOidcToken } = require('@vercel/oidc')
+
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
   ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
+  : null
+const hasIndividualGoogleCredentials = Boolean(
+  process.env.GOOGLE_PROJECT_ID &&
+    process.env.GOOGLE_CLIENT_EMAIL &&
+    process.env.GOOGLE_PRIVATE_KEY
+)
+const GCP_OIDC_ENV = [
+  'GCP_PROJECT_ID',
+  'GCP_PROJECT_NUMBER',
+  'GCP_SERVICE_ACCOUNT_EMAIL',
+  'GCP_WORKLOAD_IDENTITY_POOL_ID',
+  'GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID'
+]
+const hasGcpOidcConfig = GCP_OIDC_ENV.every((name) => process.env[name])
+const gcpOidcClient = hasGcpOidcConfig
+  ? ExternalAccountClient.fromJSON({
+      type: 'external_account',
+      audience: `//iam.googleapis.com/projects/${process.env.GCP_PROJECT_NUMBER}/locations/global/workloadIdentityPools/${process.env.GCP_WORKLOAD_IDENTITY_POOL_ID}/providers/${process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID}`,
+      subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
+      token_url: 'https://sts.googleapis.com/v1/token',
+      service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${process.env.GCP_SERVICE_ACCOUNT_EMAIL}:generateAccessToken`,
+      subject_token_supplier: {
+        getSubjectToken: getVercelOidcToken
+      }
+    })
   : null
 const firestoreOptions = serviceAccount
   ? {
@@ -30,9 +58,7 @@ const firestoreOptions = serviceAccount
         private_key: serviceAccount.private_key.replace(/\\n/g, '\n')
       }
     }
-  : process.env.GOOGLE_PROJECT_ID &&
-      process.env.GOOGLE_CLIENT_EMAIL &&
-      process.env.GOOGLE_PRIVATE_KEY
+  : hasIndividualGoogleCredentials
     ? {
         projectId: process.env.GOOGLE_PROJECT_ID,
         credentials: {
@@ -40,6 +66,12 @@ const firestoreOptions = serviceAccount
           private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n')
         }
       }
+    : gcpOidcClient
+      ? {
+          projectId: process.env.GCP_PROJECT_ID,
+          authClient: gcpOidcClient,
+          preferRest: true
+        }
     : {}
 const db = new Firestore(firestoreOptions)
 db.settings({ ignoreUndefinedProperties: true })
@@ -71,13 +103,10 @@ const REQUIRED_ENV = [
 const missingEnv = REQUIRED_ENV.filter((name) => !process.env[name])
 if (
   !serviceAccount &&
-  !(
-    process.env.GOOGLE_PROJECT_ID &&
-    process.env.GOOGLE_CLIENT_EMAIL &&
-    process.env.GOOGLE_PRIVATE_KEY
-  )
+  !hasIndividualGoogleCredentials &&
+  !hasGcpOidcConfig
 ) {
-  missingEnv.push('FIREBASE_SERVICE_ACCOUNT_KEY')
+  missingEnv.push(...GCP_OIDC_ENV.filter((name) => !process.env[name]))
 }
 const slackConfig = {
   clientId: process.env.SLACK_CLIENT_ID || 'not-configured',
@@ -223,9 +252,28 @@ expressReceiver.router.get('/', async (req, res) => {
   res.redirect('https://sadeandmoji.com')
 })
 expressReceiver.router.get('/api/slack/health', async (req, res) => {
+  let firestore = hasGcpOidcConfig || serviceAccount || hasIndividualGoogleCredentials
+    ? 'configured'
+    : 'not-configured'
+
+  if (req.query.deep === '1' && firestore === 'configured') {
+    try {
+      await db.collection(OAUTHDB).limit(1).get()
+      firestore = 'connected'
+    } catch (error) {
+      Logger.error('Firestore health check failed:', error)
+      return res.status(503).json({
+        ok: false,
+        service: 'kick-slack',
+        firestore: 'unavailable'
+      })
+    }
+  }
+
   res.status(missingEnv.length ? 503 : 200).json({
     ok: missingEnv.length === 0,
     service: 'kick-slack',
+    firestore,
     missingEnvironmentVariables: missingEnv
   })
 })
