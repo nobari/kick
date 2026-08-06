@@ -10,6 +10,11 @@
 html {
   height: 100%;
   scroll-padding-top: calc(#{$navbar-height} - 1px);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
 }
 
 // Styling for page sections
@@ -26,6 +31,31 @@ html {
       font-size: 3rem;
       line-height: 2.5rem;
     }
+  }
+}
+
+.feature {
+  align-items: center;
+
+  .feature-copy {
+    margin: 1rem 0 0;
+  }
+}
+
+.legal-section {
+  h3 {
+    margin-top: 1.75rem;
+  }
+
+  p,
+  li {
+    max-width: 78ch;
+  }
+}
+
+@include media-breakpoint-up(md) {
+  .feature .feature-copy {
+    margin-top: 0;
   }
 }
 
