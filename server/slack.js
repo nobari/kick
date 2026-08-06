@@ -69,6 +69,16 @@ const REQUIRED_ENV = [
   'SLACK_STATE_SECRET'
 ]
 const missingEnv = REQUIRED_ENV.filter((name) => !process.env[name])
+if (
+  !serviceAccount &&
+  !(
+    process.env.GOOGLE_PROJECT_ID &&
+    process.env.GOOGLE_CLIENT_EMAIL &&
+    process.env.GOOGLE_PRIVATE_KEY
+  )
+) {
+  missingEnv.push('FIREBASE_SERVICE_ACCOUNT_KEY')
+}
 const slackConfig = {
   clientId: process.env.SLACK_CLIENT_ID || 'not-configured',
   clientSecret: process.env.SLACK_CLIENT_SECRET || 'not-configured',
