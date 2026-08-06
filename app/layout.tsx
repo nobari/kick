@@ -1,57 +1,88 @@
 import type { Metadata, Viewport } from "next";
-import "../src/scss/styles.scss";
+import "./globals.css";
+import { SiteFooter, SiteHeader } from "./ui/SiteChrome";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://slack-kickbot.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Kick Productivity Bot",
+  title: {
+    default: "Kick Bot — Async Standups, Kudos & Team Picks in Slack",
+    template: "%s | Kick Bot",
+  },
   description:
-    "Organize standups, kudos, team picks, and more from inside Slack.",
+    "Run async Slack standups, share kudos, send team rewards, and make fair random picks without adding another tool.",
   applicationName: "Kick Bot",
+  authors: [{ name: "Sadegh Nobari" }],
+  creator: "Sadegh Nobari",
+  publisher: "Kick Bot",
+  category: "productivity",
+  keywords: [
+    "Slack standup bot",
+    "async standup Slack",
+    "Slack scrum bot",
+    "Slack kudos bot",
+    "team productivity bot",
+    "random team picker",
+  ],
+  alternates: { canonical: "/" },
   icons: {
-    icon: "/assets/favicon.ico",
+    icon: [
+      { url: "/assets/favicon.ico" },
+      { url: "/assets/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
     apple: "/assets/apple-touch-icon.png",
   },
-  manifest: "/assets/site.webmanifest",
+  manifest: "/manifest.webmanifest",
   openGraph: {
-    title: "Kick Productivity Bot",
-    description:
-      "Organize standups, kudos, team picks, and more from inside Slack.",
-    images: ["/assets/img/logo.png"],
     type: "website",
+    url: siteUrl,
+    siteName: "Kick Bot",
+    title: "Kick Bot — Better team rituals, right inside Slack",
+    description:
+      "Async standups, kudos, rewards, and fair team picks without another dashboard.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Kick Bot for Slack" }],
   },
   twitter: {
-    card: "summary",
-    title: "Kick Productivity Bot",
-    description:
-      "Organize standups, kudos, team picks, and more from inside Slack.",
-    images: ["/assets/img/logo.png"],
+    card: "summary_large_image",
+    title: "Kick Bot — Better team rituals, right inside Slack",
+    description: "Async standups, kudos, rewards, and fair team picks in Slack.",
+    images: ["/opengraph-image"],
   },
-  other: {
-    "slack-app-id": "A044BL326B1",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
+  other: { "slack-app-id": "A044BL326B1" },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#102644",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fffdf8" },
+    { media: "(prefers-color-scheme: dark)", color: "#11152a" },
+  ],
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:wght@400;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>{children}</body>
+      <body>
+        <a className="skip-link" href="#main-content">Skip to content</a>
+        <SiteHeader />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }
