@@ -8,7 +8,7 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Kick Bot — Async Standups, Kudos & Team Picks in Slack",
+    default: "Kick Bot — Team Rituals for Slack",
     template: "%s | Kick Bot",
   },
   description:
@@ -39,14 +39,14 @@ export const metadata: Metadata = {
     type: "website",
     url: siteUrl,
     siteName: "Kick Bot",
-    title: "Kick Bot — Better team rituals, right inside Slack",
+    title: "Kick Bot — Better team rituals for Slack",
     description:
       "Async standups, kudos, rewards, and fair team picks without another dashboard.",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Kick Bot for Slack" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kick Bot — Better team rituals, right inside Slack",
+    title: "Kick Bot — Better team rituals for Slack",
     description: "Async standups, kudos, rewards, and fair team picks in Slack.",
     images: ["/opengraph-image"],
   },

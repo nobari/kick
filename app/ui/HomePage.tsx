@@ -184,7 +184,7 @@ export default function HomePage() {
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-copy">
           <p className="eyebrow"><span className="eyebrow-dot"/> Built for teams that live in Slack</p>
-          <h1 id="hero-title">Better team rituals.<br/><em>Right inside Slack.</em></h1>
+          <h1 id="hero-title">Better team rituals.<br/><em>Built for Slack.</em></h1>
           <p className="hero-lede">Kick turns async standups, recognition, rewards, and team picks into simple Slack workflows—so everyone stays aligned without adding another tool.</p>
           <div className="hero-actions">
             <SlackButton />
