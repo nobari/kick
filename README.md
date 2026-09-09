@@ -7,7 +7,7 @@ The application has been migrated from a Pug/Firebase/Cloud Run setup to Next.js
 ## Architecture
 
 - Next.js App Router renders the public website.
-- The public site is statically rendered at `https://slack-kickbot.vercel.app` with generated metadata, structured data, `robots.txt`, `sitemap.xml`, and `llms.txt`.
+- The public site is statically rendered at `https://kick.bozmoz.com` with generated metadata, structured data, `robots.txt`, `sitemap.xml`, and `llms.txt`.
 - `/api/slack/[[...path]]` hosts the Slack Bolt Express receiver as a Vercel Function.
 - Google Cloud Firestore stores Slack OAuth installations and workflow records.
 - pnpm manages dependencies and the lockfile.
@@ -48,11 +48,11 @@ Legacy Slack secrets were embedded in old local deployment files. Rotate the Sla
 
 ## Slack app URLs
 
-The production Slack app configuration uses the canonical Vercel domain:
+The production Slack app configuration uses the canonical custom domain:
 
-- OAuth redirect URL: `https://slack-kickbot.vercel.app/api/slack/oauth_redirect`
-- Request URL for slash commands, interactivity, and events: `https://slack-kickbot.vercel.app/api/slack/events`
-- Install URL: `https://slack-kickbot.vercel.app/api/slack/install`
+- OAuth redirect URL: `https://kick.bozmoz.com/api/slack/oauth_redirect`
+- Request URL for slash commands, interactivity, and events: `https://kick.bozmoz.com/api/slack/events`
+- Install URL: `https://kick.bozmoz.com/api/slack/install`
 
 Keep the Cloud Run service available until the Vercel environment variables are set, the OAuth redirect URL is accepted by Slack, and a command has been tested in a non-production workspace.
 

@@ -1,8 +1,8 @@
 # Legacy-domain redirect
 
-This Firebase Hosting configuration keeps the expiring `sadeandmoji.com`
-domain useful by permanently redirecting every request to the canonical Vercel
-deployment at `https://slack-kickbot.vercel.app`.
+This Firebase Hosting configuration permanently redirects requests for the legacy
+`sadeandmoji.com` site to the canonical Vercel deployment at
+`https://kick.bozmoz.com`.
 
 Deploy it from this directory with:
 

@@ -8,8 +8,8 @@
     ],
     "redirects": [
       {
-        "source": "**",
-        "destination": "https://slack-kickbot.vercel.app",
+        "source": "/:path*",
+        "destination": "https://kick.bozmoz.com/:path",
         "type": 301
       }
     ]

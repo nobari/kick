@@ -1,7 +1,7 @@
 const TEST = !!process.env.TEST
 const FAST = true
 const GLOBAL_PREFIX = TEST ? 't' : ''
-const INSTALL_LINK = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://slack-kickbot.vercel.app'}/api/slack/install`,
+const INSTALL_LINK = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kick.bozmoz.com'}/api/slack/install`,
   EMAIL = 'kick.bot.help@gmail.com'
 const APP_CONFIG = {
   funcs: {
@@ -249,7 +249,7 @@ expressReceiver.router.get('/sasha', async (req, res) => {
 })
 expressReceiver.router.get('/', async (req, res) => {
   // You're working with an express req and res now.
-  res.redirect(process.env.NEXT_PUBLIC_SITE_URL || 'https://slack-kickbot.vercel.app')
+  res.redirect(process.env.NEXT_PUBLIC_SITE_URL || 'https://kick.bozmoz.com')
 })
 expressReceiver.router.get('/api/slack/health', async (req, res) => {
   let firestore = hasGcpOidcConfig || serviceAccount || hasIndividualGoogleCredentials

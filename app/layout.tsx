@@ -3,7 +3,7 @@ import "./globals.css";
 import { SiteFooter, SiteHeader } from "./ui/SiteChrome";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://slack-kickbot.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://kick.bozmoz.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

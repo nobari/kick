@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://slack-kickbot.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://kick.bozmoz.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date("2026-08-06T00:00:00.000Z");
+  const lastModified = new Date("2026-09-09T00:00:00.000Z");
   return [
     { url: siteUrl, lastModified, changeFrequency: "monthly", priority: 1, images: [`${siteUrl}/assets/img/logo.png`] },
     { url: `${siteUrl}/privacy`, lastModified, changeFrequency: "yearly", priority: 0.4 },

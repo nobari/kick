@@ -2,11 +2,11 @@ const body = `# Kick Bot
 
 > Kick is a Slack productivity bot for async standups, peer recognition, team rewards, and fair random selection.
 
-Canonical website: https://slack-kickbot.vercel.app
-Install: https://slack-kickbot.vercel.app/api/slack/install
-Support: https://slack-kickbot.vercel.app/support
-Privacy: https://slack-kickbot.vercel.app/privacy
-Terms: https://slack-kickbot.vercel.app/terms
+Canonical website: https://kick.bozmoz.com
+Install: https://kick.bozmoz.com/api/slack/install
+Support: https://kick.bozmoz.com/support
+Privacy: https://kick.bozmoz.com/privacy
+Terms: https://kick.bozmoz.com/terms
 
 ## Core workflows
 
