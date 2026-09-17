@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@google-cloud/firestore", "@slack/bolt"],
+  serverExternalPackages: ["@slack/bolt"],
   async redirects() {
     return [
       {

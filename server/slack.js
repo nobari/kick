@@ -140,26 +140,6 @@ expressReceiver.router.get('/api/slack/health', async (req, res) => {
 })
 // Global error handler
 app.error(() => console.error('Slack request failed'))
-/*
-pubsub test
-const {PubSub} = require('@google-cloud/pubsub');
-const TOPIC_NAME = 'order-topic';
-function getNewOrderNumber() {
-  return Math.round(10000 + Math.random() * 90000);
-}
-
-async function publishMessage(data) {
-  try {
-    const dataBuffer = Buffer.from(JSON.stringify(data))
-    const messageId = await pubsub
-        .topic(TOPIC_NAME)
-        .publishMessage({data: dataBuffer});
-    console.log(`Message ${messageId} published.`);
-  } catch (error) {
-    console.error(`Received error while publishing: ${error.message}`);
-  }
-}
-*/
 
 function splitArrayIntoChunks(arr, chunkSize) {
   const chunks = []

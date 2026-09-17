@@ -14,10 +14,8 @@
     "lint": "eslint .",
     "test": "node --test server/rituals/*.test.js server/install-result.test.js tests/scheduler.test.mjs",
     "test:ritual-db": "node --env-file=.env.rehearsal.local --test tests/ritual-postgres.test.mjs",
-    "db:inventory": "node scripts/db/firestore-inventory.mjs slack-manage",
     "test:db-handlers": "node --test tests/postgres-handlers.test.mjs",
-    "test:db-inventory": "node --test tests/firestore-inventory.test.mjs tests/firestore-retry.test.mjs tests/encrypted-snapshot.test.mjs",
-    "test:db": "node --test tests/firestore-inventory.test.mjs tests/firestore-retry.test.mjs tests/encrypted-snapshot.test.mjs tests/normalized-plan.test.mjs tests/database-schema.test.mjs tests/installation-repository.test.mjs tests/import-rehearsal.test.mjs tests/database-connection.test.mjs tests/reconcile-plan.test.mjs"
+    "test:db": "node --test tests/database-schema.test.mjs tests/installation-repository.test.mjs tests/database-connection.test.mjs tests/production-guard.test.mjs"
   },
   "engines": {
     "node": ">=20.9"

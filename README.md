@@ -2,7 +2,7 @@
 
 Kick organizes daily syncs, kudos, team picks, and coins inside Slack. This repository contains both the public website and the Slack Bolt service.
 
-The application uses Next.js 16 and Vercel, with a normalized Neon Postgres backend for existing Slack installations and team history. See [the migration runbook](docs/firestore-neon-migration.md) for cutover status, verification and recovery procedures. Original Firestore records and legacy Google compute services have been deleted; the encrypted migration snapshot is retained for recovery.
+The application uses Next.js 16 and Vercel, with a normalized Neon Postgres backend for existing Slack installations and team history. See [database operations](docs/database-operations.md) for verification and recovery information. The encrypted migration snapshot is retained separately for recovery.
 
 ## Architecture
 
@@ -35,16 +35,16 @@ Copy `.env.example` to `.env.local` for local development. Configure the same va
 | `SLACK_CLIENT_SECRET` | Slack app OAuth client secret. |
 | `SLACK_SIGNING_SECRET` | Verifies incoming Slack requests. |
 | `SLACK_STATE_SECRET` | A new random secret used to sign OAuth state. |
-| `KICK_STORAGE_BACKEND` | Optional; only `postgres` is accepted. No Firestore fallback exists. |
+| `KICK_STORAGE_BACKEND` | Optional; only `postgres` is accepted. No alternative backend exists. |
 | `DATABASE_URL` | Pooled Neon connection, server-only. |
 | `DATABASE_URL_UNPOOLED` | Direct Neon connection for guarded migration tools only. |
 | `KICK_DATA_KEY` | Secret 32-byte base64 key for installation encryption. Preserve separately from database backups. |
 | `KICK_MAINTENANCE` | Deployment-scoped `1` pauses Slack endpoints with 503; unset or `0` enables them. |
 | `CRON_SECRET` | Random shared secret for authenticated scheduler requests. |
-| `KICK_SCHEDULER_ENABLED` | Set `true` after connecting the five-minute external scheduler. |
+| `KICK_SCHEDULER_ENABLED` | Set `true` after connecting and verifying the external scheduler within the database compute allowance. |
 | `KICK_RITUALS_DM_ENABLED` | Set `true` after Slack DM permissions and consent are ready. |
 
-No Google credentials or SDKs are needed at runtime. Historical migration/recovery tools are retained separately. Do not commit environment files, database URLs, encryption keys, or Slack credentials.
+Historical migration/recovery tools are archived outside this repository. Do not commit environment files, database URLs, encryption keys, or Slack credentials.
 
 Legacy Slack secrets were embedded in old local deployment files. Rotate the Slack client secret, signing secret, bot/user tokens, and test-app credentials before production cutover.
 
@@ -56,7 +56,7 @@ The production Slack app configuration uses the canonical custom domain:
 - Request URL for slash commands, interactivity, and events: `https://kick.bozmoz.com/api/slack/events`
 - Install URL: `https://kick.bozmoz.com/api/slack/install`
 
-Legacy Cloud Run and Firebase Slack endpoints are fenced during database cutover to prevent writes to the old store. Do not reopen them without following the recovery runbook.
+Legacy hosting endpoints are retired. All installation links and Slack request URLs must use the canonical domain above.
 
 ## Verification
 

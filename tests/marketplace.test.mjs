@@ -18,7 +18,6 @@ test('landing page explicitly identifies Kick and its Slack integration', () => 
   assert.ok(landing.includes('What happens inside your Slack workspace?'));
   for (const command of ['/sync', '/kudos', '/coins', '/pick']) assert.ok(landing.includes(command));
   assert.ok(landing.includes('Neon'));
-  assert.ok(!landing.includes('Google Cloud Firestore'));
 });
 test('privacy policy is linked directly in navigation, hero, and footer', () => {
   assert.ok((landing.match(/href="\/privacy"/g) || []).length >= 5);

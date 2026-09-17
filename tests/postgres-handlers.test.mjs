@@ -8,7 +8,7 @@ import pg from 'pg';
 import { rehearsalConnection } from '../scripts/db/rehearsal-db.mjs';
 import workflowsModule from '../server/db/workflows.cjs';
 
-test('published handlers use Postgres for sync, kudos, coins and pick without Firestore or live Slack calls', { skip: !process.env.KICK_DB_BRANCH }, async () => {
+test('published handlers use Postgres for sync, kudos, coins and pick without live Slack calls', { skip: !process.env.KICK_DB_BRANCH }, async () => {
   const client = new pg.Client({ connectionString: rehearsalConnection() });
   await client.connect();
   try {
@@ -35,7 +35,6 @@ test('published handlers use Postgres for sync, kudos, coins and pick without Fi
     } }, console: { log() {}, warn() {}, error: (...args) => errors.push(args) }, setTimeout, clearTimeout,
     require: name => {
       if (name === '@slack/bolt') return { App, ExpressReceiver };
-      if (name === '@google-cloud/firestore') return { Firestore: class { constructor() { throw new Error('Firestore must not initialize'); } } };
       if (name === './db/connection.cjs') return { getDatabase: () => database };
       return realRequire(name);
     } };
