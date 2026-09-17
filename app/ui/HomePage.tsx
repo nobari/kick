@@ -116,8 +116,8 @@ function SlackPreview() {
       </div>
       <div className="slack-thread">
         <div className="slack-message">
-          <span className="avatar avatar-person">AS</span>
-          <div><strong>Aya</strong><span className="timestamp">9:01</span><p><code>/sync</code></p></div>
+          <span className="avatar avatar-person">TM</span>
+          <div><strong>Team member</strong><span className="timestamp">9:01</span><p><code>/sync</code></p></div>
         </div>
         <div className="slack-message kick-message">
           <Image src="/assets/img/logo.png" width={40} height={40} alt="" />
@@ -162,7 +162,7 @@ export default function HomePage() {
         operatingSystem: "Slack",
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         featureList: ["Async Slack standups", "Kudos and peer recognition", "Team coins", "Random team member picker"],
-        author: { "@type": "Person", name: "Sadegh Nobari" },
+        author: { "@type": "Organization", name: "Kick Bot" },
       },
       {
         "@type": "FAQPage",
@@ -183,13 +183,14 @@ export default function HomePage() {
       <section className="hero section-shell" aria-labelledby="hero-title">
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-copy">
-          <p className="eyebrow"><span className="eyebrow-dot"/> Built for teams that live in Slack</p>
-          <h1 id="hero-title">Better team rituals.<br/><em>Built for Slack.</em></h1>
-          <p className="hero-lede">Kick turns async standups, recognition, rewards, and team picks into simple Slack workflows—so everyone stays aligned without adding another tool.</p>
+          <p className="eyebrow"><span className="eyebrow-dot"/> Kick Bot · Independent app for Slack</p>
+          <h1 id="hero-title">Kick: team standups<br/><em>and kudos in Slack.</em></h1>
+          <p className="hero-lede">Keep your team aligned without another dashboard. Kick is a Slack app for async standups, peer recognition, virtual team coins, and random teammate picks—using slash commands, forms, and messages inside your workspace.</p>
           <div className="hero-actions">
             <SlackButton />
             <a className="text-link" href="#workflows">Explore the workflows <span aria-hidden="true">↓</span></a>
           </div>
+          <p className="installation-disclosure">Before installing, read our <a href="/privacy">Privacy policy</a> to learn what Slack data Kick collects, where it is stored, and how to request deletion. <a href="/support">Get support</a>.</p>
           <ul className="trust-list" aria-label="Product highlights">
             <li><span aria-hidden="true">✓</span> Free core workflows</li>
             <li><span aria-hidden="true">✓</span> No separate account</li>
@@ -251,10 +252,18 @@ export default function HomePage() {
           <h2 id="how-title">From install to first ritual in three steps.</h2>
         </div>
         <ol className="steps">
-          <li><span>01</span><h3>Add Kick to Slack</h3><p>Approve the clearly listed Slack permissions. No separate Kick account is required.</p></li>
+          <li><span>01</span><h3>Add Kick to Slack</h3><p>Choose your workspace and approve Slack’s permissions. After a successful installation, Kick shows a confirmation page with your next steps. No separate Kick account is required.</p></li>
           <li><span>02</span><h3>Run a command</h3><p>Start with <code>/sync</code>, <code>/kudos</code>, <code>/coins</code>, or <code>/pick</code> in a public channel.</p></li>
           <li><span>03</span><h3>Act on the result</h3><p>Submit the focused modal and keep the outcome in Slack where everyone can find it.</p></li>
         </ol>
+        <div className="integration-details">
+          <h3>What happens inside your Slack workspace?</h3>
+          <p>Already installed? Follow our <a href="/get-started">step-by-step getting-started guide</a> to run your first command and troubleshoot setup.</p>
+          <p>After an authorized workspace member installs Kick through Slack’s permission screen, teammates can run <code>/sync</code> in a public channel. A Slack form collects yesterday’s work, today’s plan, blockers, mood, and optional kudos. Submitting it posts an update in that channel; <code>/sync -r 7</code> retrieves a seven-day report.</p>
+          <p><code>/kudos</code> and <code>/coins</code> let you select teammates and explain their contribution, then share the recognition in Slack. Coins are virtual recognition points, not money. <code>/pick</code> selects eligible channel members at random and posts the result for your team.</p>
+          <p>Kick uses Slack authorization and member/channel identifiers to connect each action to the correct workspace. Workflow records are stored in Postgres hosted by Neon, and the app runs on Vercel. There is no separate Kick login, external dashboard, or paid service account required for these core features.</p>
+          <p>Start in a test channel: submitted updates and recognition may be visible to other people in that conversation. Type <code>/sync -h</code> for help, or <a href="/support">contact support</a>. Read the <a href="/privacy">full privacy policy</a> before sharing personal or sensitive information.</p>
+        </div>
       </section>
 
       <section id="commands" className="commands-section" aria-labelledby="commands-title">
@@ -280,15 +289,15 @@ export default function HomePage() {
       <section id="privacy" className="privacy-section section-shell" aria-labelledby="privacy-title">
         <div className="privacy-card">
           <div className="privacy-copy">
-            <p className="kicker">Privacy by restraint</p>
-            <h2 id="privacy-title">Only the data needed to run the workflow.</h2>
-            <p>Kick uses Slack workspace, channel, and member information to operate team workflows. It does not store team members’ email addresses.</p>
+            <p className="kicker">Your Slack data</p>
+            <h2 id="privacy-title">Know what you share before you install.</h2>
+            <p>Kick processes Slack installation details, member and channel identifiers, and the updates you submit. Neon Postgres stores app records; Vercel hosts the service. Our English-language policy explains data use, storage, retention, recovery copies, and access or deletion requests.</p>
             <a className="text-link dark" href="/privacy">Read the privacy policy <span aria-hidden="true">→</span></a>
           </div>
           <ul className="privacy-points">
             <li><Icon name="shield"/><div><strong>No separate login</strong><span>Slack handles identity and installation.</span></div></li>
             <li><Icon name="people"/><div><strong>No stored member emails</strong><span>Kick is built around Slack IDs, not email lists.</span></div></li>
-            <li><Icon name="bolt"/><div><strong>Clear deletion path</strong><span>Workspace owners can request an export or deletion.</span></div></li>
+            <li><Icon name="bolt"/><div><strong>Clear deletion path</strong><span>Individuals and workspace owners can request access, an export, or deletion.</span></div></li>
           </ul>
         </div>
       </section>

@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   description:
     "Run async Slack standups, share kudos, send team rewards, and make fair random picks without adding another tool.",
   applicationName: "Kick Bot",
-  authors: [{ name: "Sadegh Nobari" }],
-  creator: "Sadegh Nobari",
+  authors: [{ name: "Kick Bot" }],
+  creator: "Kick Bot",
   publisher: "Kick Bot",
   category: "productivity",
   keywords: [

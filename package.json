@@ -11,18 +11,26 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "node --test server/rituals/*.test.js server/install-result.test.js tests/scheduler.test.mjs",
+    "test:ritual-db": "node --env-file=.env.rehearsal.local --test tests/ritual-postgres.test.mjs",
+    "db:inventory": "node scripts/db/firestore-inventory.mjs slack-manage",
+    "test:db-handlers": "node --test tests/postgres-handlers.test.mjs",
+    "test:db-inventory": "node --test tests/firestore-inventory.test.mjs tests/firestore-retry.test.mjs tests/encrypted-snapshot.test.mjs",
+    "test:db": "node --test tests/firestore-inventory.test.mjs tests/firestore-retry.test.mjs tests/encrypted-snapshot.test.mjs tests/normalized-plan.test.mjs tests/database-schema.test.mjs tests/installation-repository.test.mjs tests/import-rehearsal.test.mjs tests/database-connection.test.mjs tests/reconcile-plan.test.mjs"
   },
   "engines": {
     "node": ">=20.9"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^8.7.1",
+    "@neondatabase/serverless": "^1.1.0",
     "@slack/bolt": "^4.6.0",
-    "@vercel/oidc": "^3.8.2",
-    "google-auth-library": "^11.0.0",
+    "@slack/web-api": "7.19.0",
+    "@vercel/functions": "^3.9.5",
+    "drizzle-orm": "^0.45.2",
     "lodash": "^4.17.21",
     "next": "^16.3.0",
+    "pg": "^8.23.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "yargs-parser": "^21.1.1"
@@ -30,8 +38,10 @@
   "devDependencies": {
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.0.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.3.0",
     "sass": "^1.89.0",

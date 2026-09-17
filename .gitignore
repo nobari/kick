@@ -25,8 +25,12 @@ grun/
 
 # Next.js / Vercel
 .next/
+*.tsbuildinfo
 .vercel/
 .env*.local
+.wrangler/
+**/.wrangler/
+**/.dev.vars
 # Firebase config
 
 # Uncomment this if you'd like others to create their own Firebase project.

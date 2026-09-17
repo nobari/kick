@@ -261,3 +261,9 @@
     .site-header { background: var(--paper); }
   }
 }
+/* Product and data disclosures for visitors arriving from Slack. */
+.installation-disclosure { max-width: 39rem; margin-top: 1.25rem; font-size: .9rem; line-height: 1.65; }
+.installation-disclosure a, .integration-details a { text-decoration: underline; text-underline-offset: .2em; }
+.integration-details { max-width: 54rem; margin: 3rem auto 0; padding: 2rem; border: 1px solid #d9d8d1; border-radius: 1.25rem; background: #fffdf8; }
+.integration-details h3 { margin: 0 0 1rem; font-size: 1.4rem; }
+.integration-details p { line-height: 1.8; margin: 1rem 0 0; }

@@ -18,65 +18,12 @@ const APP_CONFIG = {
   }
 }
 var _ = require('lodash')
-const { Firestore } = require('@google-cloud/firestore')
-const { ExternalAccountClient } = require('google-auth-library')
-const { getVercelOidcToken } = require('@vercel/oidc')
-
-const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
-  : null
-const hasIndividualGoogleCredentials = Boolean(
-  process.env.GOOGLE_PROJECT_ID &&
-    process.env.GOOGLE_CLIENT_EMAIL &&
-    process.env.GOOGLE_PRIVATE_KEY
-)
-const GCP_OIDC_ENV = [
-  'GCP_PROJECT_ID',
-  'GCP_PROJECT_NUMBER',
-  'GCP_SERVICE_ACCOUNT_EMAIL',
-  'GCP_WORKLOAD_IDENTITY_POOL_ID',
-  'GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID'
-]
-const hasGcpOidcConfig = GCP_OIDC_ENV.every((name) => process.env[name])
-const gcpOidcClient = hasGcpOidcConfig
-  ? ExternalAccountClient.fromJSON({
-      type: 'external_account',
-      audience: `//iam.googleapis.com/projects/${process.env.GCP_PROJECT_NUMBER}/locations/global/workloadIdentityPools/${process.env.GCP_WORKLOAD_IDENTITY_POOL_ID}/providers/${process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID}`,
-      subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
-      token_url: 'https://sts.googleapis.com/v1/token',
-      service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${process.env.GCP_SERVICE_ACCOUNT_EMAIL}:generateAccessToken`,
-      subject_token_supplier: {
-        getSubjectToken: () => getVercelOidcToken()
-      }
-    })
-  : null
-const firestoreOptions = serviceAccount
-  ? {
-      projectId: serviceAccount.project_id,
-      credentials: {
-        client_email: serviceAccount.client_email,
-        private_key: serviceAccount.private_key.replace(/\\n/g, '\n')
-      }
-    }
-  : hasIndividualGoogleCredentials
-    ? {
-        projectId: process.env.GOOGLE_PROJECT_ID,
-        credentials: {
-          client_email: process.env.GOOGLE_CLIENT_EMAIL,
-          private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n')
-        }
-      }
-    : gcpOidcClient
-      ? {
-          projectId: process.env.GCP_PROJECT_ID,
-          authClient: gcpOidcClient,
-          preferRest: true
-        }
-    : {}
-const db = new Firestore(firestoreOptions)
-db.settings({ ignoreUndefinedProperties: true })
-
-const Logger = console
+if (process.env.KICK_STORAGE_BACKEND && process.env.KICK_STORAGE_BACKEND !== 'postgres') throw new Error('Kick requires Postgres');
+const { getDatabase } = require('./db/connection.cjs');
+const postgres = { query: (...args) => getDatabase().query(...args), transaction: (...args) => getDatabase().transaction(...args) };
+const workflows = require('./db/workflows.cjs').createWorkflowRepository(postgres);
+const postgresInstallations = require('./db/installations.cjs').createInstallationRepository(postgres, { environment: TEST ? 'test' : 'production' });
+const Logger = { log() {}, error() { console.error('Slack workflow failed') } };
 
 const {
   App,
@@ -90,7 +37,7 @@ const {
   ViewsUpdateArguments,
   LogLevel
 } = require('@slack/web-api')
-const { FieldValue } = require('@google-cloud/firestore')
+
 const parser = require('yargs-parser')
 const OAUTHDB = 'auth'
 
@@ -101,13 +48,7 @@ const REQUIRED_ENV = [
   'SLACK_STATE_SECRET'
 ]
 const missingEnv = REQUIRED_ENV.filter((name) => !process.env[name])
-if (
-  !serviceAccount &&
-  !hasIndividualGoogleCredentials &&
-  !hasGcpOidcConfig
-) {
-  missingEnv.push(...GCP_OIDC_ENV.filter((name) => !process.env[name]))
-}
+missingEnv.push(...['DATABASE_URL', 'KICK_DATA_KEY'].filter(name => !process.env[name]))
 const slackConfig = {
   clientId: process.env.SLACK_CLIENT_ID || 'not-configured',
   clientSecret: process.env.SLACK_CLIENT_SECRET || 'not-configured',
@@ -128,84 +69,23 @@ const expressReceiver = new ExpressReceiver({
     'chat:write',
     'chat:write.public',
     'commands',
+    ...(process.env.KICK_RITUALS_DM_ENABLED === 'true' ? ['im:write'] : []),
     'users:read'
   ],
   installationStore: {
     storeInstallation: async (installation) => {
-      // Sample installation:
-      /**
-    * {
-    *   team: { id: 'TBJ0K6T7G', name: 'Japan Insider' },
-        enterprise: undefined,
-        user: { token: undefined, scopes: undefined, id: 'UH3EZK20N' },
-        tokenType: 'bot',
-        isEnterpriseInstall: false,
-        appId: 'A01NFRFTZC1',
-        authVersion: 'v2',
-        bot: {
-          scopes: [Array],
-          token: 'mock_token',
-          userId: 'U01TBDEC048',
-          id: 'B01SMRGUDS7'
-        }
-      }
-   */
-      Logger.log('storeInstallation:', JSON.stringify(installation))
-      const oauthRef = db.collection(OAUTHDB)
-      const team = installation.isEnterpriseInstall
-        ? installation.enterprise.id
-        : installation.team.id
-      if (TEST) {
-        installation.bot.TESTtoken = installation.bot.token
-        delete installation.bot.token
-      }
-      return await oauthRef.doc(team).set(installation, { merge: true })
+      return postgresInstallations.storeInstallation(installation)
     },
     fetchInstallation: async (installQuery) => {
-      Logger.log('fetchInstallation:', JSON.stringify(installQuery))
-      const docId = installQuery.enterpriseId || installQuery.teamId
-      const oauthRef = db.collection(OAUTHDB)
-      // org wide app installation lookup
-      // await timeout(4000);
-      const t1 = Date.now()
-      const doc = await oauthRef.doc(docId).get()
-      const t2 = Date.now()
-      if (!doc.exists) {
-        throw new Error(
-          `isEnt:${installQuery.isEnterpriseInstall} ${docId} doc doesn't exist in DB`
-        )
-      }
-      const data = doc.data()
-      Logger.log(
-        `isEnt:${installQuery.isEnterpriseInstall} time:${
-          t2 - t1
-        } installQuery:`,
-        JSON.stringify(data, null, 2)
-      )
-      if (TEST) {
-        data.bot.token = data.bot.TESTtoken
-        delete data.bot.TESTtoken
-      }
-      return data
+      return postgresInstallations.fetchInstallation(installQuery)
     },
     deleteInstallation: async (installQuery) => {
-      // change the line below so it deletes from your database
-      Logger.log('deleteInstallation:', JSON.stringify(installQuery))
-      const docId = installQuery.enterpriseId || installQuery.teamId
-      const oauthRef = db.collection(OAUTHDB)
-      const doc = await oauthRef.doc(docId).get()
-      if (doc.exists) {
-        await db
-          .collection('D' + OAUTHDB)
-          .doc(docId)
-          .set(doc.data())
-        await oauthRef.doc(docId).delete()
-      }
-      throw new Error('no such doc')
+      return postgresInstallations.deleteInstallation(installQuery)
     }
   },
   installerOptions: {
     directInstall: true,
+    callbackOptions: require('./install-result'),
     installPath: '/api/slack/install',
     redirectUriPath: '/api/slack/oauth_redirect'
   }
@@ -238,12 +118,9 @@ expressReceiver.router.get('/sasha', async (req, res) => {
   // You're working with an express req and res now.
   if (req.query.test) {
     try {
-      const count = await db.collection('auth').count().get()
-      const cnt = count.data().count
-      res.send(`Salaam ${cnt}!`)
+      return res.send(`Salaam ${await workflows.installationCount()}!`)
     } catch (e) {
-      console.log('error connecting to db:', e)
-      res.send(e)
+      return res.status(503).json({ error: 'Database unavailable' })
     }
   } else res.send('Salaam!')
 })
@@ -252,33 +129,17 @@ expressReceiver.router.get('/', async (req, res) => {
   res.redirect(process.env.NEXT_PUBLIC_SITE_URL || 'https://kick.bozmoz.com')
 })
 expressReceiver.router.get('/api/slack/health', async (req, res) => {
-  let firestore = hasGcpOidcConfig || serviceAccount || hasIndividualGoogleCredentials
-    ? 'configured'
-    : 'not-configured'
 
-  if (req.query.deep === '1' && firestore === 'configured') {
     try {
-      await db.collection(OAUTHDB).limit(1).get()
-      firestore = 'connected'
-    } catch (error) {
-      Logger.error('Firestore health check failed:', error)
-      return res.status(503).json({
-        ok: false,
-        service: 'kick-slack',
-        firestore: 'unavailable'
-      })
+      if (req.query.deep === '1') await workflows.health()
+      return res.status(missingEnv.length ? 503 : 200).json({ ok: !missingEnv.length, service: 'kick-slack', database: req.query.deep === '1' ? 'connected' : 'configured', backend: 'postgres', missingEnvironmentVariables: missingEnv })
+    } catch {
+      return res.status(503).json({ ok: false, service: 'kick-slack', database: 'unavailable', backend: 'postgres' })
     }
-  }
 
-  res.status(missingEnv.length ? 503 : 200).json({
-    ok: missingEnv.length === 0,
-    service: 'kick-slack',
-    firestore,
-    missingEnvironmentVariables: missingEnv
-  })
 })
 // Global error handler
-app.error(console.log)
+app.error(() => console.error('Slack request failed'))
 /*
 pubsub test
 const {PubSub} = require('@google-cloud/pubsub');
@@ -351,19 +212,7 @@ async function openDraftView(ACK, client, body, title) {
     const view_id = res.view.id
     try {
       const ch = await client.conversations.info({ channel })
-      db.collection('info')
-        .doc(team)
-        .collection('c')
-        .doc(channel)
-        .set({ ...ch.channel, AT }, { merge: true })
-      db.collection('info')
-        .doc(team)
-        .set({ domain: body.team_domain, AT }, { merge: true })
-      db.collection('info')
-        .doc(team)
-        .collection('u')
-        .doc(myUserID)
-        .set({ user_name: body.user_name, AT }, { merge: true })
+      await workflows.saveContext(team, channel, myUserID, body.team_domain, body.user_name, ch.channel, AT)
       Logger.log(`channel access ok:${JSON.stringify(ch)}`)
       return view_id
     } catch (e) {
@@ -416,15 +265,7 @@ async function openDraftView(ACK, client, body, title) {
       text = 'Sorry, We were slightly busy :sweat:, please try again. :bow:'
     }
     const errSay = await client.chat.postMessage({ channel, text })
-    db.collection('err').add({
-      AT: Date.now(),
-      error: errorCode || e,
-      team,
-      channel,
-      user: myUserID,
-      trigger_id,
-      slackTS: errSay.ts
-    })
+
     setTimeout(() => {
       try {
         client.chat.delete({ channel, ts: errSay.ts })
@@ -683,15 +524,10 @@ app.command(
       let isNew = true,
         lastValues,
         isNewForMe = true
-      const dailySynced = await db
-        .collection('stat')
-        .doc(team)
-        .collection('sc')
-        .doc(channel)
-        .get()
+      const dailySynced = await loadDailyState(team, channel)
       Logger.log(`sync4:team:${team} channel:${channel}`)
-      if (dailySynced.exists) {
-        const oldTs = dailySynced.data()
+      if (dailySynced) {
+        const oldTs = dailySynced
         isNew = isNewSync(oldTs.AT, AT)
         Logger.log(`sync40:myUserID:${myUserID} isNew:${isNew}`)
         let myLastTS = oldTs.u && oldTs.u[myUserID]
@@ -699,15 +535,10 @@ app.command(
         if (!myLastTS) myLastTS = oldTs.last?.u && oldTs.last.u[myUserID]
         if (myLastTS) {
           Logger.log(`sync41:myUserID=${myUserID} myLastTS=${myLastTS}`)
-          const result = await db
-            .collection('sync')
-            .doc(team)
-            .collection(channel)
-            .doc(myLastTS)
-            .get()
-          if (result.exists) {
+          const result = await loadStandup(team, channel, myLastTS)
+          if (result) {
             Logger.log(`sync42:myUserID=${myUserID}`)
-            const myLastSync = result.data()
+            const myLastSync = result
             if (myLastSync) {
               lastValues = myLastSync.values
               lastValues.link = myLastSync.link
@@ -896,21 +727,9 @@ app.command(
   }
 )
 async function storeTeamCustoms(set, team, myUserID, AT, objName) {
-  const setObj = { AT, f: myUserID, v: {} }
-  let setStr = ''
-  for (let i = 0; i < set.length; i += 2) {
-    setStr += `${set[i]} = ${set[i + 1]}`
-    setObj.v[set[i]] = set[i + 1]
-  }
-  const result = await db
-    .collection('info')
-    .doc(team)
-    .update({
-      set: {
-        [objName]: setObj
-      }
-    })
-  return `:white_check_mark: ${objName}:\n${set.join(' is set to ')}.`
+
+    await workflows.setSettings(team, objName, myUserID, set, AT)
+    return `:white_check_mark: ${objName}:\n${set.join(' is set to ')}.`
 }
 /**
  * returns {[coins|kudos]:{AT:number,f:string,v:Object}}
@@ -918,8 +737,7 @@ async function storeTeamCustoms(set, team, myUserID, AT, objName) {
  * @returns {Promise<{[key:string]:{AT:number,f:string,v:Object}}>}
  */
 async function getTeamCustoms(team) {
-  const result = await db.collection('info').doc(team).get()
-  return result.data()?.set
+  return workflows.getSettings(team)
 }
 function getUserNamesfromString(str = '@val1, @val2, @val3') {
   const regex = /@(\w+)/g
@@ -1066,15 +884,10 @@ app.view(
       if (values.k && !values.k?.length) delete values.k
       const AT = Date.now()
       let cts
-      const dailySynced = await db
-        .collection('stat')
-        .doc(team)
-        .collection('sc')
-        .doc(channel)
-        .get()
+      const dailySynced = await loadDailyState(team, channel)
       let oldTs, myLastTS
-      if (dailySynced.exists) {
-        oldTs = dailySynced.data()
+      if (dailySynced) {
+        oldTs = dailySynced
         myLastTS =
           (oldTs.u && oldTs.u[myUserID]) || //happens only for the new sync thread
           (oldTs.last?.u && oldTs.last.u[myUserID]) //happens after shifting everything to the last
@@ -1105,26 +918,16 @@ app.view(
           channelTS.last = { ...oldTs }
           delete channelTS.last.last
         }
-        await db
-          .collection('stat')
-          .doc(team)
-          .collection('sc')
-          .doc(channel)
-          .set(channelTS)
+        await workflows.saveThread(team, channel, cts, AT)
       }
       Logger.log(`syncBack1:myUserID=${myUserID}`, values)
       let myLastSync,
         mood = values.m,
         promised
       if (myLastTS) {
-        const result = await db
-          .collection('sync')
-          .doc(team)
-          .collection(channel)
-          .doc(myLastTS)
-          .get()
-        if (result.exists) {
-          myLastSync = result.data()
+        const result = await loadStandup(team, channel, myLastTS)
+        if (result) {
+          myLastSync = result
           if (myLastSync?.values) {
             if (myLastSync.values.m != mood)
               mood = `${myLastSync.values.m} => ${mood}`
@@ -1294,65 +1097,16 @@ app.view(
         blocks
       })
       Logger.log(`syncBack3:myUserID=${myUserID}`)
-      await db
-        .collection('stat')
-        .doc(team)
-        .collection('sc')
-        .doc(channel)
-        .set({ u: { [myUserID]: th.ts } }, { merge: true })
-      const url = await client.chat.getPermalink({
-        message_ts: th.ts,
-        channel
-      })
-      await db.collection('sync').doc(team).collection(channel).doc(th.ts).set({
-        // ch: channel,
-        f: myUserID,
-        values,
-        cts,
-        AT,
-        link: url.permalink
-      })
-      const ctsStat = { m: { [values.m]: FieldValue.arrayUnion(myUserID) }, AT }
-      const uStat = {
-        all: FieldValue.increment(1),
-        [channel]: FieldValue.increment(1),
-        AT
-      }
-      if (values.k?.length) {
-        await storeKudos(
-          values,
-          team,
-          channel,
-          myUserID,
-          th.ts,
-          AT,
-          url.permalink,
-          cts
-        )
-      }
-      await db
-        .collection('statc')
-        .doc(team)
-        .collection(channel)
-        .doc(cts)
-        .set(ctsStat, { merge: true })
-      await db
-        .collection('stat')
-        .doc(team)
-        .collection('sync')
-        .doc(myUserID)
-        .set(uStat, { merge: true })
-      Logger.log(`syncBack4:myUserID=${myUserID}`)
-      client.views.update({})
+
+        const url = await client.chat.getPermalink({ message_ts: th.ts, channel })
+        await workflows.saveStandup({ team, channel, user: myUserID, ts: th.ts, cts, values, AT, link: url.permalink })
+        await rituals.recordLegacy(team, channel, myUserID, values).catch(() => Logger.error('Ritual check-in mirror failed'))
+        for (const recipient of values.k || [])
+          await rituals.recognize(team, channel, myUserID, recipient, values.kr, th.ts).catch(() => Logger.error('Ritual recognition mirror failed'))
+        return
     } catch (e) {
       Logger.error(e)
-      db.collection('err').add({
-        AT: Date.now(),
-        error: e,
-        team,
-        channel,
-        user: myUserID
-      })
+
     }
   }
 )
@@ -1367,15 +1121,10 @@ app.view(
     const values = extractValues(view.state.values)
     const AT = Date.now()
     let cts
-    const dailySynced = await db
-      .collection('stat')
-      .doc(team)
-      .collection('c')
-      .doc(channel)
-      .get()
+    const dailySynced = await loadDailyState(team, channel)
     let oldTs, myLastTS
-    if (dailySynced.exists) {
-      oldTs = dailySynced.data()
+    if (dailySynced) {
+      oldTs = dailySynced
       // if (isNewSync(oldTs.AT, AT)) {
       if (oldTs.u && oldTs.u[myUserID]) myLastTS = oldTs.u[myUserID]
       // } else {
@@ -1390,14 +1139,9 @@ app.view(
     let myLastSync,
       mood = values.m,
       promised
-    const result = await db
-      .collection('sync')
-      .doc(team)
-      .collection(channel)
-      .doc(myLastTS)
-      .get()
-    if (result.exists) {
-      myLastSync = result.data()
+    const result = await loadStandup(team, channel, myLastTS)
+    if (result) {
+      myLastSync = result
       if (myLastSync?.values) {
         mood = `${myLastSync.values.m} => ${mood}`
         promised = myLastSync.values.t
@@ -1557,24 +1301,19 @@ function getUsersStr(users) {
 function getData(arr) {
   return arr.map((d) => d.data())
 }
+async function loadDailyState(team, channel) {
+  return workflows.getDailyState(team, channel)
+}
+async function loadStandup(team, channel, ts) {
+  return workflows.getStandup(team, channel, ts)
+}
 async function getSyncs(team, channel, days, AT) {
   const since = AT - days * 24 * 3600 * 1000
-  const syncs = await db
-    .collection('sync')
-    .doc(team)
-    .collection(channel)
-    .where('AT', '>=', since)
-    .get()
-  return getData(syncs.docs)
+  return workflows.getStandups(team, channel, since)
 }
 async function getKudos(team, days, AT) {
   const since = AT - days * 24 * 3600 * 1000
-  const ks = await db
-    .collection('kudos')
-    .where('team', '==', team)
-    .where('AT', '>=', since)
-    .get()
-  return getData(ks.docs)
+  return workflows.getRecognition(team, since)
 }
 async function storeKudos(
   values,
@@ -1587,32 +1326,9 @@ async function storeKudos(
   cts = false,
   isCoin = false
 ) {
-  await db
-    .collection('stat')
-    .doc(team)
-    .collection('kudos')
-    .doc(from)
-    .set({ ker: FieldValue.increment(values.k.length) }, { merge: true })
-  for (const kudos of values.k) {
-    await db
-      .collection('stat')
-      .doc(team)
-      .collection('kudos')
-      .doc(kudos)
-      .set({ ked: FieldValue.increment(1) }, { merge: true })
-    await db.collection('kudos').add({
-      team,
-      ch: channel,
-      k: kudos,
-      f: from,
-      kr: values.kr || false,
-      cts,
-      ts,
-      AT,
-      link,
-      type: isCoin ? 'coin' : 'kudos'
-    })
-  }
+  await workflows.saveRecognition({ team, channel, from, recipients: values.k, ts, AT, link, cts, kind: isCoin ? 'coin' : 'kudos', reason: values.kr })
+  for (const recipient of values.k)
+    await rituals.recognize(team, channel, from, recipient, values.kr, ts).catch(() => Logger.error('Ritual recognition mirror failed'))
 }
 
 // async function addTimezoneContext({ payload, client, context, next }) {
@@ -1759,10 +1475,20 @@ async function updateConversationUsers(
   if (isRecent) return
   //it maybe old and needs update
   const users = []
-  const conversation = await client.conversations.members({
-    channel: channelId
-  })
-  const allUsers = await client.users.list()
+  const conversation = { members: [] }
+  const allUsers = { members: [] }
+  let cursor
+  do {
+    const page = await client.conversations.members({ channel: channelId, limit: 200, ...(cursor ? { cursor } : {}) })
+    conversation.members.push(...(page.members || []))
+    cursor = page.response_metadata?.next_cursor
+  } while (cursor)
+  cursor = undefined
+  do {
+    const page = await client.users.list({ limit: 200, ...(cursor ? { cursor } : {}) })
+    allUsers.members.push(...(page.members || []))
+    cursor = page.response_metadata?.next_cursor
+  } while (cursor)
   const usersObj = {},
     bots = {}
   for (const user of allUsers.members) {
@@ -1782,30 +1508,9 @@ async function updateConversationUsers(
     }
   }
   const toUpdate = { users: usersObj, bots, usersAT: Date.now() }
-  if (exists) {
-    await db
-      .collection('info')
-      .doc(team)
-      .collection('c')
-      .doc(channelId)
-      .update({ users: FieldValue.delete(), bots: FieldValue.delete() })
-    Logger.log(`updateConversationUsers:toUpdate:`, toUpdate)
-    await db
-      .collection('info')
-      .doc(team)
-      .collection('c')
-      .doc(channelId)
-      .update(toUpdate)
-  } else {
-    Logger.log(`updateConversationUsers:toset:`, toUpdate)
-    await db
-      .collection('info')
-      .doc(team)
-      .collection('c')
-      .doc(channelId)
-      .set(toUpdate)
-  }
-  return users
+
+    await workflows.saveMembership(team, channelId, usersObj, bots, toUpdate.usersAT)
+    return users
 }
 
 /**
@@ -1816,34 +1521,11 @@ async function updateConversationUsers(
  */
 async function getConversationUsers(client, channelId, team, AT) {
   if (!channelId?.length) return
-  const channelInfoDB = await db
-    .collection('info')
-    .doc(team)
-    .collection('c')
-    .doc(channelId)
-    .get()
-  if (channelInfoDB.exists) {
-    const data = channelInfoDB.data()
-    if (data.users) {
-      let users = Object.keys(data.users)
-      if (data.bots) users = users.filter((u) => !data.bots[u])
-      updateConversationUsers(
-        client,
-        channelId,
-        team,
-        data.usersAT || 0,
-        AT,
-        channelInfoDB.exists
-      )
-      return users
-    }
-  }
 
-  const conversation = await client.conversations.members({
-    channel: channelId
-  })
-  updateConversationUsers(client, channelId, team, 0, AT, channelInfoDB.exists)
-  return conversation.members
+    const data = await workflows.getMembership(team, channelId)
+    if (data && data.usersAT > AT - 10 * 3600 * 1000) return Object.keys(data.users)
+    if (data) return (await updateConversationUsers(client, channelId, team, data.usersAT, AT, true))?.map(user => user.id) || []
+    return (await updateConversationUsers(client, channelId, team, 0, AT, false))?.map(user => user.id) || []
 }
 
 app.view(
@@ -2641,39 +2323,13 @@ async function processPick(values, channel, team, myUserID, AT, client) {
     message.blocks = blocks
   }
   const th = await client.chat.postMessage(message)
-  client.chat.postMessage({
+  await client.chat.postMessage({
     channel,
     thread_ts: th.ts,
     text: `picked from [${values.from.length}] users`,
     blocks: proofBlocks
   })
-  await db.collection('pick').add({
-    team,
-    p: selectedUsers[0],
-    ps: selectedUsers,
-    ts: th.ts,
-    by: myUserID,
-    c: channel,
-    for: values.for || false,
-    AT,
-    q: Question || false,
-    n: NUM
-  })
-  for (const selected of selectedUsers)
-    await db
-      .collection('stat')
-      .doc(team)
-      .collection('pick')
-      .doc(selected)
-      .set(
-        {
-          all: FieldValue.increment(1),
-          [channel]: FieldValue.increment(1),
-          [values.for || 'general']: FieldValue.increment(1),
-          AT
-        },
-        { merge: true }
-      )
+  return workflows.savePick({ team, channel, user: myUserID, selected: selectedUsers, candidates: values.from, purpose: values.for, question: Question, count: NUM > 0 ? NUM : selectedUsers.length, ts: th.ts, AT })
 }
 
 function getHelpView(trigger_id) {
@@ -2892,8 +2548,20 @@ const QUESTIONS = [
   'How do you handle working with limited information or data?'
 ]
 
+const { createStore } = require('./rituals/store')
+const { createEngine } = require('./rituals/engine')
+const { registerRituals } = require('./rituals/slack')
+const ritualStore = createStore(postgres)
+const rituals = createEngine(ritualStore, async (team) => {
+  const installation = await postgresInstallations.fetchInstallation({ teamId: team, isEnterpriseInstall: false });
+  if (!installation.bot?.token) throw new Error('installation_missing');
+  return new WebClient(installation.bot.token, { retryConfig: { retries: 0 }, timeout: 10000 });
+}, Date.now, { dmEnabled: process.env.KICK_RITUALS_DM_ENABLED === 'true' });
+if (rituals) registerRituals(app, ritualStore, rituals)
+
 module.exports = {
   handler: expressReceiver.app,
+  rituals,
   isConfigured: missingEnv.length === 0,
   missingEnv
 }
