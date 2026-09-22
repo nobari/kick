@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s | Kick Bot",
   },
   description:
-    "Run async Slack standups, share kudos, send team rewards, and make fair random picks without adding another tool.",
+    "Bring Slack check-ins, blockers, kudos, and fair rotations together. Explore opt-in team rituals, focused forms, and a personal App Home.",
   applicationName: "Kick Bot",
   authors: [{ name: "Kick Bot" }],
   creator: "Kick Bot",
@@ -41,13 +41,13 @@ export const metadata: Metadata = {
     siteName: "Kick Bot",
     title: "Kick Bot — Better team rituals for Slack",
     description:
-      "Async standups, kudos, rewards, and fair team picks without another dashboard.",
+      "Check in, unblock your team, and celebrate contributions—without leaving Slack.",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Kick Bot for Slack" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Kick Bot — Better team rituals for Slack",
-    description: "Async standups, kudos, rewards, and fair team picks in Slack.",
+    description: "Team check-ins, blockers, appreciation, and fair rotations in Slack.",
     images: ["/opengraph-image"],
   },
   robots: {

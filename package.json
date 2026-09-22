@@ -12,7 +12,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
-    "test": "node --test server/rituals/*.test.js server/install-result.test.js tests/scheduler.test.mjs",
+    "test": "node --test server/rituals/*.test.js server/install-result.test.js tests/scheduler.test.mjs tests/review-manifest.test.mjs",
+    "slack:review-manifest": "node scripts/slack-review-manifest.mjs",
     "test:ritual-db": "node --env-file=.env.rehearsal.local --test tests/ritual-postgres.test.mjs",
     "test:db-handlers": "node --test tests/postgres-handlers.test.mjs",
     "test:db": "node --test tests/database-schema.test.mjs tests/installation-repository.test.mjs tests/database-connection.test.mjs tests/production-guard.test.mjs"

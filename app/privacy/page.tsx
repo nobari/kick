@@ -52,6 +52,7 @@ export default function PrivacyPage() {
           <section id="permissions">
             <h2>How Kick uses Slack permissions</h2>
             <p>Commands permissions enable slash commands. Channel and member permissions identify the conversation and eligible participants. Messaging permissions let Kick post workflow results. Public-channel history access supports workflow context and message-related operations. The Slack installation screen shows the permissions you are being asked to grant.</p>
+            <p>The proposed direct-message permission allows Kick to open a private conversation for an opted-in check-in reminder or assigned-blocker follow-up. It does not grant access to your existing private-message history. This feature remains unavailable until the required permission is approved and granted to your workspace installation. You can disable private reminders in your preferences.</p>
             <p>Kick is an independent third-party integration. Slack controls its own platform, workspace retention settings, and handling of messages stored within Slack.</p>
           </section>
           <section id="retention">

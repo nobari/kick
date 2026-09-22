@@ -63,15 +63,7 @@ const expressReceiver = new ExpressReceiver({
   ...slackConfig,
   processBeforeResponse: true,
   stateSecret: process.env.SLACK_STATE_SECRET || 'not-configured',
-  scopes: [
-    'channels:history',
-    'channels:read',
-    'chat:write',
-    'chat:write.public',
-    'commands',
-    ...(process.env.KICK_RITUALS_DM_ENABLED === 'true' ? ['im:write'] : []),
-    'users:read'
-  ],
+  scopes: require('./rituals/capabilities').oauthScopes(process.env),
   installationStore: {
     storeInstallation: async (installation) => {
       return postgresInstallations.storeInstallation(installation)
@@ -2532,12 +2524,14 @@ const { createStore } = require('./rituals/store')
 const { createEngine } = require('./rituals/engine')
 const { registerRituals } = require('./rituals/slack')
 const ritualStore = createStore(postgres)
+const canRemind = async team => require('./rituals/capabilities').canDirectMessage(
+  await postgresInstallations.fetchInstallation({ teamId: team, isEnterpriseInstall: false }))
 const rituals = createEngine(ritualStore, async (team) => {
   const installation = await postgresInstallations.fetchInstallation({ teamId: team, isEnterpriseInstall: false });
   if (!installation.bot?.token) throw new Error('installation_missing');
   return new WebClient(installation.bot.token, { retryConfig: { retries: 0 }, timeout: 10000 });
-}, Date.now, { dmEnabled: process.env.KICK_RITUALS_DM_ENABLED === 'true' });
-if (rituals) registerRituals(app, ritualStore, rituals)
+}, Date.now, { dmEnabled: process.env.KICK_RITUALS_DM_ENABLED === 'true', canRemind });
+if (rituals) registerRituals(app, ritualStore, rituals, { canRemind })
 
 module.exports = {
   handler: expressReceiver.app,

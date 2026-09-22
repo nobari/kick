@@ -12,7 +12,10 @@ export async function tick(env, request = fetch) {
   return { configurations: result.configurations, sent: result.sent };
 }
 const worker = {
-  async scheduled(_event, env) { await tick(env); },
+  async scheduled(_event, env) {
+    const result = await tick(env);
+    console.log(JSON.stringify({ event: 'kick_scheduler_complete', ...result }));
+  },
   fetch() { return new Response('Not found', { status: 404 }); },
 };
 export default worker;

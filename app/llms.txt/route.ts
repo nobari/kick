@@ -17,6 +17,17 @@ Terms: https://kick.bozmoz.com/terms
 - /pick randomly selects one or more eligible channel members and can include a random question.
 - Add -h to a command for current help in Slack.
 
+## Team-rituals release
+
+- /sync setup configures a public-channel workflow with participants, weekdays, IANA time zone, template or custom questions, digest time, and 7/30/90-day workflow retention. It starts paused and requires preview and confirmation.
+- /sync checkin submits an update during the configured check-in window; blockers can have an assigned helper and be resolved.
+- /sync home refreshes the membership-aware App Home, which has overview, updates, blockers, and aggregate trends. The Slack Home tab and app_home_opened event must be configured.
+- /sync preferences saves quiet hours, leave dates, snooze-related preferences, and reminder opt-out.
+- /pick rotate queues a least-recent selection in an enabled channel ritual; it is not the same as random /pick.
+- Optional digests and Friday recognition roundups are delivered by an external scheduler with 15-minute checks when activated. Delays can occur during outages or backlogs.
+- Private reminders and helper follow-ups are pending Slack permission approval and reinstall consent. They are not yet available through the published installation flow.
+- Getting started and feature availability: https://kick.bozmoz.com/get-started
+
 ## Account and pricing
 
 Kick does not require a separate user account. Installation and identity are handled by Slack. Core workflows are free.

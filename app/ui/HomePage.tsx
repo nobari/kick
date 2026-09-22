@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { SlackButton } from "./SiteChrome";
+import RitualFeatures from "./RitualFeatures";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://kick.bozmoz.com";
@@ -36,7 +37,7 @@ const workflows = [
     eyebrow: "Fair participation",
     title: "Pick people without the awkward pause.",
     description:
-      "Randomly choose one or more eligible channel members for a task, question, or rotation. Add an optional prompt to keep recurring rituals fresh.",
+      "Randomly choose one or more eligible channel members for a task or question. For recurring responsibilities, /pick rotate uses least-recent selection in a configured team ritual.",
     command: "/pick",
     detail: "Choose the group, number of people, and optional question.",
     image: "/assets/img/features/pick.png",
@@ -63,7 +64,7 @@ const faqs = [
   {
     question: "What is Kick Bot for Slack?",
     answer:
-      "Kick is a Slack productivity bot for async standups, team kudos, lightweight rewards, and fair random picks. Everything happens through slash commands and Slack modals, so teammates do not need another account or dashboard.",
+      "Kick is an independent Slack app for check-ins, team kudos, virtual rewards, fair picks, and opt-in team rituals. Use slash commands, focused forms, and a personal App Home without a separate account or external dashboard.",
   },
   {
     question: "How do Slack standups work with Kick?",
@@ -84,6 +85,16 @@ const faqs = [
     question: "Is Kick free?",
     answer:
       "Kick includes its core team workflows for free. There is no separate paid account required to install and try the app in a Slack workspace.",
+  },
+  {
+    question: "How do scheduled check-ins and private reminders work?",
+    answer:
+      "Use /sync setup to choose participants, questions, weekdays, a time zone, and a digest time. Review and confirm before enabling. Scheduled delivery is checked every 15 minutes when activated. Private reminders and helper follow-ups require Slack permission approval and reinstall consent; they are not yet available through the published installation flow.",
+  },
+  {
+    question: "Is a fair rotation the same as a random pick?",
+    answer:
+      "No. /pick selects randomly. /pick rotate selects the least recently chosen eligible participant from an enabled channel workflow. You can exclude people for one turn without removing them from the rotation. Rotation results are delivered on the next scheduler run.",
   },
   {
     question: "What Slack data does Kick store?",
@@ -148,7 +159,7 @@ export default function HomePage() {
         url: siteUrl,
         name: "Kick Bot",
         alternateName: "Kick Productivity Bot",
-        description: "A Slack productivity bot for async standups, kudos, team rewards, and fair random picks.",
+        description: "An independent Slack app for team check-ins, blockers, kudos, and fair rotations, with opt-in schedules and an App Home.",
       },
       {
         "@type": "SoftwareApplication",
@@ -161,7 +172,7 @@ export default function HomePage() {
         applicationSubCategory: "Team collaboration and productivity",
         operatingSystem: "Slack",
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-        featureList: ["Async Slack standups", "Kudos and peer recognition", "Team coins", "Random team member picker"],
+        featureList: ["Async Slack standups", "Kudos and peer recognition", "Virtual team coins", "Random team member picker", "Guided channel setup", "Custom check-in templates", "Blocker tracking", "Membership-aware App Home", "Aggregate team insights"],
         author: { "@type": "Organization", name: "Kick Bot" },
       },
       {
@@ -184,11 +195,11 @@ export default function HomePage() {
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-copy">
           <p className="eyebrow"><span className="eyebrow-dot"/> Kick Bot · Independent app for Slack</p>
-          <h1 id="hero-title">Kick: team standups<br/><em>and kudos in Slack.</em></h1>
-          <p className="hero-lede">Keep your team aligned without another dashboard. Kick is a Slack app for async standups, peer recognition, virtual team coins, and random teammate picks—using slash commands, forms, and messages inside your workspace.</p>
+          <h1 id="hero-title">Kick: team standups.<br/><em>Real follow-through.</em></h1>
+          <p className="hero-lede">Bring check-ins, blockers, appreciation, and fair team decisions together in Slack. A calmer rhythm for your team—with focused forms, a personal Home, and opt-in rituals. No extra dashboard.</p>
           <div className="hero-actions">
             <SlackButton />
-            <a className="text-link" href="#workflows">Explore the workflows <span aria-hidden="true">↓</span></a>
+            <a className="text-link" href="#team-rituals">Explore the new experience <span aria-hidden="true">↓</span></a>
           </div>
           <p className="installation-disclosure">Before installing, read our <a href="/privacy">Privacy policy</a> to learn what Slack data Kick collects, where it is stored, and how to request deletion. <a href="/support">Get support</a>.</p>
           <ul className="trust-list" aria-label="Product highlights">
@@ -219,10 +230,12 @@ export default function HomePage() {
         </div>
       </section>
 
+      <RitualFeatures />
+
       <section id="workflows" className="workflows-section" aria-labelledby="workflows-title">
         <div className="section-shell">
           <div className="section-heading centered">
-            <p className="kicker">Four focused workflows</p>
+            <p className="kicker">The familiar essentials</p>
             <h2 id="workflows-title">A small command can change the rhythm of a team.</h2>
             <p>Every workflow opens a focused Slack experience and returns the result where the team can act on it.</p>
           </div>
@@ -278,9 +291,14 @@ export default function HomePage() {
             <tbody>
               <tr><th scope="row"><code>/sync</code></th><td>Submit a standup update</td></tr>
               <tr><th scope="row"><code>/sync -r 7</code></th><td>Review the last seven days</td></tr>
+              <tr><th scope="row"><code>/sync setup</code></th><td>Configure, preview, and confirm a channel ritual</td></tr>
+              <tr><th scope="row"><code>/sync checkin</code></th><td>Answer the current ritual’s questions</td></tr>
+              <tr><th scope="row"><code>/sync home</code></th><td>Refresh your Kick Home tab</td></tr>
+              <tr><th scope="row"><code>/sync preferences</code></th><td>Set quiet hours, leave, and reminder preferences</td></tr>
               <tr><th scope="row"><code>/kudos</code></th><td>Recognize a teammate</td></tr>
               <tr><th scope="row"><code>/coins</code></th><td>Send a team coin</td></tr>
               <tr><th scope="row"><code>/pick</code></th><td>Choose one or more people fairly</td></tr>
+              <tr><th scope="row"><code>/pick rotate</code></th><td>Queue a least-recent team pick in an enabled ritual</td></tr>
             </tbody>
           </table>
         </div>

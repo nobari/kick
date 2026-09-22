@@ -4,7 +4,7 @@ const { randomUUID } = require('node:crypto')
 const text = value => ({ type: 'plain_text', text: value })
 const button = (label, action_id, value) => ({ type: 'button', text: text(label), action_id, value })
 const section = value => ({ type: 'section', text: { type: 'mrkdwn', text: value.slice(0, 2900) } })
-function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true } = {}) {
+function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, canRemind = async () => true } = {}) {
   const configId = (team, channel) => key(team, channel)
   async function config(team, channel) { return store.get('configs', configId(team, channel)) }
   async function channelMembers(client, channel) {
@@ -93,7 +93,7 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true } =
   async function deliver(job) {
     const c = await store.get('configs', job.config), now = clock()
     if (!c || !c.enabled || job.expiresAt <= now) return 'skipped'
-    if (job.user && !dmEnabled) return 'skipped'
+    if (job.user && (!dmEnabled || !await canRemind(c.team))) return 'skipped'
     const client = await clientFor(c.team)
     const run = job.run && await store.get('runs', job.run)
     let channel = c.channel, blocks, message
@@ -106,7 +106,10 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true } =
         if (!mayRemind(pref || {}, now, c.zone)) return 'deferred'
       }
       message = job.kind === 'prompt' ? `Time for your team check-in · ${run.date}` : 'A gentle check-in reminder. Share an update when you have a moment.'
-      blocks = [section(message), { type: 'actions', elements: [button('Share update', 'ritual_checkin', c.channel),
+      message += ` Submit before ${c.digestTime} (${c.zone}). Your answers will be shared in the channel digest.`
+      blocks = [{ type: 'header', text: text(job.user ? 'Your check-in reminder' : 'Time to check in') }, section(message),
+        { type: 'context', elements: [text(`${run.members.length} participants · ${c.retentionDays}-day retention · No reply required in this thread`)] },
+        { type: 'actions', elements: [{ ...button('Share update', 'ritual_checkin', c.channel), style: 'primary' },
         ...(job.user ? [button('Snooze 1 hour', 'ritual_snooze', c.channel), button('Preferences', 'ritual_preferences', c.channel)] : [])] }]
     } else if (job.kind === 'digest') {
       if (!run) return 'skipped'
@@ -119,11 +122,15 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true } =
       blocks.push(section(`*Open blockers:* ${open.length}. Review and resolve in Kick’s Home tab.\n*Pending:* ${missing.map(u => `<@${u}>`).join(', ') || 'Everyone has responded.'}`))
       // Slack allows 50 blocks; preserve all responses in Home, summarize overflow.
       if (blocks.length > 50) blocks = [...blocks.slice(0, 48), section('More updates are available in Kick’s Home tab.'), blocks.at(-1)]
+      // Screen readers use the top-level text rather than interior blocks.
+      message += '\n' + responses.map(r => `<@${r.user}>: ${r.answers.map((a, i) => `${escape(run.questions[i])}: ${escape(a)}`).join('; ')}`).join('\n')
+      message = message.slice(0, 35000) + `\nOpen blockers: ${open.length}. Read all updates in Kick Home.`
     } else if (job.kind === 'roundup') {
       const items = (await store.list('recognition', 'config', '==', c.id)).filter(r => r.at >= job.since && r.expiresAt > now)
       if (!items.length) return 'skipped'
       message = `Weekly appreciation · ${items.length} contributions celebrated. No rankings—just thanks.`
       blocks = [section(message), ...items.slice(-20).map(r => section(`<@${r.from}> thanked <@${r.to}>: ${escape(r.reason || 'Thank you for your contribution!')}`))]
+      message += '\n' + items.slice(-20).map(r => `<@${r.from}> thanked <@${r.to}>: ${escape(r.reason || 'Thank you for your contribution!')}`).join('\n')
     } else if (job.kind === 'followup') {
       const b = await store.get('blockers', job.blocker)
       if (!b || b.resolvedAt || b.expiresAt <= now || (b.helper || b.user) !== job.user) return 'skipped'

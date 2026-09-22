@@ -278,3 +278,42 @@ test('legacy commands and unknown options pass through middleware', async () => 
   await f.invoke('use', { body: { command: '/sync', text: '-r 7' }, next: async () => { passed++ } })
   assert.equal(passed, 1); assert.equal(f.acks.length, 0)
 }))
+
+test('reminders are suppressed when this installation has not consented, even when globally enabled', async () => {
+  const f = fixture(); await f.store.set('configs', f.c.id, f.c)
+  const engine = createEngine(f.store, async () => f.client, f.now, { dmEnabled: true, canRemind: async () => false })
+  const run = await engine.currentRun(f.c)
+  assert.equal(await engine.deliver({ config: f.c.id, kind: 'reminder', run: run.id, user: 'U1', expiresAt: f.now() + DAY }), 'skipped')
+  assert.equal(f.opened.length, 0)
+})
+test('digest fallback text includes the answers for screen-reader users', async () => {
+  const f = fixture(); await f.store.set('configs', f.c.id, f.c)
+  await f.engine.submit(f.c, 'U1', ['Accessible answer', 'Next step'])
+  f.setNow('2026-09-09T08:00Z'); await f.engine.tick()
+  assert.match(f.sent.find(m => m.text.startsWith('Team digest')).text, /Accessible answer/)
+})
+test('Home names channels, separates views, and handles empty trends without invalid percentages', async () => {
+  const f = fixture(); await f.store.set('configs', f.c.id, f.c)
+  let published
+  f.client.conversations.info = async () => ({ channel: { name: 'team-check-in', is_private: false } })
+  f.client.views.publish = async args => { published = args }
+  const ui = registerRituals({ use() {}, action() {}, view() {}, event() {} }, f.store, f.engine)
+  await ui.home(f.client, 'T1', 'U2', 'C1', 'trends')
+  const serialized = JSON.stringify(published)
+  assert.match(serialized, /#team-check-in/)
+  assert.match(serialized, /No sessions/)
+  assert.doesNotMatch(serialized, /—%|Channel settings/)
+  assert.ok(published.view.blocks.length <= 100)
+})
+test('setup uses native time controls and preserves their submitted values', async () => withUI(async f => {
+  await f.invoke('use', { body: { command: '/sync', text: 'setup', team_id: 'T1', channel_id: 'C1', user_id: 'U1', trigger_id: 'trigger' } })
+  assert.equal(f.updates[0].blocks.find(b => b.block_id === 'time').element.type, 'timepicker')
+  const { read } = require('./slack')
+  assert.equal(read({ state: { values: values({ time: { selected_time: '09:30' } }) } }, 'time'), '09:30')
+}))
+test('editing a setup preview reuses the modal rather than opening another stack', async () => withUI(async f => {
+  const id = 'draft-review'; await f.store.set('drafts', id, { ...f.c, editor: 'U1', expiresAt: Date.now() + 60000 })
+  f.client.views.open = async () => { throw new Error('Must reuse the existing modal') }
+  await f.invoke('action', { body: { team: { id: 'T1' }, user: { id: 'U1' }, trigger_id: 'trigger', view: { type: 'modal', id: 'V1' } }, action: { action_id: 'ritual_edit_draft', value: id } })
+  assert.equal(f.updates.at(-1).callback_id, 'ritual_setup_save')
+}))

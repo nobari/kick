@@ -30,17 +30,17 @@ For app `A044BL326B1` in Slack app settings:
 5. Existing `/sync`, `/pick`, `/kudos`, and `/coins` slash command URLs remain unchanged. No new slash command registration is required.
 6. Keep the public installation flow on the currently approved scopes while the Marketplace update is pending. Its current URL does not request `im:write`, so repeating that flow will not grant the additional permission. Test draft permissions using Slack's supported development/test-app flow. After approval, enable the new scope in the production installation flow and reinstall through `https://kick.bozmoz.com/api/slack/install`. The OAuth redirect URL remains `https://kick.bozmoz.com/api/slack/oauth_redirect`.
 7. Update the Slack review submission to explain scheduled check-ins, private reminders, App Home, and the new scope. Do not claim that these changes are approved until Slack approves them.
-8. After permission approval and reinstall consent, set `KICK_RITUALS_DM_ENABLED=true` in Vercel Production and redeploy. Until then, DM jobs are suppressed, existing OAuth scopes remain unchanged, and setup explains that private reminders are unavailable.
+8. After permission approval, set `KICK_OAUTH_DM_SCOPE_ENABLED=true` in Vercel Production and redeploy, then reinstall through the production OAuth flow. After confirming consent, set `KICK_RITUALS_DM_ENABLED=true` and redeploy. Until then, DM jobs are suppressed and setup explains that private reminders are unavailable.
 
 Official references: [App Home event](https://docs.slack.dev/reference/events/app_home_opened/), [opening direct messages and required scopes](https://docs.slack.dev/reference/methods/conversations.open/).
 
-The [Slack review guide](https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide/) warns that requesting unreviewed scopes in the public installation link can break installation. In the current runtime, `KICK_RITUALS_DM_ENABLED` also controls whether OAuth requests `im:write`; keep it false until the published configuration supports that scope.
+The [Slack review guide](https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide/) warns that requesting unreviewed scopes in the public installation link can break installation. `KICK_OAUTH_DM_SCOPE_ENABLED` now controls whether OAuth requests `im:write`, independently of `KICK_RITUALS_DM_ENABLED`. Keep both false in production until approval. DM delivery additionally requires that the individual installation's recorded scopes contain `im:write`. See [the complete re-review packet](slack-rereview-release.md).
 
 ## External scheduler and Vercel activation
 
 - Set a randomly generated `CRON_SECRET` in the production environment. Keep the value secret; do not put it in a URL or commit it. Redeploy after setting it.
-- `scheduler/wrangler.jsonc` defines a Cloudflare scheduled Worker every five minutes. The user approved a free external scheduler. Vercel stays on Hobby; `vercel.json` deliberately has no Vercel cron entries.
-- **Activation hold:** do not deploy that five-minute schedule unchanged on the current Neon Free plan. Neon includes 100 CU-hours/project/month and suspends idle compute after five minutes. Five-minute database polling risks keeping compute awake continuously (about 180 CU-hours over 30 days at 0.25 CU). Choose a less frequent cadence or bounded operating hours before activation; ordinary app traffic and rehearsal compute also consume the allowance. See [Neon pricing](https://neon.com/pricing). No free-tier capacity guarantee is implied.
+- `scheduler/wrangler.jsonc` defines a Cloudflare scheduled Worker every 15 minutes. The user approved a free external scheduler. Vercel stays on Hobby; `vercel.json` deliberately has no Vercel cron entries. Delivery is not second-precise and may be later during downtime or backlogs.
+- **Compute budget:** the 15-minute cadence replaces the proposed five-minute polling that could keep the database continuously awake. At 0.25 CU and roughly five active minutes per tick, scheduler-only usage is approximately 60 CU-hours per 30 days, before query time, normal traffic, autoscaling, and rehearsal usage. Neon Free includes 100 CU-hours/project/month. Monitor actual usage; this estimate is not a free-tier capacity guarantee. See [Neon pricing](https://neon.com/pricing).
 - Authenticate with `pnpm dlx wrangler login`, deploy with `pnpm dlx wrangler deploy --config scheduler/wrangler.jsonc`, and securely supply the same `CRON_SECRET` via `wrangler secret put`. The Worker has no public route and no Slack/database credentials. Never pass the secret as a command-line argument.
 - Set `KICK_SCHEDULER_ENABLED=true` only after connecting the scheduler. Until then the cron endpoint returns 503 after authentication and setup refuses to activate a schedule. Existing commands and paused configuration remain available.
 - Apply `drizzle/0001_postgres_rituals.sql` via the guarded migration runner before deploying this runtime. Nine typed tables replace the old document collections, with composite tenant foreign keys, indexed due jobs/expiry, and per-session response uniqueness. No Google SDK or credential is used.
@@ -80,7 +80,7 @@ In a dedicated public Slack test channel:
 
 Only after this test should you enable schedules in real team channels. No real team schedule is created automatically by deployment.
 
-## September 17 completion status
+## September 17 earlier rollout (historical)
 
 - Postgres migration applied and tested on the isolated rehearsal branch, then applied additively to production. No core history was deleted or reimported.
 - Production release `dpl_5zoSyrcuDeReNuUBvpSR2XkCEFsK` (`kick-kavasszs8-nobari.vercel.app`) promoted to `https://kick.bozmoz.com`. Scheduling and DM flags are explicitly false on this deployment. Home/commands are wired to Postgres; Slack Home activation still requires the settings above.

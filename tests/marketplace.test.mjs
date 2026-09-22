@@ -35,9 +35,9 @@ test('policy is English, product-specific, and has its own canonical URL', () =>
   assert.ok(privacy.includes('Kick Bot privacy policy'));
   assert.ok(privacy.includes('href="https://kick.bozmoz.com/privacy"'));
 });
-test('website does not advertise the unshipped scheduling release', () => {
-  assert.ok(!landing.includes('/sync setup'));
-  assert.ok(!landing.includes('/pick rotate'));
+test('website explains the full release without claiming pending permissions are active', () => {
+  for (const term of ['/sync setup', '/pick rotate', '15 minutes', 'pending Slack permission approval', 'Illustrative preview', 'No individual productivity scores']) assert.ok(landing.includes(term), term);
+  assert.ok(!landing.includes('role="tab"'));
 });
 test('landing page links to a public getting-started guide with actionable instructions', () => {
   assert.ok(landing.includes('href="/get-started"'));

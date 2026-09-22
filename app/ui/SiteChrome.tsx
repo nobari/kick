@@ -24,12 +24,12 @@ export function SiteHeader() {
       <div className="nav-shell">
         <Link className="brand" href="/" aria-label="Kick Bot home"><Image src="/assets/img/logo.png" width={42} height={42} alt="" priority/><span>Kick</span></Link>
         <nav className="desktop-nav" aria-label="Main navigation">
-          <Link href="/#workflows">Workflows</Link><Link href="/#how-it-works">How it works</Link><Link href="/#commands">Commands</Link><Link href="/privacy">Privacy policy</Link><Link href="/#faq">FAQ</Link>
+          <Link href="/#team-rituals">Team rituals</Link><Link href="/#how-it-works">How it works</Link><Link href="/#commands">Commands</Link><Link href="/privacy">Privacy policy</Link><Link href="/#faq">FAQ</Link>
         </nav>
         <div className="header-action"><SlackButton variant="compact"/></div>
         <details className="mobile-nav">
           <summary aria-label="Open navigation"><span/><span/></summary>
-          <nav aria-label="Mobile navigation"><Link href="/#workflows">Workflows</Link><Link href="/#how-it-works">How it works</Link><Link href="/#commands">Commands</Link><Link href="/privacy">Privacy policy</Link><Link href="/#faq">FAQ</Link><SlackButton variant="compact"/></nav>
+          <nav aria-label="Mobile navigation"><Link href="/#team-rituals">Team rituals</Link><Link href="/#workflows">Core workflows</Link><Link href="/#how-it-works">How it works</Link><Link href="/#commands">Commands</Link><Link href="/privacy">Privacy policy</Link><Link href="/#faq">FAQ</Link><SlackButton variant="compact"/></nav>
         </details>
       </div>
     </header>
