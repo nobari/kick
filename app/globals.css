@@ -50,8 +50,8 @@
   :root {
     --ink: #15162a;
     --ink-soft: #4e5068;
-    --paper: #fffdf8;
-    --paper-warm: #f7f3ea;
+    --paper: #ffffff;
+    --paper-warm: #f3f4f6;
     --navy: #11152a;
     --navy-soft: #1b2140;
     --orange: #f36b2b;
@@ -59,7 +59,7 @@
     --orange-pale: #fff0e5;
     --violet: #635bff;
     --green: #1e9d77;
-    --line: #dfddd5;
+    --line: #dfe2e7;
     --white: #fff;
     --shadow-sm: 0 10px 30px rgb(20 24 47 / .08);
     --shadow-lg: 0 2px 8px rgb(20 24 47 / .06);
@@ -142,7 +142,7 @@
 
   .hero-visual { position: relative; }
   .product-screenshot { margin: 0 auto; max-width: 300px; }
-  .product-screenshot img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: .5rem; }
+  .product-screenshot img { width: 100%; height: auto; border-radius: .5rem; }
   .product-screenshot figcaption { margin-top: .8rem; font-size: .8rem; color: var(--ink-soft); }
 
   .proof-strip { border-block: 1px solid var(--line); background: var(--paper-warm); }
@@ -158,7 +158,7 @@
   .kicker.light { color: #ffaf82; }
   .intro-copy { display: grid; gap: 1.25rem; color: var(--ink-soft); font-size: 1.08rem; }
 
-  .workflows-section { padding-block: var(--section); background: #f4efe6; overflow: hidden; }
+  .workflows-section { padding-block: var(--section); background: var(--paper-warm); overflow: hidden; }
   .section-heading.centered { max-width: 760px; margin-inline: auto; text-align: center; }
   .section-heading.centered > p:last-child { max-width: 630px; margin: 1.3rem auto 0; color: var(--ink-soft); font-size: 1.05rem; }
   .workflow-list { margin-top: clamp(4.5rem, 9vw, 8rem); display: grid; gap: clamp(6rem, 12vw, 11rem); }
@@ -169,7 +169,7 @@
   .command-note { margin-top: 1.7rem; display: flex; align-items: center; gap: .8rem; }
   .command-note code { flex: 0 0 auto; border-radius: .55rem; background: var(--ink); color: white; font-size: .86rem; padding: .55rem .7rem; }
   .command-note span { color: #656679; font-size: .78rem; line-height: 1.4; }
-  .workflow-visual { display: flex; justify-content: center; padding: 1.5rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--paper); }
+  .workflow-visual { display: flex; justify-content: center; }
   .workflow-visual img { width: min(100%, 400px); height: auto; border-radius: .25rem; }
 
   .how-section { padding-block: var(--section); }
@@ -205,8 +205,8 @@
   .faq-list details[open] summary span::after { transform: rotate(0); }
   .faq-list details p { max-width: 680px; padding: 0 3rem 1.5rem 0; color: var(--ink-soft); font-size: .94rem; }
 
-  .final-cta { padding: clamp(3rem, 6vw, 5rem) 2rem; text-align: center; border-block: 1px solid var(--line); background: var(--paper-warm); }
-  .final-cta h2 { font-size: clamp(2rem, 4vw, 3rem); }.final-cta > p { margin: 1.25rem auto 1.8rem; color: var(--ink-soft); }.final-cta .slack-button-official { margin-inline: auto; }
+  .final-cta { padding: clamp(4rem, 8vw, 7rem) 2rem; text-align: center; border-radius: var(--radius-lg); background: var(--orange); color: var(--ink); }
+  .final-cta h2 { font-size: clamp(2.5rem, 5.5vw, 5rem); }.final-cta > p { margin: 1.25rem auto 1.8rem; color: var(--ink); }.final-cta .slack-button-official { margin-inline: auto; }
 
   .site-footer { margin-top: var(--section); background: var(--navy); color: white; }
   .footer-main { padding-block: 4.5rem; display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 3rem; }
@@ -240,7 +240,6 @@
     .hero { padding-block: 3.5rem 4.5rem; }.hero-actions { align-items: center; flex-direction: column; }.hero-actions .text-link { justify-content: center; }
     .trust-list { display: grid; grid-template-columns: 1fr 1fr; }.trust-list li:last-child { grid-column: span 2; }
     .proof-grid { grid-template-columns: 1fr; padding-block: .7rem; }.proof-grid > div { min-height: 5rem; border-right: 0; border-bottom: 1px solid var(--line); padding: 1rem .6rem; }.proof-grid > div:last-child { border-bottom: 0; }
-    .workflow-visual { padding: 1rem; }
     .command-note { align-items: flex-start; flex-direction: column; }
     .steps { grid-template-columns: 1fr; gap: 2.5rem; }.steps li, .steps li:last-child { padding: 0 0 0 1.5rem; border: 0; border-left: 1px solid var(--line); }
     .command-table th, .command-table td { height: auto; padding-block: .75rem; display: block; }.command-table th { width: 100%; padding-bottom: .15rem; }
@@ -264,6 +263,6 @@
 /* Product and data disclosures for visitors arriving from Slack. */
 .installation-disclosure { max-width: 39rem; margin-top: 1.25rem; font-size: .9rem; line-height: 1.65; }
 .installation-disclosure a, .integration-details a { text-decoration: underline; text-underline-offset: .2em; }
-.integration-details { max-width: 54rem; margin: 3rem auto 0; padding: 2rem; border: 1px solid #d9d8d1; border-radius: 1.25rem; background: #fffdf8; }
+.integration-details { max-width: 54rem; margin: 3rem auto 0; padding: 2rem; border: 1px solid var(--line); border-radius: 1.25rem; background: var(--paper); }
 .integration-details h3 { margin: 0 0 1rem; font-size: 1.4rem; }
 .integration-details p { line-height: 1.8; margin: 1rem 0 0; }
