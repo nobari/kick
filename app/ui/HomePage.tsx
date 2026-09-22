@@ -118,35 +118,10 @@ function Icon({ name }: { name: "sync" | "kudos" | "pick" | "coins" | "shield" |
 }
 
 function SlackPreview() {
-  return (
-    <div className="slack-preview" role="img" aria-label="Example Kick standup conversation in Slack">
-      <div className="slack-window-bar">
-        <span className="window-dots" aria-hidden="true"><i/><i/><i/></span>
-        <span># daily-standup</span>
-        <span className="preview-status">Team ritual</span>
-      </div>
-      <div className="slack-thread">
-        <div className="slack-message">
-          <span className="avatar avatar-person">TM</span>
-          <div><strong>Team member</strong><span className="timestamp">9:01</span><p><code>/sync</code></p></div>
-        </div>
-        <div className="slack-message kick-message">
-          <Image src="/assets/img/logo.png" width={40} height={40} alt="" />
-          <div>
-            <strong>Kick</strong><span className="app-badge">APP</span><span className="timestamp">9:01</span>
-            <p>Good morning! Ready to share your update?</p>
-            <div className="update-card">
-              <div><span>MOOD</span><strong>Focused 🎯</strong></div>
-              <div><span>YESTERDAY</span><p>Shipped the onboarding review.</p></div>
-              <div><span>TODAY</span><p>Finalize the release checklist.</p></div>
-              <div><span>BLOCKERS</span><p>None</p></div>
-            </div>
-          </div>
-        </div>
-        <div className="channel-result"><span className="pulse-dot"/> Update captured. Your team can review it anytime.</div>
-      </div>
-    </div>
-  );
+  return <figure className="product-screenshot">
+    <Image src="/assets/img/features/sync.png" width={512} height={932} alt="Kick standup form in Slack" sizes="(max-width: 340px) 90vw, 300px" loading="eager" />
+    <figcaption>The standup form, opened with <code>/sync</code>.</figcaption>
+  </figure>;
 }
 
 export default function HomePage() {
@@ -192,20 +167,17 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
 
       <section className="hero section-shell" aria-labelledby="hero-title">
-        <div className="hero-glow" aria-hidden="true" />
         <div className="hero-copy">
-          <p className="eyebrow"><span className="eyebrow-dot"/> Kick Bot · Independent app for Slack</p>
-          <h1 id="hero-title">Kick: team standups.<br/><em>Real follow-through.</em></h1>
-          <p className="hero-lede">Bring check-ins, blockers, appreciation, and fair team decisions together in Slack. A calmer rhythm for your team—with focused forms, a personal Home, and opt-in rituals. No extra dashboard.</p>
+          <h1 id="hero-title">Team standups<br/>in Slack.</h1>
+          <p className="hero-lede">Use Kick to share updates, track blockers, thank teammates, and rotate responsibilities. Everything stays in your workspace.</p>
           <div className="hero-actions">
             <SlackButton />
-            <a className="text-link" href="#team-rituals">Explore the new experience <span aria-hidden="true">↓</span></a>
+            <a className="text-link" href="#workflows">See how Kick works</a>
           </div>
           <p className="installation-disclosure">Before installing, read our <a href="/privacy">Privacy policy</a> to learn what Slack data Kick collects, where it is stored, and how to request deletion. <a href="/support">Get support</a>.</p>
           <ul className="trust-list" aria-label="Product highlights">
-            <li><span aria-hidden="true">✓</span> Free core workflows</li>
-            <li><span aria-hidden="true">✓</span> No separate account</li>
-            <li><span aria-hidden="true">✓</span> Built for Slack</li>
+            <li>Free core workflows</li>
+            <li>No separate account</li>
           </ul>
         </div>
         <div className="hero-visual"><SlackPreview /></div>
@@ -222,7 +194,7 @@ export default function HomePage() {
       <section className="intro-section section-shell" aria-labelledby="why-kick">
         <div className="section-heading">
           <p className="kicker">Why Kick</p>
-          <h2 id="why-kick">The structure your team needs.<br/>None of the process it doesn’t.</h2>
+          <h2 id="why-kick">Keep team updates in one place.</h2>
         </div>
         <div className="intro-copy">
           <p>Team rituals are useful. Chasing updates, choosing a volunteer, and remembering to recognize good work are not.</p>
@@ -236,21 +208,19 @@ export default function HomePage() {
         <div className="section-shell">
           <div className="section-heading centered">
             <p className="kicker">The familiar essentials</p>
-            <h2 id="workflows-title">A small command can change the rhythm of a team.</h2>
+            <h2 id="workflows-title">Four commands for everyday teamwork.</h2>
             <p>Every workflow opens a focused Slack experience and returns the result where the team can act on it.</p>
           </div>
           <div className="workflow-list">
             {workflows.map((workflow, index) => (
               <article className={`workflow-row${index % 2 ? " reverse" : ""}`} id={workflow.id} key={workflow.id}>
                 <div className="workflow-copy">
-                  <div className={`feature-icon ${workflow.id}`}><Icon name={workflow.id}/></div>
                   <p className="workflow-eyebrow">{workflow.eyebrow}</p>
                   <h3>{workflow.title}</h3>
                   <p>{workflow.description}</p>
                   <div className="command-note"><code>{workflow.command}</code><span>{workflow.detail}</span></div>
                 </div>
                 <div className={`workflow-visual ${workflow.id}`}>
-                  <div className="screenshot-chrome"><span/><span/><span/><b>Slack</b></div>
                   <Image src={workflow.image} width={workflow.imageWidth} height={workflow.imageHeight} alt={workflow.alt} sizes="(max-width: 700px) 88vw, 480px" />
                 </div>
               </article>
@@ -262,12 +232,12 @@ export default function HomePage() {
       <section id="how-it-works" className="how-section section-shell" aria-labelledby="how-title">
         <div className="section-heading centered">
           <p className="kicker">How it works</p>
-          <h2 id="how-title">From install to first ritual in three steps.</h2>
+          <h2 id="how-title">Get started with Kick.</h2>
         </div>
         <ol className="steps">
-          <li><span>01</span><h3>Add Kick to Slack</h3><p>Choose your workspace and approve Slack’s permissions. After a successful installation, Kick shows a confirmation page with your next steps. No separate Kick account is required.</p></li>
-          <li><span>02</span><h3>Run a command</h3><p>Start with <code>/sync</code>, <code>/kudos</code>, <code>/coins</code>, or <code>/pick</code> in a public channel.</p></li>
-          <li><span>03</span><h3>Act on the result</h3><p>Submit the focused modal and keep the outcome in Slack where everyone can find it.</p></li>
+          <li><h3>Add Kick to Slack</h3><p>Choose your workspace and approve Slack’s permissions. After a successful installation, Kick shows a confirmation page with your next steps. No separate Kick account is required.</p></li>
+          <li><h3>Run a command</h3><p>Start with <code>/sync</code>, <code>/kudos</code>, <code>/coins</code>, or <code>/pick</code> in a public channel.</p></li>
+          <li><h3>Share with your team</h3><p>Fill in the form and submit it to post the result in your channel.</p></li>
         </ol>
         <div className="integration-details">
           <h3>What happens inside your Slack workspace?</h3>
@@ -283,7 +253,7 @@ export default function HomePage() {
         <div className="section-shell commands-grid">
           <div className="commands-intro">
             <p className="kicker light">Command reference</p>
-            <h2 id="commands-title">Easy to learn.<br/>Fast to repeat.</h2>
+            <h2 id="commands-title">Find the command you need.</h2>
             <p>Add <code>-h</code> to any command for contextual help in Slack.</p>
           </div>
           <table className="command-table">
@@ -337,10 +307,7 @@ export default function HomePage() {
       </section>
 
       <section className="final-cta section-shell" aria-labelledby="cta-title">
-        <div className="cta-orbit one" aria-hidden="true"/><div className="cta-orbit two" aria-hidden="true"/>
-        <Image src="/assets/img/logo.png" width={72} height={72} alt="" />
-        <p className="kicker light">Ready when your team is</p>
-        <h2 id="cta-title">Make the next ritual<br/>the easiest one yet.</h2>
+        <h2 id="cta-title">Try Kick with your team.</h2>
         <p>Bring standups, recognition, and fair team decisions into Slack.</p>
         <SlackButton variant="light" />
       </section>

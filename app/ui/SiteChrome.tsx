@@ -45,7 +45,7 @@ export function SiteFooter() {
         <div className="footer-links"><strong>Trust</strong><Link href="/privacy">Privacy policy</Link><Link href="/terms">Terms</Link><Link href="/support">Support</Link></div>
         <div className="footer-links"><strong>Get Kick</strong><a href={installUrl}>Add to Slack</a><a href="mailto:kick.bot.help@gmail.com">Contact us</a></div>
       </div>
-      <div className="footer-bottom section-shell"><span>© 2026 Kick Bot · Independent third-party integration for Slack</span><span>Not affiliated with or endorsed by Slack.</span></div>
+      <div className="footer-bottom section-shell"><span>© 2026 Kick</span><span>Not affiliated with or endorsed by Slack.</span></div>
     </footer>
   );
 }

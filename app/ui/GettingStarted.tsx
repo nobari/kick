@@ -5,12 +5,12 @@ export default function GettingStarted() {
   return (
     <>
       <ol className="steps">
-        <li><span>01</span><h2>Open your workspace</h2><p>Open the Slack workspace where you installed Kick. Choose a public test channel that you belong to.</p><p><a href="https://app.slack.com/">Open Slack →</a></p></li>
-        <li><span>02</span><h2>Share your first update</h2><p>Type <code>/sync</code> in the channel’s message box and send it. Fill in yesterday’s work, today’s plan, blockers, and mood in the form.</p></li>
-        <li><span>03</span><h2>Review it with your team</h2><p>Submit the form to post your update in that channel. Use <code>/sync -r 7</code> to review recent updates.</p></li>
+        <li><h2>Open your workspace</h2><p>Open the Slack workspace where you installed Kick. Choose a public test channel that you belong to.</p><p><a href="https://app.slack.com/">Open Slack →</a></p></li>
+        <li><h2>Share your first update</h2><p>Type <code>/sync</code> in the channel’s message box and send it. Fill in yesterday’s work, today’s plan, blockers, and mood in the form.</p></li>
+        <li><h2>Review it with your team</h2><p>Submit the form to post your update in that channel. Use <code>/sync -r 7</code> to review recent updates.</p></li>
       </ol>
       <section className="integration-details" aria-labelledby="guided-rituals">
-        <h2 id="guided-rituals">Set your team’s rhythm</h2>
+        <h2 id="guided-rituals">Set up scheduled check-ins</h2>
         <p>In a public channel, run <code>/sync setup</code>. Choose active human participants who belong to the channel, weekdays, an IANA time zone (for example, <code>Asia/Tokyo</code>), check-in and digest times, and a template. You can also write one to five custom questions.</p>
         <p>New setups start <strong>Paused</strong>. Select Enabled when you are ready, review the preview, then Confirm. Only the workflow owner or a workspace admin can change an existing setup. {scheduled ? "The scheduler checks for due work every 15 minutes. Delivery may be later during an outage or backlog." : "Automatic scheduling is not activated yet; save your setup as Paused for now."} Leave at least 15 minutes between the check-in opening and digest so a scheduler run can occur.</p>
         <h3>Check in, then follow through</h3>

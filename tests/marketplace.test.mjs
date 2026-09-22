@@ -14,7 +14,7 @@ test('all generated public pages and metadata omit personal-name attribution', (
 });
 
 test('landing page explicitly identifies Kick and its Slack integration', () => {
-  assert.match(landing, /<h1[^>]*>Kick: team standups/);
+  assert.match(landing, /<h1[^>]*>Team standups/);
   assert.ok(landing.includes('What happens inside your Slack workspace?'));
   for (const command of ['/sync', '/kudos', '/coins', '/pick']) assert.ok(landing.includes(command));
   assert.ok(landing.includes('Neon'));
@@ -42,4 +42,11 @@ test('website explains the full release without claiming pending permissions are
 test('landing page links to a public getting-started guide with actionable instructions', () => {
   assert.ok(landing.includes('href="/get-started"'));
   for (const term of ['Open your workspace', 'Share your first update', '/sync -r 7', 'href="/privacy"', 'href="/support"']) assert.ok(guide.includes(term), term);
+});
+
+test('public marketing pages omit decorative numbering and the retired hero tagline', () => {
+  for (const html of [landing, guide]) {
+    assert.doesNotMatch(html, /Kick Bot · Independent app for Slack|eyebrow-dot|feature-number|hero-glow|cta-orbit/);
+    assert.doesNotMatch(html, /<span>0[1-9]<\/span>|0[1-3] · (Your Home|The check-in|The digest)/);
+  }
 });

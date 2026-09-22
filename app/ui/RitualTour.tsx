@@ -3,9 +3,9 @@
 import { useState } from "react";
 
 const scenes = [
-  { id: "home", label: "01 · Your Home", title: "One calm place to catch up.", description: "See your next step, browse team updates, and find open blockers in Kick’s Home tab. Channel membership controls what you can see." },
-  { id: "checkin", label: "02 · The check-in", title: "A useful update. A focused form.", description: "Answer your team’s questions, name a blocker, and choose someone who can help. No new account. No dashboard to keep open." },
-  { id: "digest", label: "03 · The digest", title: "Close the loop, together.", description: "An opt-in channel digest brings responses, pending updates, and blocker counts together. Read full updates in Home when you need more context." },
+  { id: "home", label: "Home", title: "Browse updates and blockers.", description: "See your next step, browse team updates, and find open blockers in Kick’s Home tab. Channel membership controls what you can see." },
+  { id: "checkin", label: "Check-in", title: "Share a team update.", description: "Answer your team’s questions, name a blocker, and choose someone who can help. No new account. No dashboard to keep open." },
+  { id: "digest", label: "Digest", title: "Read the channel summary.", description: "An opt-in channel digest brings responses, pending updates, and blocker counts together. Read full updates in Home when you need more context." },
 ] as const;
 
 export default function RitualTour() {
