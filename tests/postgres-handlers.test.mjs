@@ -23,7 +23,7 @@ test('published handlers use Postgres for sync, kudos, coins and pick without li
     class App {
       command(name, fn) { commands.set(String(name), fn); }
       view(name, fn) { views.set(name, fn); }
-      action() {} message() {} error() {} event() {} use() {}
+      action() {} message() {} error() {} event() {} use() {} shortcut() {}
     }
     class ExpressReceiver {
       constructor(options) { receiverOptions = options; this.app = {}; this.router = { get: (path, fn) => routes.set(path, fn) }; }

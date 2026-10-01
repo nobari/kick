@@ -10,6 +10,11 @@ export function reviewManifest(origin) {
     features: {
       bot_user: { display_name: 'Kick Review', always_online: false },
       app_home: { home_tab_enabled: true, messages_tab_enabled: true, messages_tab_read_only_enabled: true },
+      shortcuts: [
+        { name: 'Track action', type: 'message', callback_id: 'kick_track_action', description: 'Review a message and save an assigned action with a due date' },
+        { name: 'Report blocker', type: 'message', callback_id: 'kick_report_blocker', description: 'Review a message and record a blocker with a helper' },
+        { name: 'Give kudos', type: 'message', callback_id: 'kick_give_kudos', description: 'Review a message and thank a teammate in the channel' },
+      ],
       slash_commands: [
         ['tsync', 'Check in, view reports, or configure team rituals'],
         ['tpick', 'Random pick or fair team rotation'],

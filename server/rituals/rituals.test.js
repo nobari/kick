@@ -30,7 +30,7 @@ function fixture() {
     views: { publish: async () => {}, open: async () => ({ view: { id: 'V1' } }), update: async () => ({}) }
   }
   const engine = createEngine(store, async () => client, () => now)
-  const c = { id: engine.configId('T1', 'C1'), team: 'T1', channel: 'C1', owner: 'U1', enabled: true,
+  const c = { id: engine.configId('T1', 'C1'), name: 'Daily standup', workflowKey: 'default', team: 'T1', channel: 'C1', owner: 'U1', enabled: true,
     zone: 'Asia/Tokyo', time: '09:00', digestTime: '17:00', days: [1, 2, 3, 4, 5], members: ['U1', 'U2', 'U3'],
     questions: TEMPLATES.standup, template: 'standup', retentionDays: 30, roundup: true, nextAt: now }
   return { store, engine, c, sent, opened, client, rows, now: () => now, advance: ms => { now += ms }, setNow: value => { now = Date.parse(value) } }
@@ -197,7 +197,7 @@ test('App Home does not reveal channel data to nonmembers', async () => {
   await f.engine.submit(f.c, 'U1', ['Sensitive team update', 'Next'])
   let published
   f.client.views.publish = async data => { published = data }
-  const bolt = { use() {}, action() {}, view() {}, event() {} }
+  const bolt = { use() {}, action() {}, view() {}, event() {}, shortcut() {} }
   const ui = registerRituals(bolt, f.store, f.engine)
   await ui.home(f.client, 'T1', 'outsider')
   assert.ok(!JSON.stringify(published).includes('Sensitive team update'))
@@ -226,11 +226,12 @@ async function withUI(fn) {
   const symbol = Symbol.for('@vercel/request-context'), previous = globalThis[symbol]
   globalThis[symbol] = { get: () => ({ waitUntil: p => pending.push(p) }) }
   f.client.views.update = async value => { updates.push(value.view); return { view: { id: 'V1' } } }
-  const bolt = Object.fromEntries(['action', 'view', 'event'].map(k => [k, (pattern, fn) => { handlers[k] = fn }]))
+  const bolt = Object.fromEntries(['action', 'view', 'event', 'shortcut'].map(k => [k, (pattern, fn) => { (handlers[k] ||= []).push({ pattern, fn }) }]))
   bolt.use = fn => { handlers.use = fn }
   registerRituals(bolt, f.store, f.engine, { schedulerEnabled: true, dmEnabled: true })
   const invoke = async (kind, args) => {
-    await handlers[kind]({ ack: async value => { acks.push(value) }, client: f.client, ...args })
+    const handler = kind === 'use' ? handlers.use : handlers[kind].find(h => typeof h.pattern === 'string' ? h.pattern === args.event?.type : h.pattern.test(args.action?.action_id || args.view?.callback_id || args.body?.callback_id)).fn
+    await handler({ ack: async value => { acks.push(value) }, client: f.client, ...args })
     await Promise.all(pending.splice(0))
   }
   try { await fn({ ...f, invoke, updates, acks }) } finally { globalThis[symbol] = previous }
@@ -244,7 +245,7 @@ test('setup opens a loading modal before fetching settings and starts paused', a
 }))
 test('setup preview saves no active schedule until confirmed', async () => withUI(async f => {
   const view = { id: 'V1', callback_id: 'ritual_setup_save', private_metadata: 'C1', blocks: [], state: { values: values({
-    zone: 'Asia/Tokyo', time: '09:00', digest: '17:00', enabled: 'yes', days: { selected_options: [{ value: '3' }] },
+    name: 'Weekly wins', zone: 'Asia/Tokyo', time: '09:00', digest: '17:00', enabled: 'yes', days: { selected_options: [{ value: '3' }] },
     members: { selected_users: ['U1', 'U2'] }, template: 'wins', roundup: 'yes', retention: '30'
   }) } }
   await f.invoke('view', { body: { team: { id: 'T1' }, user: { id: 'U1' } }, view })
@@ -297,7 +298,7 @@ test('Home names channels, separates views, and handles empty trends without inv
   let published
   f.client.conversations.info = async () => ({ channel: { name: 'team-check-in', is_private: false } })
   f.client.views.publish = async args => { published = args }
-  const ui = registerRituals({ use() {}, action() {}, view() {}, event() {} }, f.store, f.engine)
+  const ui = registerRituals({ use() {}, action() {}, view() {}, event() {}, shortcut() {} }, f.store, f.engine)
   await ui.home(f.client, 'T1', 'U2', 'C1', 'trends')
   const serialized = JSON.stringify(published)
   assert.match(serialized, /#team-check-in/)

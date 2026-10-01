@@ -89,7 +89,7 @@ const faqs = [
   {
     question: "How do scheduled check-ins and private reminders work?",
     answer:
-      "Use /sync setup to choose participants, questions, weekdays, a time zone, and a digest time. Review and confirm before enabling. Scheduled delivery is checked every 15 minutes when activated. Private reminders and helper follow-ups require Slack permission approval and reinstall consent; they are not yet available through the published installation flow.",
+      "Use /sync setup to choose participants, questions, weekdays, a time zone, and a digest time. Review and confirm before enabling. Scheduled delivery is checked every 15 minutes when activated. Private reminders and helper follow-ups require permission granted to your installation and service activation.",
   },
   {
     question: "Is a fair rotation the same as a random pick?",
@@ -147,7 +147,7 @@ export default function HomePage() {
         applicationSubCategory: "Team collaboration and productivity",
         operatingSystem: "Slack",
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-        featureList: ["Async Slack standups", "Kudos and peer recognition", "Virtual team coins", "Random team member picker", "Guided channel setup", "Custom check-in templates", "Blocker tracking", "Membership-aware App Home", "Aggregate team insights"],
+        featureList: ["Async Slack standups", "Kudos and peer recognition", "Virtual team coins", "Random team member picker", "Guided workflow setup", "Custom check-in templates", "Blocker tracking", "Membership-aware App Home", "Aggregate team insights", "Assigned action items", "Editable check-ins and late corrections", "Multiple workflows per channel", "Sprint goals and recaps", "Attributed retrospectives and voting", "Planning poker", "Search retained Kick history", "Calendar exceptions", "Delivery operations and audit"],
         author: { "@type": "Organization", name: "Kick Bot" },
       },
       {
@@ -169,7 +169,7 @@ export default function HomePage() {
       <section className="hero section-shell" aria-labelledby="hero-title">
         <div className="hero-copy">
           <h1 id="hero-title">Team standups<br/>in Slack.</h1>
-          <p className="hero-lede">Use Kick to share updates, track blockers, thank teammates, and rotate responsibilities. Everything stays in your workspace.</p>
+          <p className="hero-lede">Share updates, turn blockers into actions, and plan the next sprint together. Use Kick inside Slack, without another dashboard.</p>
           <div className="hero-actions">
             <SlackButton />
             <a className="text-link" href="#workflows">See how Kick works</a>
@@ -264,6 +264,7 @@ export default function HomePage() {
               <tr><th scope="row"><code>/sync setup</code></th><td>Configure, preview, and confirm a channel ritual</td></tr>
               <tr><th scope="row"><code>/sync checkin</code></th><td>Answer the current ritual’s questions</td></tr>
               <tr><th scope="row"><code>/sync home</code></th><td>Refresh your Kick Home tab</td></tr>
+              <tr><th scope="row"><code>/sync workflows</code></th><td>Refresh Home to choose or add a named workflow</td></tr>
               <tr><th scope="row"><code>/sync preferences</code></th><td>Set quiet hours, leave, and reminder preferences</td></tr>
               <tr><th scope="row"><code>/kudos</code></th><td>Recognize a teammate</td></tr>
               <tr><th scope="row"><code>/coins</code></th><td>Send a team coin</td></tr>

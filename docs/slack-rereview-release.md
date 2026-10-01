@@ -1,5 +1,7 @@
 # Kick team-rituals release: Slack re-review packet
 
+For the October collaboration update and its three message shortcuts, use [the current publishing packet](./slack-collaboration-release.md). This September document is historical; do not re-request its already-published scopes.
+
 ## Activation update — September 23, 2026
 
 The owner confirmed that the production Slack update, including `im:write` and `app_home_opened`, was approved and published. The submission instructions below are retained as the historical review packet, not outstanding approval requirements.

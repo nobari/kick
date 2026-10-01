@@ -9,7 +9,7 @@ import engineModule from '../server/rituals/engine.js';
 import domain from '../server/rituals/domain.js';
 
 test('Postgres rituals: real transactions, concurrent workers and all scheduled workflows', {
-  skip: process.env.KICK_DB_BRANCH !== 'br-old-voice-aw1siabw',
+  skip: process.env.KICK_DB_BRANCH !== 'br-summer-tooth-awtmudnn',
 }, async t => {
   const pool = new pg.Pool({ connectionString: rehearsalConnection(), max: 4 });
   const db = connection.databaseForPool(pool), store = storage.createStore(db);

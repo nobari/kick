@@ -6,16 +6,16 @@ import { rehearsalConnection } from '../scripts/db/rehearsal-db.mjs';
 
 test('rehearsal guard refuses absent, production, pooled and insecure URLs', () => {
   for (const env of [{}, { KICK_DB_BRANCH: 'main' }, {
-    KICK_DB_BRANCH: 'br-old-voice-aw1siabw',
-    DATABASE_URL_UNPOOLED: 'postgresql://user:secret@ep-jolly-snow-aw8g6rfs-pooler.c-12.us-east-1.aws.neon.tech/neondb?sslmode=verify-full',
+    KICK_DB_BRANCH: 'br-summer-tooth-awtmudnn',
+    DATABASE_URL_UNPOOLED: 'postgresql://user:secret@ep-round-voice-awpjdbi1-pooler.c-12.us-east-1.aws.neon.tech/neondb?sslmode=verify-full',
   }, {
-    KICK_DB_BRANCH: 'br-old-voice-aw1siabw',
-    DATABASE_URL_UNPOOLED: 'postgresql://user:secret@ep-jolly-snow-aw8g6rfs.c-12.us-east-1.aws.neon.tech/neondb?sslmode=disable',
+    KICK_DB_BRANCH: 'br-summer-tooth-awtmudnn',
+    DATABASE_URL_UNPOOLED: 'postgresql://user:secret@ep-round-voice-awpjdbi1.c-12.us-east-1.aws.neon.tech/neondb?sslmode=disable',
   }]) assert.throws(() => rehearsalConnection(env));
 });
 
 test('normalized schema enforces tenant boundaries, uniqueness and valid quantities', {
-  skip: process.env.KICK_DB_BRANCH !== 'br-old-voice-aw1siabw',
+  skip: process.env.KICK_DB_BRANCH !== 'br-summer-tooth-awtmudnn',
 }, async () => {
   const client = new pg.Client({ connectionString: rehearsalConnection(), connectionTimeoutMillis: 15000 });
   await client.connect();

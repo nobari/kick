@@ -13,7 +13,16 @@ function localTime(now, zone) {
     day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(p.weekday) }
 }
 function validTime(value) { return /^([01]\d|2[0-3]):[0-5]\d$/.test(value) }
+function deadline(now, zone, day, time) {
+  // Find the first closing minute on the actual local timeline, including DST gaps/repeats.
+  for (let at = Math.floor(now / 60000) * 60000; at <= now + 27 * 3600000; at += 60000) {
+    const local = localTime(at, zone)
+    if (local.date > day || (local.date === day && local.time >= time)) return at
+  }
+  throw new Error('Unable to resolve this schedule deadline.')
+}
 function validateConfig(c) {
+  if (c.name !== undefined && (!c.name.trim() || c.name.length > 60)) throw new Error('Give the workflow a name of 1–60 characters.')
   try { localTime(Date.now(), c.zone) } catch { throw new Error('Use an IANA time zone, such as Asia/Tokyo.') }
   if (!c.zone || !validTime(c.time) || !validTime(c.digestTime) || c.digestTime <= c.time)
     throw new Error('Use HH:MM times, with the digest later than the check-in.')
@@ -50,4 +59,4 @@ function insights(runs, responses, blockers, now) {
   })
 }
 const escape = value => String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-module.exports = { DAY, TEMPLATES, localTime, validTime, validateConfig, mayRemind, nextInRotation, insights, escape }
+module.exports = { DAY, TEMPLATES, localTime, validTime, deadline, validateConfig, mayRemind, nextInRotation, insights, escape }

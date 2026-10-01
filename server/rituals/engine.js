@@ -1,12 +1,20 @@
-const { DAY, localTime, mayRemind, nextInRotation, insights, escape } = require('./domain')
+const { DAY, localTime, deadline, mayRemind, nextInRotation, insights, escape } = require('./domain')
 const { key } = require('./store')
 const { randomUUID } = require('node:crypto')
 const text = value => ({ type: 'plain_text', text: value })
 const button = (label, action_id, value) => ({ type: 'button', text: text(label), action_id, value })
 const section = value => ({ type: 'section', text: { type: 'mrkdwn', text: value.slice(0, 2900) } })
 function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, canRemind = async () => true } = {}) {
-  const configId = (team, channel) => key(team, channel)
-  async function config(team, channel) { return store.get('configs', configId(team, channel)) }
+  const configId = (team, channel, workflow = 'default') => workflow === 'default' ? key(team, channel) : key(team, channel, workflow)
+  async function config(team, reference) {
+    const [channel, workflow = 'default'] = reference.split('~')
+    const c = await store.get('configs', /^[a-f0-9]{64}$/.test(reference) ? reference : configId(team, channel, workflow))
+    return c?.team === team ? c : null
+  }
+  async function schedule(c, now) {
+    const local = localTime(now, c.zone), exception = await store.get('calendar', key(c.id, 'calendar', local.date))
+    return exception?.expiresAt > now ? { ...c, time: exception.time || c.time, digestTime: exception.digestTime || c.digestTime, days: exception.skip ? [] : [local.day] } : c
+  }
   async function channelMembers(client, channel) {
     const users = new Set(); let cursor
     do {
@@ -22,9 +30,10 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
   async function currentRun(c) {
     const now = clock(), local = localTime(now, c.zone)
     const id = key(c.id, local.date)
-    if (!c.enabled || !c.days.includes(local.day) || local.time < c.time || local.time >= c.digestTime) return null
     const existing = await store.get('runs', id)
-    if (existing) return existing
+    if (existing) return c.enabled && (existing.closesAt ? now < existing.closesAt : local.time < c.digestTime) ? existing : null
+    c = await schedule(c, now)
+    if (!c.enabled || !c.days.includes(local.day) || local.time < c.time || local.time >= c.digestTime) return null
     const current = await channelMembers(await clientFor(c.team), c.channel)
     const members = []
     for (const user of c.members) {
@@ -32,8 +41,13 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
       const pref = await store.get('prefs', key(c.team, user))
       if (!pref?.leaveUntil || pref.leaveUntil < local.date) members.push(user)
     }
-    await store.create('runs', id, { config: c.id, team: c.team, channel: c.channel, date: local.date,
-      at: now, members, questions: c.questions, expiresAt: now + c.retentionDays * DAY })
+    const create = async tx => {
+      const exception = await tx.get('calendar', key(c.id, 'calendar', local.date))
+      if (exception?.expiresAt > now && (exception.skip || local.time < exception.time || local.time >= exception.digestTime)) return
+      await tx.create('runs', id, { config: c.id, team: c.team, channel: c.channel, date: local.date,
+        at: now, closesAt: deadline(now, c.zone, local.date, exception?.expiresAt > now ? exception.digestTime : c.digestTime), members, questions: c.questions, expiresAt: now + c.retentionDays * DAY })
+    }
+    if (store.locked) await store.locked(c.id, create); else await create(store)
     return store.get('runs', id)
   }
   async function submit(c, user, answers, blocker, helper) {
@@ -66,7 +80,7 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
     const now = clock(), local = localTime(now, c.zone)
     if (!c.enabled) return
     const run = await currentRun(c) || await store.get('runs', key(c.id, local.date))
-    if (run && local.time < c.digestTime) {
+    if (run && (run.closesAt ? now < run.closesAt : local.time < c.digestTime)) {
       await queue(c, key(run.id, 'prompt'), { kind: 'prompt', run: run.id })
       if (dmEnabled && now - run.at >= 60 * 60000) {
         for (const user of run.members) {
@@ -78,7 +92,7 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
     }
     const recentRuns = await store.list('runs', 'config', '==', c.id)
     for (const previous of recentRuns.filter(r => r.expiresAt > now && now - r.at < 2 * DAY &&
-      (r.date < local.date || (r.date === local.date && local.time >= c.digestTime))))
+      (r.closesAt ? now >= r.closesAt : r.date < local.date || (r.date === local.date && local.time >= c.digestTime))))
       await queue(c, key(previous.id, 'digest'), { kind: 'digest', run: previous.id })
     if (local.time >= c.digestTime && local.day === 5 && c.roundup)
       await queue(c, key(c.id, local.date, 'roundup'), { kind: 'roundup', since: now - 7 * DAY })
@@ -92,30 +106,30 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
   }
   async function deliver(job) {
     const c = await store.get('configs', job.config), now = clock()
-    if (!c || !c.enabled || job.expiresAt <= now) return 'skipped'
+    if (!c || (!c.enabled && job.kind !== 'notice') || job.expiresAt <= now) return 'skipped'
     if (job.user && (!dmEnabled || !await canRemind(c.team))) return 'skipped'
     const client = await clientFor(c.team)
     const run = job.run && await store.get('runs', job.run)
     let channel = c.channel, blocks, message
     if (job.kind === 'prompt' || job.kind === 'reminder') {
       const local = localTime(now, c.zone)
-      if (!run || local.date !== run.date || local.time >= c.digestTime) return 'skipped'
+      if (!run || local.date !== run.date || (run.closesAt ? now >= run.closesAt : local.time >= c.digestTime)) return 'skipped'
       if (job.kind === 'reminder') {
         if (!c.members.includes(job.user) || await store.get('responses', key(run.id, job.user))) return 'skipped'
         const pref = await store.get('prefs', key(c.team, job.user))
         if (!mayRemind(pref || {}, now, c.zone)) return 'deferred'
       }
       message = job.kind === 'prompt' ? `Time for your team check-in · ${run.date}` : 'A gentle check-in reminder. Share an update when you have a moment.'
-      message += ` Submit before ${c.digestTime} (${c.zone}). Your answers will be shared in the channel digest.`
+      message += ` ${c.name || 'Daily standup'}: submit before ${run.closesAt ? localTime(run.closesAt, c.zone).time : c.digestTime} (${c.zone}). Your answers will be shared in the channel digest.`
       blocks = [{ type: 'header', text: text(job.user ? 'Your check-in reminder' : 'Time to check in') }, section(message),
         { type: 'context', elements: [text(`${run.members.length} participants · ${c.retentionDays}-day retention · No reply required in this thread`)] },
-        { type: 'actions', elements: [{ ...button('Share update', 'ritual_checkin', c.channel), style: 'primary' },
+        { type: 'actions', elements: [{ ...button('Share update', 'ritual_checkin', c.id), style: 'primary' },
         ...(job.user ? [button('Snooze 1 hour', 'ritual_snooze', c.channel), button('Preferences', 'ritual_preferences', c.channel)] : [])] }]
     } else if (job.kind === 'digest') {
       if (!run) return 'skipped'
       const data = await dataset(c), responses = data.responses.filter(r => r.run === run.id)
       const missing = run.members.filter(u => !responses.some(r => r.user === u))
-      message = `Team digest · ${run.date}: ${responses.length}/${run.members.length} updates; ${missing.length} pending.`
+      message = `Team digest · ${run.date}: ${responses.length}/${run.members.length} updates; ${missing.length} pending. ${c.name || 'Daily standup'}`
       blocks = [section(message)]
       responses.forEach(r => blocks.push(section(`<@${r.user}>\n${r.answers.map((a, i) => `*${escape(run.questions[i])}*\n${escape(a)}`).join('\n').slice(0, 2700)}`)))
       const open = data.blockers.filter(b => !b.resolvedAt)
@@ -138,6 +152,8 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
       if (!mayRemind(pref || {}, now, c.zone)) return 'deferred'
       message = `Can you help with this blocker? ${escape(b.detail)}`
       blocks = [section(message), { type: 'actions', elements: [button('Resolve / assign', 'ritual_blocker', b.id)] }]
+    } else if (job.kind === 'notice') {
+      message = job.reason
     } else if (job.kind === 'rotation') {
       message = `Next in the team rotation: <@${job.selected}>. ${escape(job.reason)}`
     } else return 'skipped'
@@ -214,7 +230,7 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
     await store.create('recognition', key(c.id, ts, to), { config: c.id, team, from, to, reason: String(reason || '').slice(0, 1500),
       at: clock(), expiresAt: clock() + c.retentionDays * DAY })
   }
-  return { configId, config, currentRun, submit, recordLegacy, dataset, tick, tickConfig, deliver, rotate, recognize, queue,
+  return { configId, config, schedule, currentRun, submit, recordLegacy, dataset, tick, tickConfig, deliver, rotate, recognize, queue,
     insights: async c => { const d = await dataset(c); return insights(d.runs, d.responses, d.blockers, clock()) } }
 }
 module.exports = { createEngine, text, button, section }

@@ -6,9 +6,11 @@ Kick uses Neon Postgres exclusively. The website and Slack receiver run on Verce
 
 - Core tables: `server/db/schema.ts` and `drizzle/0000_normalized_kick.sql`.
 - Team rituals: `server/db/ritual-schema.ts` and `drizzle/0001_postgres_rituals.sql`.
+- Collaboration tools: `drizzle/0002_collaboration_release.sql` and `0003_collaboration_indexes.sql`. Nine additional normalized tables, tenant-aware foreign keys, expiry indexes, and preserved default workflow IDs. Never drop these tables during an application rollback.
 - Test schema changes on the isolated rehearsal branch first. Existing production guard scripts validate the exact database target and verified TLS.
 - `pnpm test:db` runs local connection and safety checks; database-dependent cases require the rehearsal environment.
 - `pnpm test:ritual-db` runs ritual integration checks against the guarded rehearsal branch.
+- The October rehearsal uses private branch `br-summer-tooth-awtmudnn` (expires October 8) and ignored `.env.collaboration.local`. It contains a production clone and must not be attached to a public staging app. The older rehearsal branch has expired; its local credentials and the original cutover encryption keys are not replaced.
 - `https://kick.bozmoz.com/api/slack/health?deep=1` verifies the live database connection without exposing credentials.
 
 ## Recovery

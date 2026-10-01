@@ -36,8 +36,13 @@ test('policy is English, product-specific, and has its own canonical URL', () =>
   assert.ok(privacy.includes('href="https://kick.bozmoz.com/privacy"'));
 });
 test('website explains the full release without claiming pending permissions are active', () => {
-  for (const term of ['/sync setup', '/pick rotate', '15 minutes', 'pending Slack permission approval', 'Illustrative preview', 'No individual productivity scores']) assert.ok(landing.includes(term), term);
+  for (const term of ['/sync setup', '/pick rotate', '15 minutes', 'installation consent and activation', 'Illustrative preview', 'No individual productivity scores', 'planning poker', 'after Slack configuration and publication']) assert.ok(landing.includes(term), term);
   assert.ok(!landing.includes('role="tab"'));
+});
+
+test('collaboration data, visibility and retention are explained in policy and guide', () => {
+  for (const term of ['retrospective topics', 'calendar exceptions', 'Planning-poker estimates', 'source message timestamp', 'audit entries']) assert.ok(privacy.includes(term), term);
+  for (const term of ['Actions', 'Planning poker', 'Retrospectives', 'Calendar', 'Search', 'Operations', 'not anonymous', 'Edit / correct']) assert.ok(guide.includes(term), term);
 });
 test('landing page links to a public getting-started guide with actionable instructions', () => {
   assert.ok(landing.includes('href="/get-started"'));

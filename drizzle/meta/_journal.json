@@ -15,6 +15,20 @@
       "when": 1789638106588,
       "tag": "0001_postgres_rituals",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790831212525,
+      "tag": "0002_collaboration_release",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790832252051,
+      "tag": "0003_collaboration_indexes",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,2 @@
+CREATE INDEX "ritual_estimate_session" ON "ritual_estimates" USING btree ("poker_id","created_at","id");--> statement-breakpoint
+CREATE INDEX "ritual_topic_retro" ON "ritual_topics" USING btree ("retro_id","created_at","id");

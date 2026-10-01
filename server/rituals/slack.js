@@ -2,6 +2,8 @@ const { TEMPLATES, validateConfig, validTime, localTime, escape, DAY } = require
 const { key } = require('./store')
 const { text, button, section } = require('./engine')
 const { waitUntil } = require('@vercel/functions')
+const { randomUUID } = require('node:crypto')
+const { registerCollaboration } = require('./collaboration-slack')
 const background = work => waitUntil(work().catch(e => console.error('Kick workflow failed:', e.data?.error || e.code || 'unknown_error')))
 const option = (label, value) => ({ text: text(label), value: String(value) })
 const input = (id, label, element, optional = false) => ({ type: 'input', block_id: id, label: text(label), optional, element: { action_id: 'value', ...element } })
@@ -59,6 +61,9 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
     use: fn => bolt.use(fn)
   }
   async function member(client, channel, user) {
+    if (/^[a-f0-9]{64}$/.test(channel)) channel = (await store.get('configs', channel))?.channel
+    if (typeof channel !== 'string') throw new Error('Workflow unavailable.')
+    channel = channel.split('~')[0]
     // Public channels only: no additional private-channel history access is requested.
     const info = await client.conversations.info({ channel })
     if (info.channel.is_private || info.channel.is_im || info.channel.is_mpim || info.channel.is_archived)
@@ -80,9 +85,11 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
   async function setupView(team, channel, draft) {
     const c = draft || await engine.config(team, channel) || { zone: 'Asia/Tokyo', time: '09:30', digestTime: '17:00',
       days: [1, 2, 3, 4, 5], members: [], template: 'standup', questions: TEMPLATES.standup, retentionDays: 30 }
+    const actualChannel = c.channel || channel.split('~')[0]
     return modal('Set up team rituals', 'ritual_setup_save', channel, [
       context('Step 1 of 2 · Configure, then review. Nothing changes until you confirm.'),
-      section(`*<#${channel}> · Your team’s rhythm*\nUpdates and blockers are visible to channel members. Scheduled deliveries are checked every 15 minutes, not at an exact second.${schedulerEnabled ? '' : ' Automatic scheduling is not activated yet; save as Paused.'}${await remindersAvailable(team) ? '' : ' Private reminders are unavailable for this installation.'}`),
+      section(`*<#${actualChannel}> · Your team’s rhythm*\nUpdates and blockers are visible to channel members. Scheduled deliveries are checked every 15 minutes, not at an exact second.${schedulerEnabled ? '' : ' Automatic scheduling is not activated yet; save as Paused.'}${await remindersAvailable(team) ? '' : ' Private reminders are unavailable for this installation.'}`),
+      field('name', 'Workflow name', c.name || 'Daily standup'),
       header('Schedule'),
       select('enabled', 'Scheduled check-ins', [option('Enabled', 'yes'), option('Paused', 'no')], c.enabled ? 'yes' : 'no'),
       field('zone', 'IANA time zone (e.g. Asia/Tokyo)', c.zone),
@@ -127,11 +134,14 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
   }
   async function home(client, team, user, chosen, tab = 'overview') {
     const configs = await store.list('configs', 'team', '==', team)
-    const accessible = []
+    const accessible = [], membership = new Map()
     for (const c of configs) {
-      try { const info = await member(client, c.channel, user); accessible.push({ ...c, channelName: info.name || c.channel }) } catch { /* Membership is checked before disclosing data. */ }
+      try {
+        if (!membership.has(c.channel)) membership.set(c.channel, member(client, c.channel, user))
+        const info = await membership.get(c.channel); accessible.push({ ...c, channelName: info.name || c.channel })
+      } catch { /* Membership is checked before disclosing data. */ }
     }
-    const c = accessible.find(c => c.channel === chosen) || accessible.find(c => c.members.includes(user)) || accessible[0]
+    const c = accessible.find(c => c.id === chosen) || accessible.find(c => c.channel === chosen && c.workflowKey === 'default') || accessible.find(c => c.members.includes(user)) || accessible[0]
     const blocks = [header('Your team, in sync'), context('Kick · Check in. Unblock. Appreciate.')]
     if (!c) blocks.push(
       section('*Welcome! Make room for better team habits.*\nSet up a public channel once. Choose the people, questions, and schedule that fit your team.'),
@@ -141,22 +151,23 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
     else {
       const tabs = [option('Overview', 'overview'), option('Updates', 'updates'), option('Blockers', 'blockers'), option('Team trends', 'trends')]
       if (!tabs.some(t => t.value === tab)) tab = 'overview'
-      const visible = [c, ...accessible.filter(x => x.channel !== c.channel)].slice(0, 100)
+      const visible = [c, ...accessible.filter(x => x.id !== c.id)].slice(0, 100)
       blocks.push({ type: 'actions', elements: [{ type: 'static_select', action_id: 'ritual_channel',
-        placeholder: text('Choose a team'), options: visible.map(x => option(`#${x.channelName}`.slice(0, 75), x.channel)), initial_option: option(`#${c.channelName}`.slice(0, 75), c.channel) },
-        { type: 'static_select', action_id: 'ritual_tab', placeholder: text('Choose a view'), options: tabs.map(t => ({ ...t, value: `${c.channel}:${t.value}` })), initial_option: { ...tabs.find(t => t.value === tab), value: `${c.channel}:${tab}` } }] })
-      blocks.push(section(`*<#${c.channel}> · ${c.enabled ? 'Active' : 'Paused'}*\nCheck-in ${c.time} · Digest ${c.digestTime} · ${escape(c.zone)}`),
+        placeholder: text('Choose a workflow'), options: visible.map(x => option(`${x.name} · #${x.channelName}`.slice(0, 75), x.id)), initial_option: option(`${c.name} · #${c.channelName}`.slice(0, 75), c.id) },
+        { type: 'static_select', action_id: 'ritual_tab', placeholder: text('Choose a view'), options: tabs.map(t => ({ ...t, value: `${c.id}:${t.value}` })), initial_option: { ...tabs.find(t => t.value === tab), value: `${c.id}:${tab}` } }] })
+      blocks.push(section(`*${escape(c.name)} · <#${c.channel}> · ${c.enabled ? 'Active' : 'Paused'}*\nCheck-in ${c.time} · Digest ${c.digestTime} · ${escape(c.zone)}`),
         context(`${c.members.length} participants · ${c.retentionDays}-day retention · Scheduled delivery checked every 15 minutes`))
       if (c.lastError) blocks.push(section('⚠️ *Delivery needs attention.* Contact the workflow owner or <https://kick.bozmoz.com/support|Kick support>. Your saved updates are still available.'))
       const d = await engine.dataset(c), run = d.runs.sort((a, b) => b.at - a.at)[0]
       if (tab === 'overview') {
         const local = localTime(Date.now(), c.zone)
-        const canSubmit = c.enabled && c.days.includes(local.day) && local.time >= c.time && local.time < c.digestTime && c.members.includes(user)
+        const effective = await engine.schedule(c, Date.now())
+        const canSubmit = c.enabled && effective.days.includes(local.day) && local.time >= effective.time && local.time < effective.digestTime && c.members.includes(user)
         const submitted = run?.date === local.date && d.responses.some(r => r.run === run.id && r.user === user)
         blocks.push(divider(), header('Your next step'), section(submitted ? '✓ *Your update is saved.* Thanks for keeping your team in the loop.' : canSubmit ? '*Ready when you are.* Share a short update before the digest.' : c.enabled ? 'You’re all caught up here. Check-ins open on the configured days and times.' : '*This channel is paused.* Saved updates remain available. The owner can resume scheduling in channel settings.'))
         const actions = []
-        if (canSubmit && !submitted) actions.push(primary('Share update', 'ritual_checkin', c.channel))
-        if (c.enabled) actions.push(button('Fair rotation', 'ritual_rotate', c.channel))
+        if (canSubmit && !submitted) actions.push(primary('Share update', 'ritual_checkin', c.id))
+        if (c.enabled) actions.push(button('Fair rotation', 'ritual_rotate', c.id))
         actions.push(button('My preferences', 'ritual_preferences', 'home'))
         blocks.push({ type: 'actions', elements: actions })
       }
@@ -164,14 +175,14 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         const responses = d.responses.filter(r => r.run === run.id)
         blocks.push(divider(), header('Latest check-in'), section(`*${run.date}* · ${responses.length} of ${run.members.length} responses`))
         responses.slice(0, tab === 'overview' ? 2 : 8).forEach(r => blocks.push({ ...section(`<@${r.user}>\n${r.answers.map(escape).join('\n').slice(0, 700)}`), accessory: button('Read update', 'ritual_response', r.id) }))
-        blocks.push({ type: 'actions', elements: [button('Read all updates', 'ritual_updates', `${c.channel}:0`)] })
+        blocks.push({ type: 'actions', elements: [button('Read all updates', 'ritual_updates', `${c.id}:0`)] })
       } else if (tab === 'updates') blocks.push(section('No check-ins yet. The first session opens during your configured schedule.'))
       const open = d.blockers.filter(b => !b.resolvedAt)
       if (['overview', 'blockers'].includes(tab)) {
         blocks.push(divider(), header(`Open blockers · ${open.length}`))
         if (!open.length) blocks.push(section('No open blockers. When something gets in the way, add it to your check-in and choose a helper.'))
         open.slice(0, tab === 'overview' ? 2 : 8).forEach(b => blocks.push({ ...section(`${escape(b.detail).slice(0, 1000)}\nReported by <@${b.user}> · Helper <@${b.helper}>`), ...([b.user, b.helper, c.owner].includes(user) ? { accessory: button('Resolve / assign', 'ritual_blocker', b.id) } : {}) }))
-        if (open.length) blocks.push({ type: 'actions', elements: [button('Browse all blockers', 'ritual_blockers', `${c.channel}:0`)] })
+        if (open.length) blocks.push({ type: 'actions', elements: [button('Browse all blockers', 'ritual_blockers', `${c.id}:0`)] })
       }
       if (tab === 'trends') {
         const [week, previous] = await engine.insights(c), percent = n => n === null ? 'No sessions' : `${n}%`
@@ -184,8 +195,12 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         if (!recognition.length) blocks.push(section('Good work deserves a thank-you. Use `/kudos` or `/coins` in your channel to celebrate a contribution.'))
         recognition.forEach(r => blocks.push(section(`<@${r.from}> → <@${r.to}>: ${escape(r.reason || 'Thank you!')}`)))
       }
-      const actions = [button('Refresh', 'ritual_refresh', `${c.channel}:${tab}`), button('Set up a channel', 'ritual_choose', 'setup')]
-      try { await manage(client, c, user); actions.push(button('Channel settings', 'ritual_setup', c.channel)) } catch { /* Hide owner-only controls. */ }
+      const mine = (await store.list('actions', 'config', '==', c.id)).filter(a => a.owner === user && a.status === 'open' && a.expiresAt > Date.now())
+      blocks.push(divider(), header('Your actions'), section(mine.length ? `${mine.length} open action${mine.length === 1 ? '' : 's'} in this workflow.` : 'No open actions assigned to you.'))
+      mine.slice(0, 3).forEach(a => blocks.push({ ...section(`Due ${a.due} · ${escape(a.detail).slice(0, 500)}`), accessory: button('Open action', 'collab_action', JSON.stringify({ c: c.id, id: a.id, edit: true })) }))
+      blocks.push({ type: 'actions', elements: [primary('Open team workspace', 'collab_hub', JSON.stringify({ c: c.id })), button('Add workflow', 'ritual_new_workflow', c.channel)] })
+      const actions = [button('Refresh', 'ritual_refresh', `${c.id}:${tab}`), button('Set up a channel', 'ritual_choose', 'setup')]
+      try { await manage(client, c, user); actions.push(button('Workflow settings', 'ritual_setup', c.id)) } catch { /* Hide owner-only controls. */ }
       blocks.push(divider(), { type: 'actions', elements: actions })
     }
     blocks.push(context('Your Home view is personal. Channel updates and blockers remain visible to channel members.'),
@@ -210,7 +225,7 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         const draft = await store.get('drafts', channel)
         if (!draft || draft.team !== team || draft.editor !== user || draft.expiresAt <= Date.now()) throw new Error('Setup preview expired. Start setup again.')
         await member(client, draft.channel, user)
-        return open(client, body.trigger_id, await setupView(team, draft.channel, draft))
+        return open(client, body.trigger_id, await setupView(team, draft.workflowKey === 'default' ? draft.channel : `${draft.channel}~${draft.workflowKey}`, draft))
       }
       if (action.action_id === 'ritual_choose') return open(client, body.trigger_id, modal('Choose a channel', 'ritual_choose_save', '', [input('channel', 'Public channel', { type: 'conversations_select', filter: { include: ['public'], exclude_bot_users: true } })], 'Continue'))
       if (action.action_id === 'ritual_preferences') return open(client, body.trigger_id, await preferencesView(team, user))
@@ -239,7 +254,10 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         const c = await store.get('configs', r.config); await member(client, c.channel, user)
         const run = await store.get('runs', r.run)
         return open(client, body.trigger_id, modal('Team update', 'ritual_read', '', [section(`<@${r.user}> · ${localTime(r.at, c.zone).date}`),
-          ...r.answers.map((a, i) => section(`*${escape(run?.questions[i] || 'Update')}*\n${escape(a)}`))], null))
+          ...r.answers.map((a, i) => section(`*${escape(run?.questions[i] || 'Update')}*\n${escape(a)}`)),
+          ...(r.correction ? [section(`*Late correction*\n${escape(r.correction).slice(0, 2700)}`)] : []),
+          { type: 'actions', elements: [button('Track action', 'collab_new_action', JSON.stringify({ c: c.id, source: 'responses', sourceId: r.id })),
+            ...(r.user === user ? [button('Edit / correct', 'collab_edit_update', JSON.stringify({ c: c.id, id: r.id }))] : [])] }], null))
       }
       if (action.action_id === 'ritual_blocker') {
         const b = await store.get('blockers', channel)
@@ -249,9 +267,11 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         if (![b.user, b.helper, c.owner].includes(user)) await manage(client, c, user)
         return open(client, body.trigger_id, modal('Resolve or assign', 'ritual_blocker_save', b.id, [section(escape(b.detail)),
           select('status', 'Status', [option('Open', 'open'), option('Resolved', 'resolved')], b.resolvedAt ? 'resolved' : 'open'),
-          input('helper', 'Helper', { type: 'users_select', initial_user: b.helper })]))
+          input('helper', 'Helper', { type: 'users_select', initial_user: b.helper }),
+          { type: 'actions', elements: [button('Track action', 'collab_new_action', JSON.stringify({ c: c.id, source: 'blockers', sourceId: b.id }))] }]))
       }
       await member(client, channel, user)
+      if (action.action_id === 'ritual_new_workflow') return open(client, body.trigger_id, await setupView(team, `${channel}~${randomUUID()}`))
       if (action.action_id === 'ritual_setup') {
         const c = await engine.config(team, channel)
         if (c) await manage(client, c, user)
@@ -284,7 +304,9 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         const existing = await engine.config(team, channel)
         if (existing) await manage(client, existing, user)
         const template = read(view, 'template')
-        const c = validateConfig({ team, channel, owner: existing?.owner || user, enabled: read(view, 'enabled') === 'yes',
+        const actualChannel = existing?.channel || channel.split('~')[0]
+        const workflowKey = existing?.workflowKey || channel.split('~')[1] || 'default'
+        const c = validateConfig({ team, channel: actualChannel, name: read(view, 'name'), workflowKey, owner: existing?.owner || user, enabled: read(view, 'enabled') === 'yes',
           zone: read(view, 'zone'), time: read(view, 'time'), digestTime: read(view, 'digest'), days: read(view, 'days').map(Number),
           members: read(view, 'members'), template, questions: template === 'custom' ? read(view, 'questions').split('\n').map(q => q.trim()).filter(Boolean) : TEMPLATES[template],
           roundup: read(view, 'roundup') === 'yes', retentionDays: Number(read(view, 'retention')) })
@@ -293,7 +315,7 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         await store.set('drafts', draftId, { ...c, editor: user, expiresAt: Date.now() + 15 * 60000 })
         return ack({ response_action: 'update', view: modal('Preview team ritual', 'ritual_confirm_save', draftId, [
           context('Step 2 of 2 · Check the details. Confirm to apply these settings.'),
-          section(`*<#${channel}> · ${c.enabled ? 'Enable' : 'Pause'}*\n${c.time} check-in · ${c.digestTime} digest · ${escape(c.zone)}\nDays: ${c.days.map(d => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]).join(', ')}\n${c.members.length} participants · ${c.retentionDays}-day retention\nFriday roundup: ${c.roundup ? 'On' : 'Off'}`),
+          section(`*${escape(c.name)} · <#${actualChannel}> · ${c.enabled ? 'Enable' : 'Pause'}*\n${c.time} check-in · ${c.digestTime} digest · ${escape(c.zone)}\nDays: ${c.days.map(d => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]).join(', ')}\n${c.members.length} participants · ${c.retentionDays}-day retention\nFriday roundup: ${c.roundup ? 'On' : 'Off'}`),
           section(`*Check-in preview*\n${c.questions.map((q, i) => `${i + 1}. ${escape(q)}`).join('\n')}\nOptional blocker and helper.`),
           context('Scheduled delivery is checked every 15 minutes; delays can occur during service downtime or a backlog.'),
           section(await remindersAvailable(team) ? 'One private reminder after one hour, subject to personal preferences. Unresolved blockers get weekday follow-ups. Use channel settings to pause at any time.' : 'Private reminders and helper follow-ups are unavailable for this installation. Use channel settings to pause at any time.'),
@@ -302,7 +324,8 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
       } else if (view.callback_id === 'ritual_confirm_save') {
         const draft = await store.get('drafts', channel)
         if (!draft || draft.team !== team || draft.editor !== user || draft.expiresAt <= Date.now()) throw new Error('Setup preview expired. Start setup again.')
-        const c = await engine.config(team, draft.channel)
+        const configId = engine.configId(team, draft.channel, draft.workflowKey)
+        const c = await engine.config(team, configId)
         if (c) await manage(client, c, user); else await member(client, draft.channel, user)
         // Validate the selected participant set once, using paginated channel membership.
         const members = new Set(); let cursor
@@ -314,11 +337,18 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         }
         const { id, expiresAt, editor, ...settings } = draft
         if (settings.enabled && !schedulerEnabled) throw new Error('Automatic schedules are not activated yet. Save this setup as Paused; an administrator must connect the scheduler first.')
-        await store.set('configs', engine.configId(team, draft.channel), { ...settings, nextAt: Date.now(), updatedAt: Date.now(), leaseUntil: 0, leaseOwner: null })
+        const save = async tx => {
+          const current = await tx.get('configs', configId)
+          if (!current && (await tx.list('configs', 'team', '==', team)).filter(x => x.channel === draft.channel).length >= 10) throw new Error('This channel already has ten workflows. Reuse an existing workflow.')
+          await tx.set('configs', configId, { ...settings, nextAt: Date.now(), updatedAt: Date.now(), leaseUntil: 0, leaseOwner: null })
+          await tx.create('audit', key(configId, 'settings', view.id), { team, config: configId, user, event: 'workflow_settings', target: configId,
+            detail: `${settings.name}: ${settings.enabled ? 'enabled' : 'paused'}; ${settings.time}–${settings.digestTime} ${settings.zone}; ${settings.members.length} participants; ${settings.retentionDays}-day retention`, at: Date.now(), expiresAt: Date.now() + settings.retentionDays * DAY })
+        }
+        if (store.locked) await store.locked(key(team, draft.channel, 'settings'), save); else await save(store)
         // Shorter retention applies to already-stored new-workflow records as well.
-        if (store.shortenRetention) await store.shortenRetention(engine.configId(team, draft.channel), settings.retentionDays)
+        if (store.shortenRetention) await store.shortenRetention(configId, settings.retentionDays)
         else for (const kind of ['runs', 'responses', 'blockers', 'recognition', 'rotations', 'jobs']) {
-          const records = await store.list(kind, 'config', '==', engine.configId(team, draft.channel))
+          const records = await store.list(kind, 'config', '==', configId)
           for (const record of records) {
             const expiry = (record.at || Date.now()) + settings.retentionDays * DAY
             if (record.expiresAt > expiry) await store.set(kind, record.id, { expiresAt: expiry })
@@ -361,18 +391,20 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         { response_action: 'update', view: modal('Please try again', 'ritual_error', '', [section(escape(e.message))], null) })
     }
   })
+  registerCollaboration({ app, bolt, store, engine, member, manage, modalClient, background, canRemind, dmEnabled, schedulerEnabled,
+    ui: { modal, section, button, input, field, select, option, text, read, context } })
   // Middleware intercepts only new subcommands; the legacy command handlers stay intact.
   app.use(async args => {
     const { body, next, ack, client: baseClient } = args
     const command = body.command?.replace(/^\/t/, '/')
     const sub = body.text?.trim()
-    if (!((command === '/sync' && ['setup', 'preferences', 'checkin', 'home'].includes(sub)) || (command === '/pick' && sub === 'rotate'))) return next()
+    if (!((command === '/sync' && ['setup', 'preferences', 'checkin', 'home', 'workflows'].includes(sub)) || (command === '/pick' && sub === 'rotate'))) return next()
     await ack()
     background(async () => {
     const originalClient = baseClient
-    const client = sub === 'home' ? originalClient : await modalClient(originalClient, body.trigger_id)
+    const client = ['home', 'workflows'].includes(sub) ? originalClient : await modalClient(originalClient, body.trigger_id)
     try {
-      if (sub === 'home') return home(client, body.team_id, body.user_id, body.channel_id)
+      if (['home', 'workflows'].includes(sub)) return home(client, body.team_id, body.user_id, body.channel_id)
       if (sub === 'preferences') return open(client, body.trigger_id, await preferencesView(body.team_id, body.user_id))
       await member(client, body.channel_id, body.user_id)
       if (sub === 'setup') {
@@ -387,4 +419,4 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
   })
   return { home }
 }
-module.exports = { registerRituals, read, modal }
+module.exports = { registerRituals, read, modal, ui: { modal, section, button, input, field, select, option, text, read, context } }

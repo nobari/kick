@@ -25,8 +25,22 @@ Terms: https://kick.bozmoz.com/terms
 - /sync preferences saves quiet hours, leave dates, snooze-related preferences, and reminder opt-out.
 - /pick rotate queues a least-recent selection in an enabled channel ritual; it is not the same as random /pick.
 - Optional digests and Friday recognition roundups are delivered by an external scheduler with 15-minute checks when activated. Delays can occur during outages or backlogs.
-- Private reminders and helper follow-ups are pending Slack permission approval and reinstall consent. They are not yet available through the published installation flow.
+- Private reminders and helper follow-ups require permission granted to the workspace installation and service activation.
 - Getting started and feature availability: https://kick.bozmoz.com/get-started
+
+## Team workspace
+
+- In Kick Home, select a named workflow and Open team workspace. Up to ten independent workflows can share a public channel. /sync workflows refreshes Home.
+- Actions have an assignee, due date and Open/Done status; create them directly or from an update, blocker or retrospective topic.
+- Authors can edit scheduled check-in responses before the digest closes. Later changes preserve the original and queue a labeled correction. Legacy /sync history is not editable through this feature.
+- Sprint goals have start/end dates, linked actions and workflow updates from the period. Finishing a sprint queues a factual recap of retained records.
+- Retrospectives support attributed topics, grouping, one vote per member per topic and conversion to actions. They are not anonymous.
+- Planning poker hides estimates until facilitator reveal, supports abstention and new rounds, and records a final decision.
+- Search filters the selected workflow's retained Kick updates, actions, blockers and recognition by text, person, UTC dates and status. It does not search Slack message history.
+- Owners/admins can skip a calendar date or override its times before that session opens; dates must be within the retention window.
+- Owners/admins can inspect installation connectivity, delivery failures and an audit, and retry failed, unleased deliveries. Slack delivery is not guaranteed exactly once.
+- Message shortcuts Track action, Report blocker and Give kudos require Slack configuration and publication. They preview selected message text and save only after confirmation.
+- All new collaboration records follow 7/30/90-day workflow retention. Child records can expire earlier with their parent. Channel notices are checked every 15 minutes and may be delayed.
 
 ## Account and pricing
 
