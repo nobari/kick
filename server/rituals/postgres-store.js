@@ -22,9 +22,12 @@ const columns = {
   estimates: { ...lifetime, poker: 'poker_id', user: 'user_id', round: 'round', value: 'value' },
   calendar: { ...lifetime, user: 'editor_id', date: 'local_date', skip: 'skip', time: 'checkin_time', digestTime: 'digest_time' },
   audit: { ...lifetime, user: 'actor_id', event: 'event', target: 'target_id', detail: 'detail' },
+  todos: { at: 'created_at', expiresAt: 'expires_at', user: 'user_id', detail: 'detail', due: 'due_date', status: 'status', version: 'version', completedAt: 'completed_at' },
+  polls: { ...lifetime, user: 'creator_id', title: 'title', options: 'options', status: 'status', closedAt: 'closed_at' },
+  ballots: { ...lifetime, poll: 'poll_id', user: 'user_id', choice: 'choice' },
 }
-const historyKinds = ['actions', 'votes', 'topics', 'retros', 'estimates', 'poker', 'sprints', 'calendar', 'audit', 'responses', 'blockers', 'recognition', 'jobs', 'rotations', 'runs']
-const numbers = new Set(['at', 'expiresAt', 'nextAt', 'updatedAt', 'leaseUntil', 'resolvedAt', 'snoozeUntil', 'since', 'dueAt', 'closesAt', 'editedAt', 'completedAt'])
+const historyKinds = ['ballots', 'polls', 'actions', 'votes', 'topics', 'retros', 'estimates', 'poker', 'sprints', 'calendar', 'audit', 'responses', 'blockers', 'recognition', 'jobs', 'rotations', 'runs']
+const numbers = new Set(['at', 'expiresAt', 'nextAt', 'updatedAt', 'leaseUntil', 'resolvedAt', 'snoozeUntil', 'since', 'dueAt', 'closesAt', 'closedAt', 'editedAt', 'completedAt'])
 function mapping(kind) {
   if (!Object.hasOwn(columns, kind)) throw new Error('Unknown ritual entity')
   return { ...common, ...columns[kind] }
@@ -54,6 +57,40 @@ function createStore(database) {
       })
     },
     async get(kind, id) { mapping(kind); return decode(kind, (await database.query(`SELECT * FROM ritual_${kind} WHERE id=$1`, [id])).rows[0]) },
+    async personalTodos(team, user, now, offset = 0) {
+      const { rows } = await database.query('SELECT * FROM ritual_todos WHERE workspace_id=$1 AND user_id=$2 AND expires_at>$3 ORDER BY created_at DESC,id LIMIT 9 OFFSET $4', [team, user, now, offset])
+      return rows.map(r => decode('todos', r))
+    },
+    async deleteTodo(team, user, id) {
+      return (await database.query('DELETE FROM ritual_todos WHERE workspace_id=$1 AND user_id=$2 AND id=$3', [team, user, id])).rowCount > 0
+    },
+    async pollResults(team, config, poll, now) {
+      const { rows } = await database.query('SELECT choice, count(*)::int AS count FROM ritual_ballots WHERE workspace_id=$1 AND config_id=$2 AND poll_id=$3 AND expires_at>$4 GROUP BY choice', [team, config, poll, now])
+      return rows
+    },
+    async pollPage(team, config, now, offset) {
+      const { rows } = await database.query('SELECT * FROM ritual_polls WHERE workspace_id=$1 AND config_id=$2 AND expires_at>$3 ORDER BY created_at DESC,id LIMIT 9 OFFSET $4', [team, config, now, offset])
+      return rows.map(r => decode('polls', r))
+    },
+    // Aggregate in SQL: report totals must never silently stop at a list limit.
+    async report(team, config, from, until, now, today) {
+      const sources = [
+        ['runs', "count(*) AS total, COALESCE(sum(cardinality(participants)),0) AS expected"],
+        ['responses', 'count(*) AS total, count(DISTINCT user_id) AS people'],
+        ['blockers', 'count(*) AS total, count(*) FILTER (WHERE resolved_at IS NULL) AS open'],
+        ['actions', "count(*) AS total, count(*) FILTER (WHERE status='done') AS done, count(*) FILTER (WHERE status='open' AND due_date<$6) AS overdue"],
+        ['sprints', "count(*) AS total, count(*) FILTER (WHERE status='closed') AS closed"],
+        ['recognition', 'count(*) AS total, count(DISTINCT recipient_id) AS people'],
+        ['retros', "count(*) AS total, count(*) FILTER (WHERE status='closed') AS closed"],
+        ['topics', 'count(*) AS total'],
+        ['poker', "count(*) AS total, count(*) FILTER (WHERE status='closed') AS closed"],
+        ['polls', "count(*) AS total, count(*) FILTER (WHERE status='closed') AS closed"],
+        ['ballots', 'count(*) AS total'],
+      ]
+      const query = sources.map(([kind, aggregate]) => `SELECT '${kind}' AS kind, row_to_json(stats) AS stats FROM (SELECT ${aggregate} FROM ritual_${kind} WHERE workspace_id=$1 AND config_id=$2 AND created_at >= $3 AND created_at < $4 AND expires_at>$5) stats`).join(' UNION ALL ')
+      const { rows } = await database.query(query, [team, config, from, until, now, today])
+      return Object.fromEntries(rows.map(r => [r.kind, Object.fromEntries(Object.entries(r.stats).map(([k, v]) => [k, Number(v)]))]))
+    },
     async search(config, { query = '', user = '', status = '', from = '', to = '', offset = 0, now }) {
       if (typeof query !== 'string' || query.length > 150 || !['', 'open', 'done'].includes(status) || !Number.isSafeInteger(offset) || offset < 0 || offset > 10000) throw new Error('Invalid search filters.')
       const sources = [
@@ -111,7 +148,7 @@ function createStore(database) {
       return (await database.query(`UPDATE ritual_${kind} SET ${entries.map(([f], i) => `"${map[f]}"=$${i + 3}`).join(',')} WHERE id=$1 AND lease_owner=$2`, [id, owner, ...entries.map(([, v]) => v)])).rowCount > 0
     },
     async cleanup(now) {
-      for (const kind of [...historyKinds, 'drafts'])
+      for (const kind of [...historyKinds, 'todos', 'drafts'])
         await database.query(`DELETE FROM ritual_${kind} WHERE id IN (SELECT id FROM ritual_${kind} WHERE expires_at <= $1 ORDER BY expires_at LIMIT 100)`, [now])
     },
     async shortenRetention(config, days) {

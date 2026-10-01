@@ -6,7 +6,7 @@ export function reviewManifest(origin) {
     throw new Error('Provide a dedicated HTTPS staging origin, not the production domain.');
   const base = url.origin;
   return {
-    display_information: { name: 'Kick Review', description: 'Team check-ins, blockers, appreciation, and fair rotations', background_color: '#11152a' },
+    display_information: { name: 'Kick Review', description: 'Standups, polls, personal and channel to-dos, reports, and team planning', background_color: '#11152a' },
     features: {
       bot_user: { display_name: 'Kick Review', always_online: false },
       app_home: { home_tab_enabled: true, messages_tab_enabled: true, messages_tab_read_only_enabled: true },

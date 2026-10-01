@@ -32,6 +32,7 @@
   .ritual-feature { padding: 1.5rem 0; border-top: 1px solid var(--line); }
   .ritual-feature h3 { font-size: 1.45rem; margin: .7rem 0; }
   .ritual-feature p { color: var(--ink-soft); font-size: .9rem; }
+  .ritual-feature .feature-example { margin-top: 1rem; color: var(--ink); line-height: 1.65; }
   .feature-availability { display: block; font-size: .7rem; color: var(--ink-soft); margin-top: 1rem; font-weight: 700; }
   @media (max-width: 800px) { .ritual-tour { grid-template-columns: 1fr; } .tour-content { min-height: 440px; } }
   @media (max-width: 520px) { .ritual-feature-grid { grid-template-columns: 1fr; } .release-notice { padding: 1.2rem; } .tour-controls button { padding-inline: .8rem; } }

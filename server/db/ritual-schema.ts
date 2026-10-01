@@ -101,3 +101,21 @@ export const ritualCalendar = pgTable('ritual_calendar', {
 export const ritualAudit = pgTable('ritual_audit', {
   ...linked(), user: text('actor_id').notNull(), event: text('event').notNull(), target: text('target_id').notNull(), detail: text('detail').notNull(),
 }, t => links(t, 'ritual_audit'));
+
+// Personal tasks deliberately have no workflow/channel relationship.
+export const ritualTodos = pgTable('ritual_todos', {
+  ...identity(), ...lifetime(), user: text('user_id').notNull(), detail: text('detail').notNull(),
+  due: text('due_date').notNull(), status: text('status').notNull().default('open'),
+  version: integer('version').notNull().default(1), completedAt: ms('completed_at'),
+}, t => [index('ritual_todo_owner').on(t.team, t.user, t.at, t.id), index('ritual_todo_expiry').on(t.expiresAt),
+  check('ritual_todo_status', sql`${t.status} IN ('open','done')`)]);
+export const ritualPolls = pgTable('ritual_polls', {
+  ...linked(), user: text('creator_id').notNull(), title: text('title').notNull(),
+  options: text('options').array().notNull(), status: text('status').notNull().default('open'), closedAt: ms('closed_at'),
+}, t => [...links(t, 'ritual_poll'), unique('ritual_poll_tenant').on(t.team, t.config, t.id),
+  check('ritual_poll_status', sql`${t.status} IN ('open','closed')`), check('ritual_poll_options', sql`cardinality(${t.options}) BETWEEN 2 AND 10`)]);
+export const ritualBallots = pgTable('ritual_ballots', {
+  ...linked(), poll: text('poll_id').notNull(), user: text('user_id').notNull(), choice: integer('choice').notNull(),
+}, t => [...links(t, 'ritual_ballot'), unique('ritual_ballot_once').on(t.poll, t.user), index('ritual_ballot_poll').on(t.poll),
+  foreignKey({ columns: [t.team, t.config, t.poll], foreignColumns: [ritualPolls.team, ritualPolls.config, ritualPolls.id] }).onDelete('cascade'),
+  check('ritual_ballot_choice', sql`${t.choice} BETWEEN 0 AND 9`)]);

@@ -4,6 +4,7 @@ const { text, button, section } = require('./engine')
 const { waitUntil } = require('@vercel/functions')
 const { randomUUID } = require('node:crypto')
 const { registerCollaboration } = require('./collaboration-slack')
+const { registerProductivity } = require('./productivity-slack')
 const background = work => waitUntil(work().catch(e => console.error('Kick workflow failed:', e.data?.error || e.code || 'unknown_error')))
 const option = (label, value) => ({ text: text(label), value: String(value) })
 const input = (id, label, element, optional = false) => ({ type: 'input', block_id: id, label: text(label), optional, element: { action_id: 'value', ...element } })
@@ -142,7 +143,8 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
       } catch { /* Membership is checked before disclosing data. */ }
     }
     const c = accessible.find(c => c.id === chosen) || accessible.find(c => c.channel === chosen && c.workflowKey === 'default') || accessible.find(c => c.members.includes(user)) || accessible[0]
-    const blocks = [header('Your team, in sync'), context('Kick · Check in. Unblock. Appreciate.')]
+    const blocks = [header('Your team, in sync'), context('Kick · Check in. Unblock. Appreciate.'),
+      { type: 'actions', elements: [button('My personal to-dos', 'work_todos', '{}')] }]
     if (!c) blocks.push(
       section('*Welcome! Make room for better team habits.*\nSet up a public channel once. Choose the people, questions, and schedule that fit your team.'),
       { type: 'actions', elements: [primary('Set up a channel', 'ritual_choose', 'setup'), button('My preferences', 'ritual_preferences', 'home')] },
@@ -391,7 +393,9 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         { response_action: 'update', view: modal('Please try again', 'ritual_error', '', [section(escape(e.message))], null) })
     }
   })
-  registerCollaboration({ app, bolt, store, engine, member, manage, modalClient, background, canRemind, dmEnabled, schedulerEnabled,
+  const collaboration = registerCollaboration({ app, bolt, store, engine, member, manage, modalClient, background, canRemind, dmEnabled, schedulerEnabled,
+    ui: { modal, section, button, input, field, select, option, text, read, context } })
+  registerProductivity({ app, store, engine, service: collaboration.service,
     ui: { modal, section, button, input, field, select, option, text, read, context } })
   // Middleware intercepts only new subcommands; the legacy command handlers stay intact.
   app.use(async args => {

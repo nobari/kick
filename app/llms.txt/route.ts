@@ -32,6 +32,11 @@ Terms: https://kick.bozmoz.com/terms
 
 - In Kick Home, select a named workflow and Open team workspace. Up to ten independent workflows can share a public channel. /sync workflows refreshes Home.
 - Actions have an assignee, due date and Open/Done status; create them directly or from an update, blocker or retrospective topic.
+- Channel to-dos is the shared action list for the selected workflow. Example: assign Prepare the release demo to a teammate, due Friday, then mark it Done.
+- My personal to-dos works directly from Home without channel setup. Tasks are private to their owner in Kick, have due dates and Open/Done status, can be deleted, and expire 30 days after creation. They never enter channel lists, shared search or reports.
+- Polls accept 2–10 choices and one changeable vote per current channel member. Example: Which day for the demo? Tuesday or Thursday. Creation queues an invitation; the creator/workflow owner closes voting and queues aggregate results. Votes are stored with Slack IDs, not anonymously.
+- Comprehensive report combines retained check-ins, blockers, channel to-dos, sprints, recognition, retrospectives, planning sessions and polls for the selected workflow over up to 90 UTC days. Preview then explicitly share. Counts use creation dates and current status, not historical snapshots. Personal to-dos, legacy command history, coin balances and hidden estimates are excluded.
+- Concrete examples for every feature: https://kick.bozmoz.com/#team-rituals
 - Authors can edit scheduled check-in responses before the digest closes. Later changes preserve the original and queue a labeled correction. Legacy /sync history is not editable through this feature.
 - Sprint goals have start/end dates, linked actions and workflow updates from the period. Finishing a sprint queues a factual recap of retained records.
 - Retrospectives support attributed topics, grouping, one vote per member per topic and conversion to actions. They are not anonymous.

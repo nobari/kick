@@ -36,13 +36,20 @@ test('policy is English, product-specific, and has its own canonical URL', () =>
   assert.ok(privacy.includes('href="https://kick.bozmoz.com/privacy"'));
 });
 test('website explains the full release without claiming pending permissions are active', () => {
-  for (const term of ['/sync setup', '/pick rotate', '15 minutes', 'installation consent and activation', 'Illustrative preview', 'No individual productivity scores', 'planning poker', 'after Slack configuration and publication']) assert.ok(landing.includes(term), term);
+  for (const term of ['/sync setup', '/pick rotate', '15 minutes', 'installation consent and activation', 'Illustrative preview', 'No individual productivity scores', 'Planning poker', 'require Slack configuration and publication']) assert.ok(landing.includes(term), term);
   assert.ok(!landing.includes('role="tab"'));
 });
 
 test('collaboration data, visibility and retention are explained in policy and guide', () => {
   for (const term of ['retrospective topics', 'calendar exceptions', 'Planning-poker estimates', 'source message timestamp', 'audit entries']) assert.ok(privacy.includes(term), term);
-  for (const term of ['Actions', 'Planning poker', 'Retrospectives', 'Calendar', 'Search', 'Operations', 'not anonymous', 'Edit / correct']) assert.ok(guide.includes(term), term);
+  for (const term of ['Channel to-dos', 'Planning poker', 'Retrospectives', 'Calendar', 'Search', 'Operations', 'not anonymous', 'Edit / correct']) assert.ok(guide.includes(term), term);
+});
+
+test('polls, private tasks and reports have concrete examples and accurate privacy limits', () => {
+  for (const term of ['Channel polls', 'Personal to-dos', 'Channel to-dos', 'Comprehensive reports', 'Which day for the demo?', 'Try it:', 'legacy command history']) assert.ok(landing.includes(term), term);
+  assert.equal((landing.match(/class="feature-example"/g) || []).length, 23);
+  for (const term of ['30 days after creation', 'not end-to-end encryption', 'ballots', 'personal to-dos', 'closing a report preview sends nothing']) assert.ok(privacy.includes(term), term);
+  for (const term of ['Save vote', 'Share report', 'current status']) assert.ok(guide.includes(term), term);
 });
 test('landing page links to a public getting-started guide with actionable instructions', () => {
   assert.ok(landing.includes('href="/get-started"'));

@@ -25,7 +25,8 @@ function registerCollaboration({ app, bolt, store, engine, member, manage, modal
     const c = await api.access(ctx)
     return form('Team workspace', 'hub', { c: c.id }, [
       section(`*${escape(c.name)} · <#${c.channel}>*\nChoose a tool. Records are shared with channel members and kept for ${c.retentionDays} days.`),
-      buttons(b('Actions', 'actions', { c: c.id }), b('Sprints', 'sprints', { c: c.id }), b('Retrospectives', 'retros', { c: c.id })),
+      buttons(b('Channel to-dos', 'actions', { c: c.id }), b('Sprints', 'sprints', { c: c.id }), b('Retrospectives', 'retros', { c: c.id })),
+      buttons(button('Polls', 'work_polls', value({ c: c.id })), button('Comprehensive report', 'work_report', value({ c: c.id })), button('My personal to-dos', 'work_todos', '{}')),
       buttons(b('Planning poker', 'poker', { c: c.id }), b('Search history', 'search', { c: c.id })),
       buttons(b('Calendar', 'calendar', { c: c.id }), b('Operations', 'operations', { c: c.id })),
       context('Calendar and operations are restricted to the workflow owner or a workspace admin. Retrospectives are attributed, not anonymous. Estimates are hidden until revealed.'),
@@ -53,7 +54,7 @@ function registerCollaboration({ app, bolt, store, engine, member, manage, modal
   }
   async function listing(api, ctx, kind, page = 0) {
     const c = await api.access(ctx), all = await api.list(ctx, kind), rows = all.slice(page * 8, page * 8 + 8)
-    const labels = { actions: 'Actions', sprints: 'Sprints', retros: 'Retrospectives', poker: 'Planning poker' }
+    const labels = { actions: 'Channel to-dos', sprints: 'Sprints', retros: 'Retrospectives', poker: 'Planning poker' }
     const target = { actions: 'action', sprints: 'sprint', retros: 'retro', poker: 'estimate' }[kind]
     const blocks = [section(`*${escape(c.name)} · ${labels[kind]}*`), buttons(b(`New ${kind === 'retros' ? 'retrospective' : kind === 'poker' ? 'session' : kind.slice(0, -1)}`, `new_${target}`, { c: c.id }))]
     if (!rows.length) blocks.push(section('Nothing here yet. Create the first one when your team is ready.'))

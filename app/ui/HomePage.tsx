@@ -147,7 +147,7 @@ export default function HomePage() {
         applicationSubCategory: "Team collaboration and productivity",
         operatingSystem: "Slack",
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-        featureList: ["Async Slack standups", "Kudos and peer recognition", "Virtual team coins", "Random team member picker", "Guided workflow setup", "Custom check-in templates", "Blocker tracking", "Membership-aware App Home", "Aggregate team insights", "Assigned action items", "Editable check-ins and late corrections", "Multiple workflows per channel", "Sprint goals and recaps", "Attributed retrospectives and voting", "Planning poker", "Search retained Kick history", "Calendar exceptions", "Delivery operations and audit"],
+        featureList: ["Async Slack standups", "Kudos and peer recognition", "Virtual team coins", "Random team member picker", "Guided workflow setup", "Custom check-in templates", "Blocker tracking", "Membership-aware App Home", "Aggregate team insights", "Channel to-dos with assignees and due dates", "Private personal to-dos", "Channel polls and results", "Comprehensive workflow reports", "Editable check-ins and late corrections", "Multiple workflows per channel", "Sprint goals and recaps", "Attributed retrospectives and voting", "Planning poker", "Search retained Kick history", "Calendar exceptions", "Delivery operations and audit"],
         author: { "@type": "Organization", name: "Kick Bot" },
       },
       {
