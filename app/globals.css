@@ -2,7 +2,12 @@
 
 @layer components {
   .ritual-section { padding-block: 5rem; }
-  .ritual-tour { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; margin-top: 4rem; }
+  .ritual-tour { margin-top: 3rem; }
+  .ritual-tour .tour-controls { justify-content: center; }
+  .ritual-tour .tour-figure img { width: 100%; height: auto; border-radius: .5rem; }
+  .ritual-tour .tour-figure a { display: block; border-radius: .5rem; }
+  .ritual-tour .tour-copy { margin-top: 2rem; }
+  .ritual-tour .tour-copy > p { max-width: 60rem; }
   .tour-controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
   .tour-controls button { border: 1px solid var(--line); border-radius: .35rem; background: white; color: var(--ink); padding: .7rem 1rem; cursor: pointer; font-size: .8rem; font-weight: 700; min-height: 44px; }
   .tour-controls button[aria-pressed="true"] { background: var(--navy); color: white; border-color: var(--navy); }

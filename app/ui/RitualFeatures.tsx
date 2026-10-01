@@ -44,7 +44,7 @@ const collaboration = [
 export default function RitualFeatures() {
   const scheduled = process.env.KICK_SCHEDULER_ENABLED === "true";
   return <section id="team-rituals" className="ritual-section section-shell" aria-labelledby="ritual-title">
-    <div className="section-heading centered"><p className="kicker">Team check-ins</p><h2 id="ritual-title">Schedule updates and track follow-ups.</h2><p>Choose a schedule, collect responses, and review what needs attention.</p></div>
+    <div className="section-heading centered"><p className="kicker">A closer look</p><h2 id="ritual-title">Updates, actions, and decisions. In Slack.</h2><p>Explore check-ins, shared and personal to-dos, polls, and reports. Choose a feature to see an example and learn where to start.</p></div>
     <RitualTour />
     <aside className="release-notice" aria-label="Feature availability"><strong>Availability</strong><p>{scheduled ? "Scheduled delivery is checked every 15 minutes and requires explicit workflow setup. " : "Automatic delivery is not activated yet; setups can be saved as paused. "}Private reminders require permission granted to your installation and service activation. App Home requires the Home tab and event subscription. Existing slash commands remain available.</p></aside>
     <div className="ritual-feature-grid">

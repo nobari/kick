@@ -172,7 +172,7 @@ export default function HomePage() {
           <p className="hero-lede">Share updates, turn blockers into actions, and plan the next sprint together. Use Kick inside Slack, without another dashboard.</p>
           <div className="hero-actions">
             <SlackButton />
-            <a className="text-link" href="#workflows">See how Kick works</a>
+            <a className="text-link" href="#team-rituals">See how Kick works</a>
           </div>
           <p className="installation-disclosure">Before installing, read our <a href="/privacy">Privacy policy</a> to learn what Slack data Kick collects, where it is stored, and how to request deletion. <a href="/support">Get support</a>.</p>
           <ul className="trust-list" aria-label="Product highlights">
