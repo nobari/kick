@@ -1,0 +1,34 @@
+{
+  "width": 1600,
+  "height": 1000,
+  "format": "PNG",
+  "maxBytes": 2000000,
+  "provenance": "Illustrative Slack-context layouts rendered from production Kick Block Kit functions with synthetic data. Not live Slack captures.",
+  "slides": [
+    {
+      "file": "01-check-ins.png",
+      "title": "ASYNC CHECK-INS",
+      "path": "Kick Home → Share update"
+    },
+    {
+      "file": "02-channel-todos.png",
+      "title": "SHARED CHANNEL TO-DOS",
+      "path": "Team workspace → Channel to-dos"
+    },
+    {
+      "file": "03-personal-todos.png",
+      "title": "PRIVATE PERSONAL TO-DOS",
+      "path": "Kick Home → My personal to-dos"
+    },
+    {
+      "file": "04-polls.png",
+      "title": "CHANNEL POLLS",
+      "path": "Team workspace → Polls → Vote / results"
+    },
+    {
+      "file": "05-reports.png",
+      "title": "COMPREHENSIVE REPORTS",
+      "path": "Team workspace → Comprehensive report"
+    }
+  ]
+}
