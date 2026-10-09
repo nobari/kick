@@ -1,6 +1,14 @@
 # Kick collaboration release — October 2026
 
-This is the current publishing packet. The September packet describes an earlier release: `im:write` and `app_home_opened` are already published. This release adds **no OAuth scopes or event subscriptions**.
+## Publication status
+
+The app owner confirmed Slack approval and publication on October 9, 2026. The submission material below is retained as a historical record, not an outstanding resubmission checklist. Publication does not certify that every engineering or human acceptance test below was performed.
+
+This release adds **no OAuth scopes or event subscriptions**. `im:write` and `app_home_opened` were published in an earlier release. Existing installations with the seven approved scopes do not need to reinstall for this release.
+
+Post-publication: reopen Kick Home or run `/sync home`; select or create a workflow for shared tools. Personal to-dos need no workflow. Team schedules remain explicitly opt-in. Do not enable previously disabled private reminders or create team schedules merely because the release was published.
+
+## Archived publishing packet
 
 ## Included in this release
 
@@ -100,7 +108,7 @@ Do not register `/poll`, `/todo` or `/report`: these are not implemented slash c
 
 For a separate Kick Review app, substitute `/tsync`, `/tpick`, `/tkudos`, `/tcoins` for the production command names.
 
-## Review/demo gate — still requires human Slack interaction
+## Historical review/demo checklist — not an outstanding publication gate
 
 - [ ] Exercise the actual interactive flows in Slack with two consenting test participants, including callbacks and permission-denied cases.
 - [ ] Demonstrate private personal lists versus shared channel to-dos, changed poll votes and closing, and report preview/sharing without personal-task disclosure. Include these in the real demo.
@@ -109,7 +117,7 @@ For a separate Kick Review app, substitute `/tsync`, `/tpick`, `/tkudos`, `/tcoi
 - [ ] Provide a real video URL. Show actual Slack—not the website's illustrative tour or synthetic test fixtures. Explain scheduler time gaps honestly. Use dummy content, and do not show credentials or private team data.
 - [ ] Replace/remove all bracketed placeholders in the text above before submission.
 - [ ] Confirm the seven scopes are unchanged and no `/t...` test commands are being submitted on the production app.
-- [ ] Submit the unpublished changes for review; **after approval**, publish the changes in Slack. A Vercel deployment does not publish Slack shortcut configuration.
+- [x] Slack approval and publication confirmed by the app owner on October 9, 2026. A Vercel deployment does not publish Slack shortcut configuration.
 
 There is no new-scope reinstall requirement from these thirteen features. Existing installations missing an earlier approved scope may still need reauthorization; keep private reminders gated until their grant is verified. This release does not enable previously disabled reminders or create team schedules automatically.
 

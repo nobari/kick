@@ -38,7 +38,7 @@ const collaboration = [
   ["Search retained history", "Find this workflow’s Kick updates, channel to-dos, blockers, and recognition by words, person, UTC dates, and status. This is not a Slack archive search.", "Search history: enter ‘demo’, choose an assignee and Done, then narrow the dates to find a completed action."],
   ["Calendar exceptions", "Owners and admins can skip a holiday or change one date’s times before its check-in opens. Other dates keep their normal schedule.", "Calendar → select a future holiday → Skip check-in. For a delayed start, save custom opening and digest times instead."],
   ["Delivery operations", "Owners and admins can inspect connectivity, delivery failures, eligible retries, and the configuration and operations audit.", "Operations → review a failed digest → Review retry. Kick rechecks expiry, workflow status and lease ownership before queuing it again."],
-  ["Message shortcuts", "Review a message before saving an action or blocker, or sending thanks. Shortcuts require Slack configuration and publication; Home tools do not wait for shortcut publication.", "On a public-channel message, choose More actions → Track action. Review the copied text and select a workflow and assignee before confirming. Cancel saves nothing."],
+  ["Message shortcuts", "Turn a public-channel message into an action, report a blocker, or send thanks. Every shortcut opens a form so you can review the text and choose a workflow before saving.", "On a public-channel message, choose More actions → Track action. Review the copied text and select a workflow and assignee before confirming. Cancel saves nothing."],
 ] as const;
 
 export default function RitualFeatures() {
