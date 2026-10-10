@@ -96,6 +96,13 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
       await queue(c, key(previous.id, 'digest'), { kind: 'digest', run: previous.id })
     if (local.time >= c.digestTime && local.day === 5 && c.roundup)
       await queue(c, key(c.id, local.date, 'roundup'), { kind: 'roundup', since: now - 7 * DAY })
+    if (local.day >= 1 && local.day <= 5 && local.time >= c.digestTime) {
+      const rule = await store.get('escalations', key(c.id, 'escalation'))
+      if (rule?.enabled && rule.expiresAt > now) {
+        const counts = await store.escalationCounts(c.team, c.id, now, now - rule.days * DAY)
+        if (counts.actions || counts.blockers) await queue(c, key(c.id, local.date, 'escalation'), { kind: 'escalation', since: now })
+      }
+    }
     if (dmEnabled && local.day >= 1 && local.day <= 5) {
       const blockers = await store.list('blockers', 'config', '==', c.id)
       for (const b of blockers.filter(b => !b.resolvedAt && b.expiresAt > now && now - b.at >= DAY)) {
@@ -152,6 +159,13 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
       if (!mayRemind(pref || {}, now, c.zone)) return 'deferred'
       message = `Can you help with this blocker? ${escape(b.detail)}`
       blocks = [section(message), { type: 'actions', elements: [button('Resolve / assign', 'ritual_blocker', b.id)] }]
+    } else if (job.kind === 'escalation') {
+      const rule = await store.get('escalations', key(c.id, 'escalation')), local = localTime(now, c.zone)
+      if (!rule?.enabled || rule.expiresAt <= now || local.day < 1 || local.day > 5 || local.time < c.digestTime || now - job.since >= DAY) return 'skipped'
+      const counts = await store.escalationCounts(c.team, c.id, now, now - rule.days * DAY)
+      if (!counts.actions && !counts.blockers) return 'skipped'
+      message = `Needs attention · ${escape(c.name)}\n${counts.actions} channel tasks overdue beyond ${rule.days} days (UTC dates); ${counts.blockers} unresolved blockers older than ${rule.days} days. Agree on the next step in Kick Home. No private records are included.`
+      blocks = [section(message), { type: 'actions', elements: [button('Review team work', 'collab_hub', JSON.stringify({ c: c.id }))] }]
     } else if (job.kind === 'notice') {
       message = job.reason
     } else if (job.kind === 'rotation') {

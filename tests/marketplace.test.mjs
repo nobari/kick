@@ -47,7 +47,7 @@ test('collaboration data, visibility and retention are explained in policy and g
 
 test('polls, private tasks and reports have concrete examples and accurate privacy limits', () => {
   for (const term of ['Channel polls', 'Personal to-dos', 'Channel to-dos', 'Comprehensive reports', 'Which day for the demo?', 'Try it:', 'legacy command history']) assert.ok(landing.includes(term), term);
-  assert.equal((landing.match(/class="feature-example"/g) || []).length, 26);
+  assert.equal((landing.match(/class="feature-example"/g) || []).length, 33);
   for (const term of ['30 days after creation', 'not end-to-end encryption', 'ballots', 'personal to-dos', 'closing a report preview sends nothing']) assert.ok(privacy.includes(term), term);
   for (const term of ['Save vote', 'Share report', 'current status']) assert.ok(guide.includes(term), term);
 });
@@ -55,6 +55,11 @@ test('team planning has concrete examples, scope and retention disclosures', () 
   for (const term of ['Workload and capacity', 'Objectives and key results', 'Decision log', '50% progress']) assert.ok(landing.includes(term), term);
   for (const term of ['Set my capacity', 'Proposed, Accepted or Superseded', 'no automatic reminders', 'Concurrent edits']) assert.ok(guide.includes(term), term);
   for (const term of ['self-declared weekly task limits', 'key-result baselines', 'not capacity limits or individual metric values']) assert.ok(privacy.includes(term), term);
+});
+test('coordination and issue sync have examples and disclose privacy, consent and manual operation', () => {
+  for (const term of ['Cross-team handoffs', 'Approvals with deadlines', 'Onboarding with a buddy', 'Private one-on-ones', 'Leave and team coverage', 'Opt-in escalations', 'Jira, Linear and GitHub issue sync']) assert.ok(landing.includes(term), term);
+  for (const term of ['No source record is copied', 'not end-to-end encrypted', 'Linked issues', 'nothing synchronizes automatically', 'Disconnect workspace']) assert.ok(guide.includes(term), term);
+  for (const term of ['encrypted agenda', 'designated approver', 'There is no background sync', 'expire after 90 days', 'single-use links']) assert.ok(privacy.includes(term), term);
 });
 test('landing page links to a public getting-started guide with actionable instructions', () => {
   assert.ok(landing.includes('href="/get-started"'));

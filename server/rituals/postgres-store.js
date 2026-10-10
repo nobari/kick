@@ -29,9 +29,21 @@ const columns = {
   decisions: { ...lifetime, user: 'creator_id', owner: 'owner_id', title: 'title', detail: 'detail', rationale: 'rationale', review: 'review_date', status: 'status', version: 'version' },
   objectives: { ...lifetime, user: 'creator_id', owner: 'owner_id', title: 'title', start: 'start_date', end: 'end_date', status: 'status', version: 'version' },
   results: { ...lifetime, objective: 'objective_id', user: 'creator_id', owner: 'owner_id', title: 'title', unit: 'unit', baseline: 'baseline', current: 'current_value', target: 'target', version: 'version' },
+  approvals: { ...lifetime, user: 'creator_id', owner: 'owner_id', title: 'title', detail: 'detail', due: 'due_date', status: 'status', version: 'version', decision: 'decision_note', decidedAt: 'decided_at' },
+  leaves: { ...lifetime, user: 'creator_id', owner: 'owner_id', title: 'title', detail: 'detail', due: 'due_date', status: 'status', version: 'version', decision: 'decision_note', decidedAt: 'decided_at', start: 'start_date', end: 'end_date', cover: 'cover_id' },
+  onboarding: { ...lifetime, user: 'creator_id', owner: 'newcomer_id', buddy: 'buddy_id', title: 'title', due: 'due_date', status: 'status', version: 'version' },
+  steps: { ...lifetime, onboarding: 'onboarding_id', user: 'creator_id', owner: 'assignee_id', detail: 'detail', due: 'due_date', status: 'status', version: 'version' },
+  meetings: { ...lifetime, user: 'creator_id', owner: 'partner_id', title: 'encrypted_title', due: 'meeting_date', status: 'status', version: 'version' },
+  notes: { ...lifetime, meeting: 'meeting_id', user: 'creator_id', owner: 'assignee_id', detail: 'encrypted_detail', due: 'due_date', status: 'status', version: 'version' },
+  handoffs: { ...lifetime, user: 'creator_id', owner: 'owner_id', title: 'title', detail: 'detail', due: 'due_date', status: 'status', version: 'version', target: 'target_config_id' },
+  escalations: { ...lifetime, user: 'editor_id', enabled: 'enabled', days: 'age_days', version: 'version' },
+  oauth: { ...lifetime, user: 'user_id', provider: 'provider', phase: 'phase', browser: 'browser_hash', verifier: 'encrypted_verifier', used: 'used' },
+  connections: { at: 'created_at', expiresAt: 'expires_at', user: 'connected_by', provider: 'provider', credentials: 'encrypted_credentials', version: 'version' },
+  mappings: { ...lifetime, connection: 'connection_id', user: 'configured_by', root: 'resource_id', container: 'container_id', label: 'label' },
+  issuelinks: { ...lifetime, mapping: 'mapping_id', action: 'action_id', remote: 'remote_id', user: 'linked_by', localStatus: 'last_local_status', remoteStatus: 'last_remote_status', version: 'version', syncedAt: 'synced_at' },
 }
-const historyKinds = ['results', 'objectives', 'decisions', 'capacity', 'ballots', 'polls', 'actions', 'votes', 'topics', 'retros', 'estimates', 'poker', 'sprints', 'calendar', 'audit', 'responses', 'blockers', 'recognition', 'jobs', 'rotations', 'runs']
-const numbers = new Set(['at', 'expiresAt', 'nextAt', 'updatedAt', 'leaseUntil', 'resolvedAt', 'snoozeUntil', 'since', 'dueAt', 'closesAt', 'closedAt', 'editedAt', 'completedAt'])
+const historyKinds = ['notes', 'meetings', 'steps', 'onboarding', 'approvals', 'leaves', 'handoffs', 'escalations', 'results', 'objectives', 'decisions', 'capacity', 'ballots', 'polls', 'actions', 'votes', 'topics', 'retros', 'estimates', 'poker', 'sprints', 'calendar', 'audit', 'responses', 'blockers', 'recognition', 'jobs', 'rotations', 'runs']
+const numbers = new Set(['at', 'expiresAt', 'nextAt', 'updatedAt', 'leaseUntil', 'resolvedAt', 'snoozeUntil', 'since', 'dueAt', 'closesAt', 'closedAt', 'editedAt', 'completedAt', 'decidedAt'])
 function mapping(kind) {
   if (!Object.hasOwn(columns, kind)) throw new Error('Unknown ritual entity')
   return { ...common, ...columns[kind] }
@@ -64,6 +76,48 @@ function createStore(database) {
     async personalTodos(team, user, now, offset = 0) {
       const { rows } = await database.query('SELECT * FROM ritual_todos WHERE workspace_id=$1 AND user_id=$2 AND expires_at>$3 ORDER BY created_at DESC,id LIMIT 9 OFFSET $4', [team, user, now, offset])
       return rows.map(r => decode('todos', r))
+    },
+    async integrationPage(kind, team, config, now, offset = 0) {
+      if (!['connections', 'mappings', 'issuelinks'].includes(kind)) throw new Error('Invalid integration list')
+      const { rows } = await database.query(`SELECT * FROM ritual_${kind} WHERE workspace_id=$1 AND expires_at>$2
+        ${kind === 'connections' ? 'AND $3::text IS NOT NULL' : 'AND config_id=$3'} ORDER BY created_at DESC,id LIMIT 9 OFFSET $4`, [team, now, config, offset])
+      return rows.map(r => decode(kind, r))
+    },
+    async removeIntegration(kind, team, id) {
+      if (!['connections', 'mappings', 'issuelinks'].includes(kind)) throw new Error('Invalid integration removal')
+      return (await database.query(`DELETE FROM ritual_${kind} WHERE workspace_id=$1 AND id=$2`, [team, id])).rowCount > 0
+    },
+    async coordinationPage(kind, team, config, user, now, offset, parent) {
+      const filters = {
+        approvals: '(creator_id=$5 OR owner_id=$5)', leaves: '(creator_id=$5 OR owner_id=$5)',
+        meetings: '(creator_id=$5 OR partner_id=$5)', onboarding: 'true',
+        steps: 'onboarding_id=$7', notes: 'meeting_id=$7',
+        handoffs: "(config_id=$2 OR (target_config_id=$2 AND (owner_id=$5 OR status IN ('accepted','completed'))))",
+      }
+      if (!Object.hasOwn(filters, kind)) throw new Error('Invalid coordination list')
+      const scope = kind === 'handoffs' ? '' : 'AND config_id=$2'
+      // All positional parameters are typed, including unused ones.
+      const { rows } = await database.query(`SELECT * FROM ritual_${kind} WHERE workspace_id=$1 ${scope} AND expires_at>$3
+        AND ${filters[kind]} AND $5::text IS NOT NULL AND $6::int >= 0 AND $7::text IS NOT NULL
+        ORDER BY created_at DESC,id LIMIT 9 OFFSET $4`, [team, config, now, offset, user, 0, parent || ''])
+      return rows.map(r => decode(kind, r))
+    },
+    async coverage(team, config, now, from, to) {
+      // Deliberately excludes titles, reasons, approvers and decision notes.
+      return (await database.query(`SELECT creator_id AS "user", cover_id AS cover, start_date AS start, end_date AS "end"
+        FROM ritual_leaves WHERE workspace_id=$1 AND config_id=$2 AND expires_at>$3 AND status='approved'
+        AND start_date<=$5 AND end_date>=$4 ORDER BY start_date,id LIMIT 51`, [team, config, now, from, to])).rows
+    },
+    async incompleteChildren(kind, parent, now) {
+      const field = { steps: 'onboarding_id', notes: 'meeting_id' }[kind]
+      if (!field) throw new Error('Invalid checklist')
+      return Number((await database.query(`SELECT count(*) AS n FROM ritual_${kind} WHERE ${field}=$1 AND expires_at>$2 AND status='open'`, [parent, now])).rows[0].n)
+    },
+    async escalationCounts(team, config, now, before) {
+      const { rows } = await database.query(`SELECT
+        (SELECT count(*)::int FROM ritual_actions WHERE workspace_id=$1 AND config_id=$2 AND expires_at>$3 AND status='open' AND due_date<$4) AS actions,
+        (SELECT count(*)::int FROM ritual_blockers WHERE workspace_id=$1 AND config_id=$2 AND expires_at>$3 AND resolved_at IS NULL AND created_at<$5) AS blockers`, [team, config, now, new Date(before).toISOString().slice(0,10), before])
+      return rows[0]
     },
     async planningPage(kind, team, config, now, offset, objective) {
       if (!['decisions', 'objectives', 'results'].includes(kind)) throw new Error('Invalid planning list')
@@ -115,6 +169,8 @@ function createStore(database) {
         ['decisions', "count(*) AS total, count(*) FILTER (WHERE status='accepted') AS accepted"],
         ['objectives', "count(*) AS total, count(*) FILTER (WHERE status='closed') AS closed"],
         ['results', 'count(*) AS total'],
+        ['onboarding', "count(*) AS total, count(*) FILTER (WHERE status='completed') AS completed"],
+        ['handoffs', "count(*) AS total, count(*) FILTER (WHERE status='completed') AS completed"],
       ]
       const query = sources.map(([kind, aggregate]) => `SELECT '${kind}' AS kind, row_to_json(stats) AS stats FROM (SELECT ${aggregate} FROM ritual_${kind} WHERE workspace_id=$1 AND config_id=$2 AND created_at >= $3 AND created_at < $4 AND expires_at>$5) stats`).join(' UNION ALL ')
       const { rows } = await database.query(query, [team, config, from, until, now, today])
@@ -177,13 +233,15 @@ function createStore(database) {
       return (await database.query(`UPDATE ritual_${kind} SET ${entries.map(([f], i) => `"${map[f]}"=$${i + 3}`).join(',')} WHERE id=$1 AND lease_owner=$2`, [id, owner, ...entries.map(([, v]) => v)])).rowCount > 0
     },
     async cleanup(now) {
-      for (const kind of [...historyKinds, 'todos', 'drafts'])
+      for (const kind of ['issuelinks', 'mappings', 'oauth', ...historyKinds, 'connections', 'todos', 'drafts'])
         await database.query(`DELETE FROM ritual_${kind} WHERE id IN (SELECT id FROM ritual_${kind} WHERE expires_at <= $1 ORDER BY expires_at LIMIT 100)`, [now])
     },
     async shortenRetention(config, days) {
       await database.transaction(async tx => {
         for (const kind of historyKinds)
           await tx.query(`UPDATE ritual_${kind} SET expires_at=LEAST(expires_at, created_at+$2::bigint) WHERE config_id=$1`, [config, days * 86400000])
+        await tx.query('UPDATE ritual_handoffs SET expires_at=LEAST(expires_at, created_at+$2::bigint) WHERE target_config_id=$1', [config, days * 86400000])
+        for (const kind of ['issuelinks', 'mappings']) await tx.query(`UPDATE ritual_${kind} SET expires_at=LEAST(expires_at, created_at+$2::bigint) WHERE config_id=$1`, [config, days * 86400000])
       })
     },
   }

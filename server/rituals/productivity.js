@@ -114,8 +114,10 @@ function createProductivity(store, engine, { access, clock = Date.now }) {
       `Polls: ${s.polls.total} created · ${s.polls.closed} closed · ${s.ballots.total} ballots first cast`,
       `Decisions: ${s.decisions.total} recorded · ${s.decisions.accepted} currently accepted`,
       `Objectives: ${s.objectives.total} created · ${s.objectives.closed} closed · ${s.results.total} key results created`,
+      `Onboarding: ${s.onboarding.total} created · ${s.onboarding.completed} completed`,
+      `Outgoing handoffs: ${s.handoffs.total} created · ${s.handoffs.completed} completed`,
     ]
-    const note = 'Retained records created in this UTC date range, with their current status—not a historical snapshot. Expected responses sum the participant lists of runs created in range; updates are counted by their own creation date. Personal to-dos, legacy command history, coin balances and hidden estimates are excluded. No productivity scores.'
+    const note = 'Retained records created in this UTC date range, with their current status—not a historical snapshot. Expected responses sum the participant lists of runs created in range; updates are counted by their own creation date. Personal to-dos, private approvals, leave requests, one-on-ones, legacy command history, coin balances and hidden estimates are excluded. No productivity scores.'
     return { c, from, to, generatedAt: now, stats: s, lines, note }
   }
   async function shareReport(ctx, filters, request) {

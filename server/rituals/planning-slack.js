@@ -25,7 +25,9 @@ function registerPlanning({ app, store, service, member, ui }) {
       buttons(b('Objectives & results', 'objectives', scope)),
       section('*Decision log*\nKeep the decision, rationale, owner and review date in one place.'),
       buttons(b('Decision log', 'decisions', scope)), disclosure,
-      buttons(button('Team workspace', 'collab_hub', JSON.stringify(scope))),
+      section('*Issue sync*\nWorkspace admins can connect Jira, Linear or GitHub, choose a project/repository, and explicitly sync selected channel tasks.'),
+      buttons(button('Issue sync', 'integ_hub', JSON.stringify(scope))),
+      buttons(button('Team workspace', 'collab_hub', JSON.stringify(scope)), button('People & coordination', 'coord_hub', JSON.stringify(scope))),
     ])
     if (action === 'workload') {
       const offset = data.offset || 0, r = await api.workload(ctx, data.week, offset)

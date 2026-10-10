@@ -13,8 +13,8 @@ try {
   try {
     await migrate(drizzle(pool), {migrationsFolder: fileURLToPath(new URL('../../drizzle', import.meta.url))});
     const { rows } = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename LIKE 'ritual_%' ORDER BY tablename");
-    if (rows.length !== 25) throw new Error('Ritual schema verification failed');
-    console.log(`${production ? 'Production' : 'Rehearsal'}: twenty-five Postgres workflow tables verified.`);
+    if (rows.length !== 37) throw new Error('Ritual schema verification failed');
+    console.log(`${production ? 'Production' : 'Rehearsal'}: 37 Postgres workflow tables verified.`);
   } finally { await pool.end(); }
 } catch (e) {
   console.error(`Ritual migration failed (${e.code || 'configuration/migration error'}); no credentials printed.`);

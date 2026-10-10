@@ -72,7 +72,7 @@ export const ritualActions = pgTable('ritual_actions', {
   ...linked(), user: text('creator_id').notNull(), owner: text('assignee_id').notNull(), detail: text('detail').notNull(),
   due: text('due_date').notNull(), status: text('status').notNull().default('open'), completedAt: ms('completed_at'),
   source: text('source_kind'), sourceId: text('source_id'), sprint: text('sprint_id'),
-}, t => [...links(t, 'ritual_action'), index('ritual_action_owner_due').on(t.team, t.owner, t.status, t.due),
+}, t => [...links(t, 'ritual_action'), unique('ritual_action_tenant').on(t.team, t.config, t.id), index('ritual_action_owner_due').on(t.team, t.owner, t.status, t.due),
   foreignKey({ columns: [t.team, t.config, t.sprint], foreignColumns: [ritualSprints.team, ritualSprints.config, ritualSprints.id] }).onDelete('cascade'),
   check('ritual_action_status', sql`${t.status} IN ('open','done')`)]);
 export const ritualRetros = pgTable('ritual_retros', {
@@ -148,3 +148,79 @@ export const ritualResults = pgTable('ritual_results', {
 }, t => [...links(t, 'ritual_result'), index('ritual_result_objective').on(t.objective, t.at, t.id),
   foreignKey({ columns: [t.team, t.config, t.objective], foreignColumns: [ritualObjectives.team, ritualObjectives.config, ritualObjectives.id] }).onDelete('cascade'),
   check('ritual_result_range', sql`abs(${t.baseline}) <= 1000000000 AND abs(${t.current}) <= 1000000000 AND abs(${t.target}) <= 1000000000 AND ${t.baseline} <> ${t.target}`)]);
+
+// Coordination entities have separate tables and explicit visibility rules.
+const requestFields = () => ({ user: text('creator_id').notNull(), owner: text('owner_id').notNull(),
+  title: text('title').notNull(), detail: text('detail').notNull(), due: text('due_date').notNull(),
+  status: text('status').notNull().default('pending'), version: integer('version').notNull().default(1) });
+export const ritualApprovals = pgTable('ritual_approvals', {
+  ...linked(), ...requestFields(), decision: text('decision_note'), decidedAt: ms('decided_at'),
+}, t => [...links(t, 'ritual_approval'), index('ritual_approval_inbox').on(t.team, t.owner, t.status, t.at),
+  check('ritual_approval_status', sql`${t.status} IN ('pending','approved','declined','cancelled')`),
+  check('ritual_approval_separation', sql`${t.user} <> ${t.owner}`)]);
+export const ritualLeaves = pgTable('ritual_leaves', {
+  ...linked(), ...requestFields(), start: text('start_date').notNull(), end: text('end_date').notNull(),
+  cover: text('cover_id').notNull(), decision: text('decision_note'), decidedAt: ms('decided_at'),
+}, t => [...links(t, 'ritual_leave'), index('ritual_leave_coverage').on(t.team, t.config, t.status, t.start, t.end),
+  check('ritual_leave_dates', sql`${t.start} <= ${t.end}`),
+  check('ritual_leave_status', sql`${t.status} IN ('pending','approved','declined','cancelled')`),
+  check('ritual_leave_separation', sql`${t.user} <> ${t.owner} AND ${t.user} <> ${t.cover}`)]);
+export const ritualOnboarding = pgTable('ritual_onboarding', {
+  ...linked(), user: text('creator_id').notNull(), owner: text('newcomer_id').notNull(), buddy: text('buddy_id').notNull(),
+  title: text('title').notNull(), due: text('due_date').notNull(), status: text('status').notNull().default('active'),
+  version: integer('version').notNull().default(1),
+}, t => [...links(t, 'ritual_onboarding'), unique('ritual_onboarding_tenant').on(t.team, t.config, t.id),
+  check('ritual_onboarding_status', sql`${t.status} IN ('active','completed','cancelled')`)]);
+export const ritualSteps = pgTable('ritual_steps', {
+  ...linked(), onboarding: text('onboarding_id').notNull(), user: text('creator_id').notNull(), owner: text('assignee_id').notNull(),
+  detail: text('detail').notNull(), due: text('due_date').notNull(), status: text('status').notNull().default('open'),
+  version: integer('version').notNull().default(1),
+}, t => [...links(t, 'ritual_step'), index('ritual_step_parent').on(t.onboarding, t.at, t.id),
+  foreignKey({ columns: [t.team, t.config, t.onboarding], foreignColumns: [ritualOnboarding.team, ritualOnboarding.config, ritualOnboarding.id] }).onDelete('cascade'),
+  check('ritual_step_status', sql`${t.status} IN ('open','done')`)]);
+export const ritualMeetings = pgTable('ritual_meetings', {
+  ...linked(), user: text('creator_id').notNull(), owner: text('partner_id').notNull(), title: text('encrypted_title').notNull(),
+  due: text('meeting_date').notNull(), status: text('status').notNull().default('active'), version: integer('version').notNull().default(1),
+}, t => [...links(t, 'ritual_meeting'), unique('ritual_meeting_tenant').on(t.team, t.config, t.id),
+  index('ritual_meeting_participants').on(t.team, t.user, t.owner, t.at),
+  check('ritual_meeting_pair', sql`${t.user} <> ${t.owner}`), check('ritual_meeting_status', sql`${t.status} IN ('active','completed','cancelled')`)]);
+export const ritualNotes = pgTable('ritual_notes', {
+  ...linked(), meeting: text('meeting_id').notNull(), user: text('creator_id').notNull(), owner: text('assignee_id').notNull(),
+  detail: text('encrypted_detail').notNull(), due: text('due_date').notNull(), status: text('status').notNull().default('open'),
+  version: integer('version').notNull().default(1),
+}, t => [...links(t, 'ritual_note'), index('ritual_note_parent').on(t.meeting, t.at, t.id),
+  foreignKey({ columns: [t.team, t.config, t.meeting], foreignColumns: [ritualMeetings.team, ritualMeetings.config, ritualMeetings.id] }).onDelete('cascade'),
+  check('ritual_note_status', sql`${t.status} IN ('open','done')`)]);
+export const ritualHandoffs = pgTable('ritual_handoffs', {
+  ...linked(), ...requestFields(), target: text('target_config_id').notNull(),
+}, t => [...links(t, 'ritual_handoff'), index('ritual_handoff_target').on(t.team, t.target, t.at, t.id),
+  foreignKey({ columns: [t.team, t.target], foreignColumns: [ritualConfigs.team, ritualConfigs.id] }).onDelete('cascade'),
+  check('ritual_handoff_target_differs', sql`${t.config} <> ${t.target}`),
+  check('ritual_handoff_status', sql`${t.status} IN ('pending','accepted','completed','declined','cancelled')`)]);
+export const ritualEscalations = pgTable('ritual_escalations', {
+  ...linked(), user: text('editor_id').notNull(), enabled: boolean('enabled').notNull().default(false),
+  days: integer('age_days').notNull().default(2), version: integer('version').notNull().default(1),
+}, t => [...links(t, 'ritual_escalation'), unique('ritual_escalation_once').on(t.team, t.config),
+  check('ritual_escalation_age', sql`${t.days} BETWEEN 1 AND 30`)]);
+
+export const ritualOauth = pgTable('ritual_oauth', {
+  ...linked(), user: text('user_id').notNull(), provider: text('provider').notNull(),
+  phase: text('phase').notNull(), browser: text('browser_hash'), verifier: text('encrypted_verifier'), used: boolean('used').notNull().default(false),
+}, t => [...links(t, 'ritual_oauth'), check('ritual_oauth_provider', sql`${t.provider} IN ('github','jira','linear')`)]);
+export const ritualConnections = pgTable('ritual_connections', {
+  ...identity(), ...lifetime(), user: text('connected_by').notNull(), provider: text('provider').notNull(),
+  credentials: text('encrypted_credentials').notNull(), version: integer('version').notNull().default(1),
+}, t => [unique('ritual_connection_provider').on(t.team, t.provider), unique('ritual_connection_tenant').on(t.team, t.id),
+  index('ritual_connection_expiry').on(t.expiresAt), check('ritual_connection_provider_valid', sql`${t.provider} IN ('github','jira','linear')`)]);
+export const ritualMappings = pgTable('ritual_mappings', {
+  ...linked(), connection: text('connection_id').notNull(), user: text('configured_by').notNull(),
+  root: text('resource_id').notNull(), container: text('container_id').notNull(), label: text('label').notNull(),
+}, t => [...links(t, 'ritual_mapping'), unique('ritual_mapping_once').on(t.team, t.config, t.connection), unique('ritual_mapping_tenant').on(t.team, t.config, t.id),
+  foreignKey({ columns: [t.team, t.connection], foreignColumns: [ritualConnections.team, ritualConnections.id] }).onDelete('cascade')]);
+export const ritualIssuelinks = pgTable('ritual_issuelinks', {
+  ...linked(), mapping: text('mapping_id').notNull(), action: text('action_id').notNull(), remote: text('remote_id').notNull(),
+  user: text('linked_by').notNull(), localStatus: text('last_local_status').notNull(), remoteStatus: text('last_remote_status').notNull(),
+  version: integer('version').notNull().default(1), syncedAt: ms('synced_at').notNull(),
+}, t => [...links(t, 'ritual_issuelink'), unique('ritual_issuelink_remote').on(t.mapping, t.remote), unique('ritual_issuelink_action').on(t.action),
+  foreignKey({ columns: [t.team, t.config, t.mapping], foreignColumns: [ritualMappings.team, ritualMappings.config, ritualMappings.id] }).onDelete('cascade'),
+  foreignKey({ columns: [t.team, t.config, t.action], foreignColumns: [ritualActions.team, ritualActions.config, ritualActions.id] }).onDelete('cascade')]);

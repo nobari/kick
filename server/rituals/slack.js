@@ -6,6 +6,8 @@ const { randomUUID } = require('node:crypto')
 const { registerCollaboration } = require('./collaboration-slack')
 const { registerProductivity } = require('./productivity-slack')
 const { registerPlanning } = require('./planning-slack')
+const { registerCoordination } = require('./coordination-slack')
+const { registerIntegrations } = require('../integrations/slack')
 const background = work => waitUntil(work().catch(e => console.error('Kick workflow failed:', e.data?.error || e.code || 'unknown_error')))
 const option = (label, value) => ({ text: text(label), value: String(value) })
 const input = (id, label, element, optional = false) => ({ type: 'input', block_id: id, label: text(label), optional, element: { action_id: 'value', ...element } })
@@ -201,7 +203,7 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
       const mine = (await store.list('actions', 'config', '==', c.id)).filter(a => a.owner === user && a.status === 'open' && a.expiresAt > Date.now())
       blocks.push(divider(), header('Your actions'), section(mine.length ? `${mine.length} open action${mine.length === 1 ? '' : 's'} in this workflow.` : 'No open actions assigned to you.'))
       mine.slice(0, 3).forEach(a => blocks.push({ ...section(`Due ${a.due} · ${escape(a.detail).slice(0, 500)}`), accessory: button('Open action', 'collab_action', JSON.stringify({ c: c.id, id: a.id, edit: true })) }))
-      blocks.push({ type: 'actions', elements: [primary('Open team workspace', 'collab_hub', JSON.stringify({ c: c.id })), button('Team planning', 'plan_hub', JSON.stringify({ c: c.id })), button('Add workflow', 'ritual_new_workflow', c.channel)] })
+      blocks.push({ type: 'actions', elements: [primary('Open team workspace', 'collab_hub', JSON.stringify({ c: c.id })), button('Team planning', 'plan_hub', JSON.stringify({ c: c.id })), button('People & coordination', 'coord_hub', JSON.stringify({ c: c.id })), button('Add workflow', 'ritual_new_workflow', c.channel)] })
       const actions = [button('Refresh', 'ritual_refresh', `${c.id}:${tab}`), button('Set up a channel', 'ritual_choose', 'setup')]
       try { await manage(client, c, user); actions.push(button('Workflow settings', 'ritual_setup', c.id)) } catch { /* Hide owner-only controls. */ }
       blocks.push(divider(), { type: 'actions', elements: actions })
@@ -399,6 +401,10 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
   registerProductivity({ app, store, engine, service: collaboration.service,
     ui: { modal, section, button, input, field, select, option, text, read, context } })
   registerPlanning({ app, store, member, service: collaboration.service,
+    ui: { modal, section, button, input, field, select, option, text, read, context } })
+  registerCoordination({ app, store, member, service: collaboration.service,
+    ui: { modal, section, button, input, field, select, option, text, read, context } })
+  registerIntegrations({ app, store, member, service: collaboration.service,
     ui: { modal, section, button, input, field, select, option, text, read, context } })
   // Middleware intercepts only new subcommands; the legacy command handlers stay intact.
   app.use(async args => {

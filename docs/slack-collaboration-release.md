@@ -2,7 +2,47 @@
 
 ## Next release: team-management expansion
 
-Implementation is being delivered incrementally. Do not submit a listing claiming all ten requested features are available yet. Provider registrations and local credentials are not functioning integrations.
+The ten-feature expansion is implemented. Do not submit the combined release until the human Slack walkthrough and real provider-consent/status round trips below are recorded. Automated tests use isolated Postgres and provider fixtures; they are not evidence of production provider consent.
+
+### Coordination and organization sync increment (October 10)
+
+- Cross-team handoffs: explicit, safe-to-share summary; receiving workflow and teammate; acceptance before receiving-channel disclosure; completion/decline/cancel. Both sender and recipient must belong to both public channels. This is a handoff tracker, not an automatic dependency graph.
+- Approvals: one designated approver per immutable request; private details and decision note; deadline, decline/cancel and self-approval protection. Cancel and recreate to change details. No multi-stage approval chains or automatic reminders.
+- Onboarding: newcomer, buddy, assigned/dated checklist steps; completion requires no open steps. Channel-visible.
+- One-on-ones: two participants, encrypted-at-rest title and shared agenda/follow-ups, assigned items and completion. Not end-to-end encrypted or a private personal draft; both participants see each item. No admin override through the app.
+- Leave: requester/approver-only details; proposed cover teammate; approved names/dates/cover only in Team coverage. Coverage is not an accepted assignment. Set reminder leave preferences separately.
+- Escalations: explicitly enabled by workflow owner/admin, 1–30-day threshold, weekday channel counts after digest time, delivery-time rechecks, daily idempotency and disable control. No DM or automatic reassignment. Requires an enabled workflow.
+- Organization-specific GitHub/Jira/Linear sync: Slack admin consent, own provider accounts, resource/container selection, explicit issue import, manual confirmed two-way **status** updates, stale-preview checks, conflict notice, audit and disconnect. Initial import copies title/status; comments, attachments, private records and later title changes do not sync. No background sync, issue creation or remote deletion. Each provider supports one connection per Slack workspace and one mapping per workflow; multiple workflows may use different containers. Connections expire after 90 days.
+
+### Remaining acceptance checks before resubmission
+
+1. In a workspace you control, create a paused public-channel workflow with at least three testers and 30-day retention. Walk through all three planning features described below.
+2. Request an approval from tester B. Check that tester C and a nonparticipant admin cannot read it. Have B approve, then cancel as requester. Try self-approval and a stale submission.
+3. Create onboarding for B with C as buddy, add a step, mark it done, and finish. Verify an open step prevents completion.
+4. Create a one-on-one between B and C, add an agenda item and follow-up, and verify A cannot view either, including as workflow owner. Complete items and finish the meeting.
+5. Request future leave from B, proposing C as cover. Verify Team coverage is empty before approval, then shows only names/dates/proposed cover. Cancel and verify coverage disappears. Avoid medical details.
+6. Configure a second public-channel workflow. Create a handoff with B as recipient; verify only B can read it from the receiving side until B accepts from that workflow. Complete the handoff.
+7. In a dedicated test workflow only, enable scheduling and escalation summaries with a one-day threshold. Add an older task/blocker, observe a single eligible channel summary after digest time, then resolve the work and disable the rule/workflow. Verify no further summary is sent. Do not enable the existing team workflow just for review.
+8. For each provider, a Slack admin uses Team planning → Issue sync → Connect. Complete the real consent flow, map a test repository/project/team and import a disposable issue after previewing its title. Mark its Kick action done; Compare → Use Kick status → choose a matching external state → Confirm. Change the provider status, then Compare → Use provider status. Test a stale preview and a both-sides conflict. Disconnect and verify mappings/links disappear while the imported task and remote issue remain. Revoke provider-side consent when finished.
+9. GitHub requires Kick Team Sync installed for the chosen repositories. Jira distribution must allow the reviewer's account before external reviewers can connect; do not claim cross-organization availability until it has been enabled and tested. Linear needs its public OAuth configuration. No provider client secrets belong in the review packet.
+10. Record a real video showing these paths, permission denials, the public landing page and privacy link. A homepage URL is not a demo-video URL. Update screenshots only with verified interface behavior and synthetic data.
+
+### Slack submission settings and draft notes
+
+No new Slack scopes, slash commands, event subscriptions or interactivity URLs are required for this increment. Keep `app_home_opened`, the Home tab and current approved permissions. No reinstall is needed merely for these Home tools. Reopen Home or run `/sync home`.
+
+- Landing page: `https://kick.bozmoz.com/` — not the install endpoint.
+- Privacy: `https://kick.bozmoz.com/privacy`; support: `https://kick.bozmoz.com/support`; terms: `https://kick.bozmoz.com/terms`.
+- Direct install: `https://kick.bozmoz.com/api/slack/install`; Slack OAuth redirect: `https://kick.bozmoz.com/api/slack/oauth_redirect`.
+- Provider callbacks are separate: `/api/integrations/github/callback`, `/api/integrations/jira/callback`, `/api/integrations/linear/callback` on the same canonical domain. Do not put them in Slack's OAuth Redirect URLs.
+
+Test account details draft (use after acceptance checks):
+
+> Kick needs no separate Kick account, paid subscription or trial. Install it in your own Slack test workspace and use a public test channel with three members. Most tools work with a paused workflow. Optional issue sync requires your own GitHub, Jira or Linear account and its permissions, plus a Slack workspace administrator. We do not provide credentials to our workspace. Follow the attached test instructions and demo for each optional provider connection.
+
+Developer notes draft:
+
+> This update adds workload/capacity, objectives and key results, decision records, explicit cross-team handoffs, private single-approver requests, onboarding checklists and buddies, participant-only one-on-one agendas, leave requests and limited team coverage, opt-in channel escalations, and organization-specific issue-tracker connections. Issue imports copy title/status after confirmation; subsequent status sync is manual and confirmed in either direction. No remote deletion, background issue sync or private-record export occurs. New Slack Home forms reuse existing approved permissions. The website, getting-started guide and privacy policy describe visibility, consent, retention and limits. See the attached verified walkthrough and actual demo-video URL.
 
 ### Planning increment (October 10)
 
@@ -26,9 +66,9 @@ Use a workspace you control. Kick needs no separate account or paid subscription
 
 Database and Block Kit tests are automated. A human Slack modal walkthrough is still required before the combined release's final review packet is declared complete. Keep an actual video demo URL distinct from the landing-page URL.
 
-### Still pending from the ten-feature request
+### Review readiness
 
-Cross-team dependencies/handoffs; approval workflows; onboarding checklists/buddies; private one-on-one agendas; leave approval/coverage; opt-in escalations; organization-configurable two-way Jira/Linear/GitHub issue sync. Their privacy boundaries, authorization flows and end-to-end tests must be completed before adding availability claims to the website or submission packet. Do not enable Jira distribution or advertise external sync merely because credentials are present.
+All ten have implementation paths, but provider consent and human end-to-end acceptance remain distinct gates. Do not mark unperformed acceptance checks as passed or reuse the old publication confirmation for this new expansion.
 
 ## Publication status
 

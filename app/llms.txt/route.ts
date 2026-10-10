@@ -47,6 +47,15 @@ Terms: https://kick.bozmoz.com/terms
 - Message shortcuts Track action, Report blocker and Give kudos require Slack configuration and publication. They preview selected message text and save only after confirmation.
 - All new collaboration records follow 7/30/90-day workflow retention. Child records can expire earlier with their parent. Channel notices are checked every 15 minutes and may be delayed.
 
+## Planning and coordination
+
+- Team planning includes self-declared weekly task capacity, objectives with measurable key results, and a decision log with owners and review dates. No individual productivity scores.
+- People & coordination includes cross-team handoffs accepted by a receiving teammate, participant-only approval requests with deadlines, channel-visible onboarding checklists with buddies, and private two-person agendas and follow-ups.
+- Leave requests have a designated approver. Team coverage shares only approved names, dates and proposed cover; reasons are private. Reminder leave preferences are set separately.
+- Escalations are opt-in weekday channel summaries of overdue actions and aging blockers; an enabled workflow and scheduler are required. Delivery rechecks current status.
+- Issue sync is administrator-managed and organization-specific. Connect GitHub, Jira or Linear, select the provider organization/site and repository/project/team, and explicitly preview/import an issue title and status into a channel to-do. Later status changes are manual and confirmed in either direction, with stale-preview checks and conflict notices. There is no background sync, remote deletion, comment/attachment copying or private-record export. Provider consent and availability are required.
+- One-on-one titles and notes are encrypted at rest and participant-only in Kick, not end-to-end encrypted. New workflow records use 7/30/90-day retention. Provider connections expire after 90 days and may be disconnected sooner.
+
 ## Account and pricing
 
 Kick does not require a separate user account. Installation and identity are handled by Slack. Core workflows are free.
