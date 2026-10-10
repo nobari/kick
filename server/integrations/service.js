@@ -21,6 +21,7 @@ function createIntegrations(store, { access, admin, member, providerApi, clock =
     // Serialize rotating refresh tokens, with a bounded eight-second provider call.
     return store.locked(`token:${id}`, async tx => {
       const c = await connection(ctx, id, tx), context = `connection:${c.team}:${id}`
+      if (c.user !== ctx.user) throw new Error('Only the Slack admin who connected this provider can use its account. Ask them to sync, or disconnect and reconnect with your own consent.')
       let credentials = unseal(c.credentials, context)
       if (credentials.expires < clock() + 60000) {
         if (!credentials.refresh) throw new Error('Reconnect this provider to renew access.')

@@ -16,6 +16,8 @@ The ten-feature expansion is implemented. Do not submit the combined release unt
 
 ### Remaining acceptance checks before resubmission
 
+Provider account access is restricted to the Slack admin who supplied that connection’s consent. Other workspace admins can disconnect it but cannot operate the connecting person’s provider account. Test this distinction with a second Slack admin as well as a regular member.
+
 1. In a workspace you control, create a paused public-channel workflow with at least three testers and 30-day retention. Walk through all three planning features described below.
 2. Request an approval from tester B. Check that tester C and a nonparticipant admin cannot read it. Have B approve, then cancel as requester. Try self-approval and a stale submission.
 3. Create onboarding for B with C as buddy, add a step, mark it done, and finish. Verify an open step prevents completion.

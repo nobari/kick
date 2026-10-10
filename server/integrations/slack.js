@@ -10,7 +10,7 @@ function registerIntegrations({ app, store, service, member, ui }) {
   const buttons = (...elements) => ({ type: 'actions', elements })
   const form = (title, action, data, blocks, submit = null) => modal(title, `integ_${action}_save`, JSON.stringify({ ...data, request: randomUUID() }), blocks, submit)
   const apiFor = client => createIntegrations(store, { access: service(client).access, admin: ctx => assertAdmin(client, ctx), member: (c, user) => member(client, c.channel, user), providerApi: createProviders() })
-  const disclosure = context('Admin-managed, explicit sync. Import shares the issue title and status with this channel. After import, only status syncs—in the direction you confirm. No background sync, comments, attachments, private to-dos or one-on-one notes. No remote deletion.')
+  const disclosure = context('Only the admin who connected the provider can operate its account; other admins may disconnect it. Import shares title/status with this channel. Later sync changes status only, in the confirmed direction. No background sync, private-record export, comments, attachments or remote deletion.')
   async function render(api, ctx, action, data = {}) {
     const c = await api.allowed(ctx), scope = { c: c.id }, back = buttons(b('Issue sync', 'hub', scope))
     if (action === 'hub') {

@@ -45,6 +45,8 @@ test('Issue sync on isolated Postgres: OAuth, org boundaries, explicit import, c
       const connections = await api.list(ctx, 'connections'); conn = connections[0];
       assert.equal(connections.length, 1); assert.equal(conn.credentials, undefined);
       assert.ok(!(await store.get('connections', conn.id)).credentials.includes('access-secret'));
+      const otherAdmin = integrations.createIntegrations(store, { access: collab.access, admin: async () => {}, member: authorize, providerApi, env, clock: () => now });
+      await assert.rejects(otherAdmin.roots({ ...ctx, user: 'U2' }, conn.id), /who connected/);
       const responses = await Promise.all([api.roots(ctx, conn.id), api.roots(ctx, conn.id)]);
       assert.equal(responses.length, 2); assert.equal(refreshed, 1);
       await assert.rejects(api.roots({ ...ctx, team: 'OTHER' }, conn.id), /unavailable/);
