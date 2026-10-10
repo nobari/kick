@@ -61,7 +61,7 @@ export const ritualJobs = pgTable('ritual_jobs', {
   dueAt: ms('due_at').notNull(), attempts: integer('attempts').notNull().default(0), done: boolean('done').notNull().default(false),
   status: text('status').notNull().default('pending'), lastError: text('last_error'),
 }, t => [...links(t, 'ritual_job'), index('ritual_job_due').on(t.dueAt, t.id).where(sql`NOT ${t.done}`),
-  check('ritual_job_kind', sql`${t.kind} IN ('prompt','reminder','digest','roundup','followup','rotation','notice')`),
+  check('ritual_job_kind', sql`${t.kind} IN ('prompt','reminder','digest','roundup','followup','rotation','notice','escalation')`),
   check('ritual_job_attempts', sql`${t.attempts} >= 0`)]);
 
 export const ritualSprints = pgTable('ritual_sprints', {

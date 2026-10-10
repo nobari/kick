@@ -57,6 +57,13 @@
       "when": 1791595441247,
       "tag": "0007_organization_issue_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791595868225,
+      "tag": "0008_escalation_job_type",
+      "breakpoints": true
     }
   ]
 }
