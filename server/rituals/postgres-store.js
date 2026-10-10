@@ -43,7 +43,7 @@ const columns = {
   issuelinks: { ...lifetime, mapping: 'mapping_id', action: 'action_id', remote: 'remote_id', user: 'linked_by', localStatus: 'last_local_status', remoteStatus: 'last_remote_status', version: 'version', syncedAt: 'synced_at' },
 }
 const historyKinds = ['notes', 'meetings', 'steps', 'onboarding', 'approvals', 'leaves', 'handoffs', 'escalations', 'results', 'objectives', 'decisions', 'capacity', 'ballots', 'polls', 'actions', 'votes', 'topics', 'retros', 'estimates', 'poker', 'sprints', 'calendar', 'audit', 'responses', 'blockers', 'recognition', 'jobs', 'rotations', 'runs']
-const numbers = new Set(['at', 'expiresAt', 'nextAt', 'updatedAt', 'leaseUntil', 'resolvedAt', 'snoozeUntil', 'since', 'dueAt', 'closesAt', 'closedAt', 'editedAt', 'completedAt', 'decidedAt'])
+const numbers = new Set(['at', 'expiresAt', 'nextAt', 'updatedAt', 'leaseUntil', 'resolvedAt', 'snoozeUntil', 'since', 'dueAt', 'closesAt', 'closedAt', 'editedAt', 'completedAt', 'decidedAt', 'syncedAt'])
 function mapping(kind) {
   if (!Object.hasOwn(columns, kind)) throw new Error('Unknown ritual entity')
   return { ...common, ...columns[kind] }

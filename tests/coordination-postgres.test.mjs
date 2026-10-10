@@ -92,6 +92,7 @@ test('Coordination: real Postgres visibility, approvals, handoffs, checklists an
       assert.equal((await store.list('jobs', 'config', '==', c.id)).filter(j => j.kind === 'escalation').length, 1);
       const job = { config: c.id, kind: 'escalation', since: now, expiresAt: now + 86400000, clientId: randomUUID() };
       assert.equal(await engine.deliver(job), 'sent'); assert.equal(sent.length, 1);
+      assert.equal(await engine.deliver({ ...job, since: now - 23 * 3600000 }), 'skipped');
       assert.match(sent[0].text, /1 channel tasks/); assert.ok(!sent[0].text.includes('Private'));
       await api.saveEscalation(ctx, { enabled: false, days: 2, version: 1 });
       assert.equal(await engine.deliver(job), 'skipped');

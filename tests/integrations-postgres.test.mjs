@@ -58,6 +58,8 @@ test('Issue sync on isolated Postgres: OAuth, org boundaries, explicit import, c
       assert.equal(ids[0], ids[1]); link = ids[0];
       const p = await api.inspect(ctx, link); action = p.action.id;
       assert.equal(p.action.detail, remote.title); assert.equal(p.action.owner, 'U2');
+      const listed = (await api.list(ctx, 'issuelinks'))[0];
+      assert.equal(typeof listed.syncedAt, 'number'); assert.ok(new Date(listed.syncedAt).toISOString());
       assert.equal((await store.list('actions', 'config', '==', c.id)).length, 1);
       await assert.rejects(api.inspect({ ...ctx, user: 'U2' }, link), /Admin/);
       assert.equal((await store.list('jobs', 'config', '==', c.id)).length, 0);

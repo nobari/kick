@@ -161,7 +161,7 @@ function createEngine(store, clientFor, clock = Date.now, { dmEnabled = true, ca
       blocks = [section(message), { type: 'actions', elements: [button('Resolve / assign', 'ritual_blocker', b.id)] }]
     } else if (job.kind === 'escalation') {
       const rule = await store.get('escalations', key(c.id, 'escalation')), local = localTime(now, c.zone)
-      if (!rule?.enabled || rule.expiresAt <= now || local.day < 1 || local.day > 5 || local.time < c.digestTime || now - job.since >= DAY) return 'skipped'
+      if (!rule?.enabled || rule.expiresAt <= now || local.day < 1 || local.day > 5 || local.time < c.digestTime || !Number.isFinite(job.since) || localTime(job.since, c.zone).date !== local.date) return 'skipped'
       const counts = await store.escalationCounts(c.team, c.id, now, now - rule.days * DAY)
       if (!counts.actions && !counts.blockers) return 'skipped'
       message = `Needs attention · ${escape(c.name)}\n${counts.actions} channel tasks overdue beyond ${rule.days} days (UTC dates); ${counts.blockers} unresolved blockers older than ${rule.days} days. Agree on the next step in Kick Home. No private records are included.`
