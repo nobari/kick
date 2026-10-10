@@ -25,8 +25,12 @@ const columns = {
   todos: { at: 'created_at', expiresAt: 'expires_at', user: 'user_id', detail: 'detail', due: 'due_date', status: 'status', version: 'version', completedAt: 'completed_at' },
   polls: { ...lifetime, user: 'creator_id', title: 'title', options: 'options', status: 'status', closedAt: 'closed_at' },
   ballots: { ...lifetime, poll: 'poll_id', user: 'user_id', choice: 'choice' },
+  capacity: { ...lifetime, user: 'user_id', week: 'week_start', limit: 'task_limit', version: 'version' },
+  decisions: { ...lifetime, user: 'creator_id', owner: 'owner_id', title: 'title', detail: 'detail', rationale: 'rationale', review: 'review_date', status: 'status', version: 'version' },
+  objectives: { ...lifetime, user: 'creator_id', owner: 'owner_id', title: 'title', start: 'start_date', end: 'end_date', status: 'status', version: 'version' },
+  results: { ...lifetime, objective: 'objective_id', user: 'creator_id', owner: 'owner_id', title: 'title', unit: 'unit', baseline: 'baseline', current: 'current_value', target: 'target', version: 'version' },
 }
-const historyKinds = ['ballots', 'polls', 'actions', 'votes', 'topics', 'retros', 'estimates', 'poker', 'sprints', 'calendar', 'audit', 'responses', 'blockers', 'recognition', 'jobs', 'rotations', 'runs']
+const historyKinds = ['results', 'objectives', 'decisions', 'capacity', 'ballots', 'polls', 'actions', 'votes', 'topics', 'retros', 'estimates', 'poker', 'sprints', 'calendar', 'audit', 'responses', 'blockers', 'recognition', 'jobs', 'rotations', 'runs']
 const numbers = new Set(['at', 'expiresAt', 'nextAt', 'updatedAt', 'leaseUntil', 'resolvedAt', 'snoozeUntil', 'since', 'dueAt', 'closesAt', 'closedAt', 'editedAt', 'completedAt'])
 function mapping(kind) {
   if (!Object.hasOwn(columns, kind)) throw new Error('Unknown ritual entity')
@@ -61,6 +65,28 @@ function createStore(database) {
       const { rows } = await database.query('SELECT * FROM ritual_todos WHERE workspace_id=$1 AND user_id=$2 AND expires_at>$3 ORDER BY created_at DESC,id LIMIT 9 OFFSET $4', [team, user, now, offset])
       return rows.map(r => decode('todos', r))
     },
+    async planningPage(kind, team, config, now, offset, objective) {
+      if (!['decisions', 'objectives', 'results'].includes(kind)) throw new Error('Invalid planning list')
+      const { rows } = await database.query(`SELECT * FROM ritual_${kind} WHERE workspace_id=$1 AND config_id=$2 AND expires_at>$3 ${kind === 'results' ? 'AND objective_id=$5' : ''} ORDER BY created_at DESC,id LIMIT 9 OFFSET $4`,
+        [team, config, now, offset, ...(kind === 'results' ? [objective] : [])])
+      return rows.map(r => decode(kind, r))
+    },
+    async workload(team, config, now, week, until, today, participants, offset) {
+      // Aggregate before pagination. A capacity is a self-declared task count,
+      // not an estimate of hours, surveillance, or a productivity score.
+      const { rows } = await database.query(`WITH load AS (
+        SELECT assignee_id AS user_id, count(*)::int AS tasks,
+          count(*) FILTER (WHERE due_date < $6)::int AS overdue
+        FROM ritual_actions WHERE workspace_id=$1 AND config_id=$2 AND expires_at>$3
+          AND status='open' AND due_date < $5 GROUP BY assignee_id
+      ), capacity AS (
+        SELECT user_id, task_limit FROM ritual_capacity WHERE workspace_id=$1 AND config_id=$2 AND expires_at>$3 AND week_start=$4
+      ), people AS (SELECT unnest($7::text[]) AS user_id UNION SELECT user_id FROM load UNION SELECT user_id FROM capacity)
+      SELECT people.user_id AS "user", coalesce(load.tasks,0) AS tasks, coalesce(load.overdue,0) AS overdue, capacity.task_limit AS "limit"
+      FROM people LEFT JOIN load USING(user_id) LEFT JOIN capacity USING(user_id)
+      ORDER BY people.user_id LIMIT 9 OFFSET $8`, [team, config, now, week, until, today, participants, offset])
+      return rows
+    },
     async deleteTodo(team, user, id) {
       return (await database.query('DELETE FROM ritual_todos WHERE workspace_id=$1 AND user_id=$2 AND id=$3', [team, user, id])).rowCount > 0
     },
@@ -86,6 +112,9 @@ function createStore(database) {
         ['poker', "count(*) AS total, count(*) FILTER (WHERE status='closed') AS closed"],
         ['polls', "count(*) AS total, count(*) FILTER (WHERE status='closed') AS closed"],
         ['ballots', 'count(*) AS total'],
+        ['decisions', "count(*) AS total, count(*) FILTER (WHERE status='accepted') AS accepted"],
+        ['objectives', "count(*) AS total, count(*) FILTER (WHERE status='closed') AS closed"],
+        ['results', 'count(*) AS total'],
       ]
       const query = sources.map(([kind, aggregate]) => `SELECT '${kind}' AS kind, row_to_json(stats) AS stats FROM (SELECT ${aggregate} FROM ritual_${kind} WHERE workspace_id=$1 AND config_id=$2 AND created_at >= $3 AND created_at < $4 AND expires_at>$5) stats`).join(' UNION ALL ')
       const { rows } = await database.query(query, [team, config, from, until, now, today])

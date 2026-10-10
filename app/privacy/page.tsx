@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <main id="main-content" className="legal-main section-shell">
       <header className="legal-hero">
-        <p className="legal-date">Last updated October 1, 2026</p>
+        <p className="legal-date">Last updated October 10, 2026</p>
         <h1>Kick Bot privacy policy</h1>
         <p>This policy covers Kick Bot, an independent integration for Slack, and its website at kick.bozmoz.com. “We” and “our” refer to the team operating Kick Bot. It explains how we handle data received from Slack, people using Kick, and visitors to our website.</p>
       </header>
@@ -62,6 +62,10 @@ export default function PrivacyPage() {
           </section>
           <section id="retention">
             <h2>How long data is kept</h2>
+            <h3>Team planning</h3>
+            <p>Team planning stores self-declared weekly task limits; decision titles, text, rationale, owners, review dates and status; objective titles, owners, dates and status; and key-result baselines, current values, targets and units. These records help channel members plan work and track outcomes. They are visible to current channel members, not used to infer individual productivity scores, and expire after the workflow’s 7-, 30-, or 90-day retention from creation. Editing does not extend retention; key results expire no later than their objective. Shortening workflow retention shortens existing planning records. Expired records are hidden immediately and removed in bounded scheduler batches.</p>
+            <p>Only the individual can set their capacity in Kick. Creators, assigned owners and workflow owners can edit decisions, objectives and results. Planning audit entries record the actor and operation, not copies of the decision text or metric values. Shared reports include aggregate counts of decisions, objectives and key results, not capacity limits or individual metric values. Saving a planning record does not post a Slack message.</p>
+            <h3>Other workflow and service records</h3>
             <p>Personal to-dos expire 30 days after creation, whether open or complete. Editing does not extend that lifetime. Owners can also delete an individual task immediately from its edit form. Polls and ballots follow their workflow’s 7-, 30-, or 90-day retention, with ballots expiring no later than the poll. Reports are calculated when requested; a shared report is saved as a delivery job for the workflow’s retention period and a message in Slack after delivery. Expired records are hidden immediately and physically removed in bounded scheduler batches.</p>
             <p>Core command history, cached channel/member information, and installation records currently have no automatic age-based deletion schedule. They remain stored until removed through a verified deletion request or service maintenance. This includes records created by the original version of Kick.</p>
             <p>New team-ritual sessions, responses, blockers, recognition copies, rotation state, and delivery jobs expire after the channel’s selected 7, 30, or 90 days. Expired records are hidden from workflow views and deleted in bounded batches by the scheduler; physical deletion may be delayed during downtime or a backlog. Setup previews expire after 15 minutes. Channel settings and personal preferences remain until removed by a verified deletion request or service maintenance. This retention does not shorten core command history or Slack’s own message retention.</p>

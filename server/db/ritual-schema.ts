@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, text, bigint, integer, boolean, jsonb, index, unique, foreignKey, check, AnyPgColumn } from 'drizzle-orm/pg-core';
+import { pgTable, text, bigint, integer, doublePrecision, boolean, jsonb, index, unique, foreignKey, check, AnyPgColumn } from 'drizzle-orm/pg-core';
 import { workspaces } from './schema';
 const ms = (name: string) => bigint(name, { mode: 'number' });
 const identity = () => ({ id: text('id').primaryKey(), team: text('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }) });
@@ -119,3 +119,32 @@ export const ritualBallots = pgTable('ritual_ballots', {
 }, t => [...links(t, 'ritual_ballot'), unique('ritual_ballot_once').on(t.poll, t.user), index('ritual_ballot_poll').on(t.poll),
   foreignKey({ columns: [t.team, t.config, t.poll], foreignColumns: [ritualPolls.team, ritualPolls.config, ritualPolls.id] }).onDelete('cascade'),
   check('ritual_ballot_choice', sql`${t.choice} BETWEEN 0 AND 9`)]);
+
+// Planning records remain workflow-scoped; no private records or external data.
+export const ritualCapacity = pgTable('ritual_capacity', {
+  ...linked(), user: text('user_id').notNull(), week: text('week_start').notNull(),
+  limit: integer('task_limit').notNull(), version: integer('version').notNull().default(1),
+}, t => [...links(t, 'ritual_capacity'), unique('ritual_capacity_week').on(t.team, t.config, t.user, t.week),
+  check('ritual_capacity_limit', sql`${t.limit} BETWEEN 0 AND 1000`)]);
+export const ritualDecisions = pgTable('ritual_decisions', {
+  ...linked(), user: text('creator_id').notNull(), owner: text('owner_id').notNull(),
+  title: text('title').notNull(), detail: text('detail').notNull(), rationale: text('rationale').notNull(),
+  review: text('review_date').notNull(), status: text('status').notNull().default('proposed'),
+  version: integer('version').notNull().default(1),
+}, t => [...links(t, 'ritual_decision'),
+  check('ritual_decision_status', sql`${t.status} IN ('proposed','accepted','superseded')`)]);
+export const ritualObjectives = pgTable('ritual_objectives', {
+  ...linked(), user: text('creator_id').notNull(), owner: text('owner_id').notNull(), title: text('title').notNull(),
+  start: text('start_date').notNull(), end: text('end_date').notNull(), status: text('status').notNull().default('active'),
+  version: integer('version').notNull().default(1),
+}, t => [...links(t, 'ritual_objective'), unique('ritual_objective_tenant').on(t.team, t.config, t.id),
+  check('ritual_objective_dates', sql`${t.end} >= ${t.start}`),
+  check('ritual_objective_status', sql`${t.status} IN ('active','closed')`)]);
+export const ritualResults = pgTable('ritual_results', {
+  ...linked(), objective: text('objective_id').notNull(), user: text('creator_id').notNull(), owner: text('owner_id').notNull(),
+  title: text('title').notNull(), unit: text('unit').notNull(),
+  baseline: doublePrecision('baseline').notNull(), current: doublePrecision('current_value').notNull(), target: doublePrecision('target').notNull(),
+  version: integer('version').notNull().default(1),
+}, t => [...links(t, 'ritual_result'), index('ritual_result_objective').on(t.objective, t.at, t.id),
+  foreignKey({ columns: [t.team, t.config, t.objective], foreignColumns: [ritualObjectives.team, ritualObjectives.config, ritualObjectives.id] }).onDelete('cascade'),
+  check('ritual_result_range', sql`abs(${t.baseline}) <= 1000000000 AND abs(${t.current}) <= 1000000000 AND abs(${t.target}) <= 1000000000 AND ${t.baseline} <> ${t.target}`)]);

@@ -28,6 +28,7 @@ function registerCollaboration({ app, bolt, store, engine, member, manage, modal
       buttons(b('Channel to-dos', 'actions', { c: c.id }), b('Sprints', 'sprints', { c: c.id }), b('Retrospectives', 'retros', { c: c.id })),
       buttons(button('Polls', 'work_polls', value({ c: c.id })), button('Comprehensive report', 'work_report', value({ c: c.id })), button('My personal to-dos', 'work_todos', '{}')),
       buttons(b('Planning poker', 'poker', { c: c.id }), b('Search history', 'search', { c: c.id })),
+      buttons(button('Team planning', 'plan_hub', value({ c: c.id }))),
       buttons(b('Calendar', 'calendar', { c: c.id }), b('Operations', 'operations', { c: c.id })),
       context('Calendar and operations are restricted to the workflow owner or a workspace admin. Retrospectives are attributed, not anonymous. Estimates are hidden until revealed.'),
     ], null)

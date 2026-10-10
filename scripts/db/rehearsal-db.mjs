@@ -7,8 +7,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // override: cutover requires a separate, reviewed operation.
 export function rehearsalConnection(env = process.env) {
   const url = new URL(env.DATABASE_URL_UNPOOLED || 'file:///missing');
-  if (env.KICK_DB_BRANCH !== 'br-summer-tooth-awtmudnn' ||
-      url.hostname !== 'ep-round-voice-awpjdbi1.c-12.us-east-1.aws.neon.tech' ||
+  if (env.KICK_DB_BRANCH !== 'br-misty-glitter-awuyz2hu' ||
+      url.hostname !== 'ep-quiet-wave-aw7atme6.c-12.us-east-1.aws.neon.tech' ||
       url.protocol !== 'postgresql:' || url.pathname !== '/neondb' ||
       url.searchParams.get('sslmode') !== 'verify-full') {
     throw new Error('Refusing database operation: expected isolated rehearsal direct connection with verified TLS');

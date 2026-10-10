@@ -1,0 +1,21 @@
+# Keep local provisioning credentials and tooling out of CLI uploads.
+.env*
+.git
+.vercel
+.next
+node_modules
+.agents
+*.log
+*.tsbuildinfo
+**/.DS_Store
+dist
+functions
+grun
+ops
+setup.sh
+**/.firebase
+**/.wrangler
+**/.dev.vars
+logs
+coverage
+.nyc_output

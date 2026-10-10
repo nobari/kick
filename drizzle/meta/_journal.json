@@ -36,6 +36,13 @@
       "when": 1790838238295,
       "tag": "0004_polls_personal_todos",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791593694437,
+      "tag": "0005_team_planning",
+      "breakpoints": true
     }
   ]
 }

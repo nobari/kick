@@ -9,7 +9,7 @@ import engineModule from '../server/rituals/engine.js';
 import collaboration from '../server/rituals/collaboration.js';
 import productivity from '../server/rituals/productivity.js';
 
-test('Polls, private to-dos and comprehensive reports on isolated Postgres', { skip: process.env.KICK_DB_BRANCH !== 'br-summer-tooth-awtmudnn' }, async t => {
+test('Polls, private to-dos and comprehensive reports on isolated Postgres', { skip: process.env.KICK_DB_BRANCH !== 'br-misty-glitter-awuyz2hu' }, async t => {
   const pool = new pg.Pool({ connectionString: rehearsalConnection(), max: 6 });
   const db = connection.databaseForPool(pool), store = storage.createStore(db), team = `productivity-${randomUUID()}`;
   let now = Date.parse('2026-10-01T10:00:00Z');

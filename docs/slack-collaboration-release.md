@@ -1,5 +1,35 @@
 # Kick collaboration release — October 2026
 
+## Next release: team-management expansion
+
+Implementation is being delivered incrementally. Do not submit a listing claiming all ten requested features are available yet. Provider registrations and local credentials are not functioning integrations.
+
+### Planning increment (October 10)
+
+- Workload and capacity: current open channel to-dos due by a selected week's end, including unfinished earlier work; self-declared weekly task limits, with unknown distinct from zero. No productivity scores, hour estimates, personal-task disclosure, or automatic assignment restrictions.
+- Objectives and measurable key results: owners, target dates, baseline/current/target/unit, decreasing targets, bounded display progress, edit concurrency checks, and close/reopen controls.
+- Decision log: proposal/decision, rationale, responsible owner, review date, and Proposed/Accepted/Superseded status. Dates are informational; no automatic reminder is sent.
+- A dedicated Team planning area with native Slack controls, paginated lists, sharing/retention notices and clear empty states. Reports add aggregate decisions/objectives/key-result counts without publishing individual capacity or metric values.
+- Website examples, getting-started guide and privacy disclosures match these capabilities.
+
+These tools do not add scopes, slash commands, subscriptions or callbacks in Slack settings. They reuse the published interactivity endpoint and App Home. No reinstall is required for this increment; reopen Home or run `/sync home`, select a workflow, then **Open team workspace → Team planning**.
+
+### Reviewer test instructions for the planning increment
+
+Use a workspace you control. Kick needs no separate account or paid subscription. Create a paused public-channel workflow with two members and 30-day retention using `/sync setup`; saving planning records does not enable scheduling or send messages.
+
+1. Create two channel to-dos assigned to yourself, one overdue and one due this week. Open Team planning → View workload. Choose this week and Set my capacity to 1. Verify two open tasks, one overdue, and one over the chosen limit. A second member without a limit should show capacity not set, not zero. Only the individual can set their limit.
+2. Create an objective with dates inside the next 30 days. Add a key result with baseline 10, current 6, target 2, unit days. Verify 50% progress. Update the current value, close the objective and verify result edits are refused until the objective is reopened.
+3. Create a decision with title, rationale, owner, and a review date within retention. Move it from Proposed to Accepted. Verify a channel member who is neither creator nor responsible owner can read, but not edit, the record.
+4. Build a comprehensive report for today. Verify aggregate decision/objective/result counts appear; capacity limits, metric values and personal to-dos do not. Close without sharing to send nothing.
+5. Try editing the same record from two open forms. Save one, then submit the stale one with a different operation. Verify Kick asks you to reopen rather than overwriting the first edit.
+
+Database and Block Kit tests are automated. A human Slack modal walkthrough is still required before the combined release's final review packet is declared complete. Keep an actual video demo URL distinct from the landing-page URL.
+
+### Still pending from the ten-feature request
+
+Cross-team dependencies/handoffs; approval workflows; onboarding checklists/buddies; private one-on-one agendas; leave approval/coverage; opt-in escalations; organization-configurable two-way Jira/Linear/GitHub issue sync. Their privacy boundaries, authorization flows and end-to-end tests must be completed before adding availability claims to the website or submission packet. Do not enable Jira distribution or advertise external sync merely because credentials are present.
+
 ## Publication status
 
 The app owner confirmed Slack approval and publication on October 9, 2026. The submission material below is retained as a historical record, not an outstanding resubmission checklist. Publication does not certify that every engineering or human acceptance test below was performed.
