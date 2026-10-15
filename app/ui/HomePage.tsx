@@ -205,7 +205,7 @@ export default function HomePage() {
       <RitualFeatures />
       <section className="integration-details" aria-labelledby="command-release">
         <h2 id="command-release">Less navigating. More getting things done.</h2>
-        <p>Kick’s next command update brings <code>/todo</code>, <code>/poll</code>, <code>/report</code>, <code>/plan</code>, <code>/decision</code>, <code>/handoff</code>, <code>/approve</code>, <code>/onboard</code>, <code>/oneonone</code> and <code>/leave</code> to focused Slack forms.</p>
+        <p>Kick’s next command update brings <code>/todo</code>, <code>/poll</code>, <code>/report</code>, <code>/plan</code>, <code>/decision</code>, <code>/handoff</code>, <code>/approve</code>, <code>/onboard</code>, <code>/oneonone</code> and <code>/timeoff</code> to focused Slack forms.</p>
         <p>Try a private task with <code>/todo mine</code>, prepare a team report with <code>/report week</code>, or review requests with <code>/approve pending</code>. These new command names are pending Slack registration and publication; their tools are already available in Kick Home.</p>
         <p>The refreshed interface includes clear sharing notices, native date and time controls, visible status choices, weekday checkboxes, and paginated task tables where Slack supports them. <a href="/get-started#command-reference">See every command and how it works →</a></p>
       </section>

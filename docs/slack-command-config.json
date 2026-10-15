@@ -92,7 +92,7 @@
       "should_escape": false
     },
     {
-      "command": "/leave",
+      "command": "/timeoff",
       "description": "Request leave and view approved team coverage",
       "usage_hint": "request | mine | coverage | help",
       "url": "https://kick.bozmoz.com/api/slack/events",

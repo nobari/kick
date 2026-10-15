@@ -13,7 +13,7 @@ const commands = [
   { name: 'approve', description: 'Request a decision or review pending requests', usage: 'request | pending | list | help' },
   { name: 'onboard', description: 'Manage onboarding checklists and buddies', usage: 'new | active | list | help' },
   { name: 'oneonone', description: 'Prepare private agendas and follow-up actions', usage: 'new | upcoming | list | help' },
-  { name: 'leave', description: 'Request leave and view approved team coverage', usage: 'request | mine | coverage | help' },
+  { name: 'timeoff', description: 'Request leave and view approved team coverage', usage: 'request | mine | coverage | help' },
 ]
 const route = (tool, action, data = {}) => ({ tool, action, data })
 const routes = {
@@ -26,7 +26,7 @@ const routes = {
   approve: { '': route('coord', 'list', { kind: 'approvals' }), request: route('coord', 'new', { kind: 'approvals' }), pending: route('coord', 'list', { kind: 'approvals', filter: 'pending' }), list: route('coord', 'list', { kind: 'approvals' }) },
   onboard: { '': route('coord', 'list', { kind: 'onboarding' }), new: route('coord', 'new', { kind: 'onboarding' }), active: route('coord', 'list', { kind: 'onboarding', filter: 'active' }), list: route('coord', 'list', { kind: 'onboarding' }) },
   oneonone: { '': route('coord', 'list', { kind: 'meetings' }), new: route('coord', 'new', { kind: 'meetings' }), upcoming: route('coord', 'list', { kind: 'meetings', filter: 'upcoming' }), list: route('coord', 'list', { kind: 'meetings' }) },
-  leave: { '': route('coord', 'list', { kind: 'leaves', filter: 'mine' }), request: route('coord', 'new', { kind: 'leaves' }), mine: route('coord', 'list', { kind: 'leaves', filter: 'mine' }), coverage: route('coord', 'coverage') },
+  timeoff: { '': route('coord', 'list', { kind: 'leaves', filter: 'mine' }), request: route('coord', 'new', { kind: 'leaves' }), mine: route('coord', 'list', { kind: 'leaves', filter: 'mine' }), coverage: route('coord', 'coverage') },
 }
 function parseCommand(command, value = '', test = false) {
   const prefix = test ? '/t' : '/'

@@ -21,6 +21,8 @@ test('14 commands have consistent help; new commands use exact names and staging
   assert.equal(parseCommand('/sync', '-r 7'), null)
   assert.equal(parseCommand('/pick', 'rotate'), null)
   assert.equal(parseCommand('/unknown', 'help'), null)
+  assert.equal(parseCommand('/leave', 'help'), null) // Slack's built-in channel-exit command.
+  assert.equal(parseCommand('/timeoff', 'coverage').action, 'coverage')
 })
 function fixture(configs = []) {
   const calls = [], pending = [], views = [], handlers = {}

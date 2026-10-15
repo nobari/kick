@@ -6,7 +6,9 @@ This is ONE combined update, including the October 10 planning, coordination and
 
 ### What is included
 
-- Ten new commands: `/todo`, `/poll`, `/report`, `/plan`, `/decision`, `/handoff`, `/approve`, `/onboard`, `/oneonone`, `/leave`.
+Compatibility correction to the original plan: use `/timeoff`, NOT `/leave`. Slack's built-in `/leave` exits a channel. Do not register it as a Kick command or use it when testing leave requests. See [Slack's built-in command reference](https://slack.com/intl/en-gb/help/articles/360057554553-Use-shortcuts-to-take-actions-in-Slack).
+
+- Ten new commands: `/todo`, `/poll`, `/report`, `/plan`, `/decision`, `/handoff`, `/approve`, `/onboard`, `/oneonone`, `/timeoff`.
 - Consistent help (`help`, `-h`, `--help`) for all fourteen commands, a Home command guide, private loading/error responses, channel workflow selection, explicit sharing and readable empty states. Existing four commands and their historical flags remain compatible. Legacy quick-post flags still post without a form.
 - The prior ten features: workload/capacity, objectives/key results, decision log, cross-team handoffs, private approvals, onboarding/buddies, private one-on-ones, leave/coverage, opt-in escalations and organization-specific GitHub/Jira/Linear manual status sync.
 - Form/UI improvements: plain-language labels and action buttons; native dates, time-zone-aware time pickers, weekday checkboxes, short radio choices, single-input focus, length hints, preserved drafts including cleared optional values, newer modal alerts and sortable/paginated Home task tables with actionable rows. New blocks fall back to ordinary sections/buttons if Slack rejects them. No AI, additional data export, file uploads or new scopes introduced.
@@ -31,9 +33,9 @@ This is ONE combined update, including the October 10 planning, coordination and
 | `/approve` | `request`, `pending`, `list`, `help` | Participant-only requests |
 | `/onboard` | `new`, `active`, `list`, `help` | Onboarding records |
 | `/oneonone` | `new`, `upcoming`, `list`, `help` | Your two-person conversations |
-| `/leave` | `request`, `mine`, `coverage`, `help` | Requests you created |
+| `/timeoff` | `request`, `mine`, `coverage`, `help` | Requests you created |
 
-`incoming` means the selected receiving workflow, still respecting acceptance visibility. `pending` means you are the designated approver and no decision has been made; expired decision deadlines can still appear but cannot be approved. `upcoming` means active and dated today or later in UTC. `month` means the last 30 days inclusive, not a calendar month. Filters apply before database pagination. `/leave` All records also shows requests where you are the approver.
+`incoming` means the selected receiving workflow, still respecting acceptance visibility. `pending` means you are the designated approver and no decision has been made; expired decision deadlines can still appear but cannot be approved. `upcoming` means active and dated today or later in UTC. `month` means the last 30 days inclusive, not a calendar month. Filters apply before database pagination. `/timeoff` All records also shows requests where you are the approver.
 
 ### Listing short description
 
@@ -45,7 +47,7 @@ Kick helps teams coordinate everyday work without leaving Slack. Share standups,
 
 Use native Slack forms and Home to plan workload, set objectives and key results, record decisions, agree on cross-team handoffs, request approvals, onboard teammates, prepare private one-on-ones, and arrange leave coverage. Scheduled check-ins, digests and escalation summaries are opt-in. Delivery checks run every 15 minutes; delivery may be delayed.
 
-Ten new slash commands bring these tools closer: /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /leave. Each offers help and focused forms. Existing /sync, /pick, /kudos and /coins remain available. Where a channel has multiple workflows, choose one before proceeding.
+Ten new slash commands bring these tools closer: /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /timeoff. Each offers help and focused forms. Existing /sync, /pick, /kudos and /coins remain available. Where a channel has multiple workflows, choose one before proceeding.
 
 Workspace admins can optionally connect their organization’s GitHub, Jira or Linear account, choose a repository/project/team, import selected issues and confirm status updates in either direction. Only the admin who supplied the connection can operate that provider account. Sync is manual, not background; private records, comments and attachments do not sync.
 

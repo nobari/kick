@@ -15,6 +15,7 @@ export default function CommandReference() {
         ))}
       </dl>
       <h3>Choose the right context</h3>
+      <p>Use <code>/timeoff</code> for leave requests and coverage. Slack’s own <code>/leave</code> exits a channel and is not a Kick command.</p>
       <p><code>/todo</code> opens your private list without a workflow. <code>/todo channel</code> opens shared tasks. Other team commands use the public channel you invoke them in; when it has multiple workflows, you choose one first. No workflow? Create one with <code>/sync setup</code> and leave it paused.</p>
       <p><code>/report week</code> and <code>/report month</code> prefill the last 7 or 30 days through today in UTC. You can adjust the dates and preview before sharing. <code>/approve pending</code> shows requests awaiting your decision; <code>/oneonone upcoming</code> shows your active meetings dated today or later in UTC.</p>
       <p>Use <code>/plan sync</code> for optional GitHub, Jira or Linear connections. A Slack administrator must supply their own provider consent. Status changes are manual and confirmed—not background synchronization.</p>

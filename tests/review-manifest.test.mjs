@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 test('review manifest uses isolated prefixed commands and the implemented permissions', () => {
   const m = reviewManifest('https://review.example.test');
-  assert.deepEqual(m.features.slash_commands.map(c => c.command), ['/tsync', '/tpick', '/tkudos', '/tcoins', '/ttodo', '/tpoll', '/treport', '/tplan', '/tdecision', '/thandoff', '/tapprove', '/tonboard', '/toneonone', '/tleave']);
+  assert.deepEqual(m.features.slash_commands.map(c => c.command), ['/tsync', '/tpick', '/tkudos', '/tcoins', '/ttodo', '/tpoll', '/treport', '/tplan', '/tdecision', '/thandoff', '/tapprove', '/tonboard', '/toneonone', '/ttimeoff']);
   assert.ok(m.oauth_config.scopes.bot.includes('im:write'));
   assert.equal(m.oauth_config.scopes.bot.length, 7);
   assert.deepEqual(m.features.shortcuts.map(s => s.callback_id), ['kick_track_action', 'kick_report_blocker', 'kick_give_kudos']);

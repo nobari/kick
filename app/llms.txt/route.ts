@@ -58,7 +58,7 @@ Terms: https://kick.bozmoz.com/terms
 
 ## Command update awaiting Slack registration and publication
 
-- Ten new command names: /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /leave. Their underlying tools remain accessible from Kick Home while command rollout is pending.
+- Ten new command names: /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /timeoff. Their underlying tools remain accessible from Kick Home while command rollout is pending.
 - All fourteen commands support help, -h and --help. Personal /todo mine needs no workflow; team tools require public-channel membership and select a workflow when multiple exist.
 - /report week and /report month prefill trailing inclusive 7/30-day UTC ranges. /approve pending is the designated approver's pending inbox; /oneonone upcoming shows active meetings today or later in UTC.
 - Native forms use date/time pickers, short radio choices, weekday checkboxes, clear sharing notices and draft-preserving validation. Newer modal alerts and Home task tables have section/button fallbacks when rejected by Slack.

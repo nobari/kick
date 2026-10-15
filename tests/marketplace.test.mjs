@@ -62,7 +62,7 @@ test('coordination and issue sync have examples and disclose privacy, consent an
   for (const term of ['encrypted agenda', 'designated approver', 'There is no background sync', 'expire after 90 days', 'single-use links']) assert.ok(privacy.includes(term), term);
 });
 test('combined command release is documented without claiming Slack publication', () => {
-  for (const name of ['todo', 'poll', 'report', 'plan', 'decision', 'handoff', 'approve', 'onboard', 'oneonone', 'leave']) {
+  for (const name of ['todo', 'poll', 'report', 'plan', 'decision', 'handoff', 'approve', 'onboard', 'oneonone', 'timeoff']) {
     assert.ok(landing.includes(`/${name}`), name);
     assert.ok(guide.includes(`/${name}`), name);
   }
