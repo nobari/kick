@@ -64,7 +64,7 @@ const faqs = [
   {
     question: "What is Kick Bot for Slack?",
     answer:
-      "Kick is an independent Slack app for check-ins, team kudos, virtual rewards, fair picks, and opt-in team rituals. Use slash commands, focused forms, and a personal App Home without a separate account or external dashboard.",
+      "Kick is an independent Slack app for standups, tasks, polls, reports, recognition, planning, and team coordination. Use focused forms and Kick Home without a separate account or external dashboard. Optional GitHub, Jira and Linear connections require your own provider account and admin consent.",
   },
   {
     question: "How do Slack standups work with Kick?",
@@ -74,7 +74,7 @@ const faqs = [
   {
     question: "Which Slack commands does Kick provide?",
     answer:
-      "The main commands are /sync for standups, /kudos for recognition, /coins for team rewards, and /pick for random selection. Add -h to a command to see its current help.",
+      "The published commands are /sync, /kudos, /coins and /pick. Ten more are configured in an unpublished Slack draft: /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /timeoff. Use their tools through Kick Home until the Marketplace update is approved and published. Every command supports help.",
   },
   {
     question: "Does Kick require a separate account?",
@@ -134,7 +134,7 @@ export default function HomePage() {
         url: siteUrl,
         name: "Kick Bot",
         alternateName: "Kick Productivity Bot",
-        description: "An independent Slack app for team check-ins, blockers, kudos, and fair rotations, with opt-in schedules and an App Home.",
+        description: "An independent Slack app for standups, tasks, polls, reports, planning and team coordination, with opt-in schedules and an App Home.",
       },
       {
         "@type": "SoftwareApplication",
@@ -142,7 +142,7 @@ export default function HomePage() {
         name: "Kick Bot",
         url: siteUrl,
         image: `${siteUrl}/assets/img/logo.png`,
-        description: "Run async standups, share kudos, send team coins, and make fair random picks without leaving Slack.",
+        description: "Coordinate standups, tasks, polls, reports, recognition and team planning inside Slack. New command shortcuts await Marketplace publication; tools are accessible through Kick Home.",
         applicationCategory: "BusinessApplication",
         applicationSubCategory: "Team collaboration and productivity",
         operatingSystem: "Slack",
@@ -168,8 +168,8 @@ export default function HomePage() {
 
       <section className="hero section-shell" aria-labelledby="hero-title">
         <div className="hero-copy">
-          <h1 id="hero-title">Team standups<br/>in Slack.</h1>
-          <p className="hero-lede">Share updates, turn blockers into actions, and plan the next sprint together. Use Kick inside Slack, without another dashboard.</p>
+          <h1 id="hero-title">Teamwork.<br/>Right in Slack.</h1>
+          <p className="hero-lede">Share standups, assign tasks, run polls, and see the week in one report. Plan work and coordinate your team with Kick, without another dashboard.</p>
           <div className="hero-actions">
             <SlackButton />
             <a className="text-link" href="#team-rituals">See how Kick works</a>

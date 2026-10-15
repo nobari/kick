@@ -14,10 +14,19 @@ test('all generated public pages and metadata omit personal-name attribution', (
 });
 
 test('landing page explicitly identifies Kick and its Slack integration', () => {
-  assert.match(landing, /<h1[^>]*>Team standups/);
+  assert.match(landing, /<h1[^>]*>Teamwork\.<br\/>Right in Slack\./);
   assert.ok(landing.includes('What happens inside your Slack workspace?'));
   for (const command of ['/sync', '/kudos', '/coins', '/pick']) assert.ok(landing.includes(command));
   assert.ok(landing.includes('Neon'));
+});
+test('release tour offers six examples and distinguishes draft commands from publication', () => {
+  assert.equal((landing.match(/aria-controls="tour-preview"/g) || []).length, 6);
+  assert.ok(landing.includes('Workload &amp; capacity'));
+  assert.ok(landing.includes('kick-slack-listing-images.zip'));
+  assert.ok(landing.includes('not live Slack captures'));
+  assert.ok(landing.includes('unpublished Slack draft'));
+  assert.ok(guide.includes('not yet published to all workspaces'));
+  for (const term of ['outgoing handoffs', 'key results', 'private approvals', 'one-on-ones']) assert.ok(guide.includes(term), term);
 });
 test('privacy policy is linked directly in navigation, hero, and footer', () => {
   assert.ok((landing.match(/href="\/privacy"/g) || []).length >= 5);

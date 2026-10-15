@@ -8,7 +8,8 @@ const scenes = [
   { id: "02-channel-todos", label: "Channel to-dos", title: "Give every next step an owner.", description: "Turn shared work into channel to-dos with an assignee, due date, and clear status. In Kick Home, choose a workflow, open the team workspace, and select Channel to-dos.", alt: "Sample Kick channel action list showing assigned tasks, due dates, and completion controls" },
   { id: "03-personal-todos", label: "Personal to-dos", title: "Your list. Your space.", description: "Keep personal tasks separate from shared work. Open My personal to-dos in Kick Home to add, edit, or complete a task. Your list is private to you in Kick and excluded from team reports.", alt: "Sample Kick personal task list with private tasks and edit and completion controls" },
   { id: "04-polls", label: "Polls", title: "Ask once. Hear the whole team.", description: "Create a channel poll with two to ten choices. Each member gets one changeable vote; the creator or workflow owner can close voting and share results. Votes are associated with Slack IDs, not anonymous.", alt: "Sample Kick poll with answer choices, vote totals, and a voting selector" },
-  { id: "05-reports", label: "Reports", title: "See the week. Choose what comes next.", description: "Preview check-ins, blockers, shared tasks, planning, and recognition for one workflow. Choose up to 90 days of retained records, then optionally share the report. Personal tasks are never included.", alt: "Sample Kick comprehensive workflow report with participation, blockers, tasks, and planning summaries" },
+  { id: "05-reports", label: "Reports", title: "See the week. Choose what comes next.", description: "Preview check-ins, blockers, shared tasks, recognition, decisions, objectives, onboarding, and handoffs for one workflow. Choose up to 90 days of retained records, then explicitly share. Personal tasks, private approvals, leave details, and one-on-ones are excluded.", alt: "Sample Kick comprehensive report with check-ins, tasks, decisions, objectives, onboarding, and handoff totals" },
+  { id: "06-workload", label: "Workload & capacity", title: "Make room for the right work.", description: "Open Team workspace → Team planning → View workload. Compare open channel tasks with each teammate’s own weekly task limit, then choose Set my capacity to set yours. An unset limit means unknown—not zero capacity. No hours tracking or productivity scores.", alt: "Sample Kick workload view comparing three teammates’ open tasks with self-declared weekly capacity" },
 ] as const;
 
 export default function RitualTour() {
@@ -32,5 +33,6 @@ export default function RitualTour() {
       </div>
     </div>
     <a className="text-link" href="/get-started">See the setup guide →</a>
+    <p><a href="/assets/slack-marketplace/2026-10/kick-slack-listing-images.zip" download>Download all six example images (ZIP, under 1 MB)</a></p>
   </div>;
 }
