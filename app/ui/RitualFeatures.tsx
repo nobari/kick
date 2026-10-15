@@ -51,6 +51,13 @@ const collaboration = [
   ["Message shortcuts", "Turn a public-channel message into an action, report a blocker, or send thanks. Every shortcut opens a form so you can review the text and choose a workflow before saving.", "On a public-channel message, choose More actions → Track action. Review the copied text and select a workflow and assignee before confirming. Cancel saves nothing."],
 ] as const;
 
+const featureGroups = [
+  { title: "Tasks, polls & team reports", description: "Turn the conversation into something you can act on.", items: [10, 11, 12, 13, 19, 22] },
+  { title: "Planning & connected work", description: "Agree on priorities, see capacity, and keep decisions close.", items: [6, 7, 8, 9, 16, 17, 18] },
+  { title: "People & coordination", description: "Make handoffs clear and give sensitive conversations their own space.", items: [0, 1, 2, 3, 4, 5] },
+  { title: "Workflow controls", description: "Adapt check-ins and delivery to the way your team works.", items: [14, 15, 20, 21] },
+] as const;
+
 export default function RitualFeatures() {
   const scheduled = process.env.KICK_SCHEDULER_ENABLED === "true";
   return <section id="team-rituals" className="ritual-section section-shell" aria-labelledby="ritual-title">
@@ -58,12 +65,21 @@ export default function RitualFeatures() {
     <RitualTour />
     <p>Prefer a command? <a href="/get-started#command-reference">See all fourteen commands and rollout status</a>. Ten new shortcuts are configured in an unpublished Slack draft; use Kick Home until the Marketplace update is approved and published.</p>
     <aside className="release-notice" aria-label="Feature availability"><strong>Availability</strong><p>{scheduled ? "Scheduled delivery is checked every 15 minutes and requires explicit workflow setup. " : "Automatic delivery is not activated yet; setups can be saved as paused. "}Private reminders require permission granted to your installation and service activation. App Home requires the Home tab and event subscription. Existing slash commands remain available.</p></aside>
-    <div className="ritual-feature-grid">
+    <details className="feature-group">
+      <summary><span><strong>Check-ins & team rituals</strong><span>Your questions, your schedule, your team’s rhythm.</span></span><span className="group-toggle" aria-hidden="true">+</span></summary>
+      <div className="ritual-feature-grid">
       {features.map(([title, description, type]) => <article className="ritual-feature" key={title}><h3>{title}</h3><p>{description}</p><p className="feature-example"><strong>Try it:</strong> {examples[title]}</p><span className="feature-availability">{type === "permission" ? "Requires installation consent and activation" : type === "scheduled" ? scheduled ? "Opt-in · 15-minute delivery checks" : "Automatic delivery awaiting activation" : type === "home" ? "Requires Slack Home configuration" : ""}</span></article>)}
-    </div>
+      </div>
+    </details>
     <div className="section-heading centered"><p className="kicker">Beyond the check-in</p><h2>From updates to next steps.</h2><p>Open Kick Home and choose a workflow. Use Team workspace, Team planning, or People &amp; coordination. No separate Kick account; optional issue sync requires a provider account and admin consent.</p></div>
-    <div className="ritual-feature-grid">
-      {collaboration.map(([title, description, example]) => <article className="ritual-feature" key={title}><h3>{title}</h3><p>{description}</p><p className="feature-example"><strong>Try it:</strong> {example}</p></article>)}
+    <div className="feature-directory">
+      {featureGroups.map(group => <details className="feature-group" key={group.title}>
+        <summary><span><strong>{group.title}</strong><span>{group.description}</span></span><span className="group-toggle" aria-hidden="true">+</span></summary>
+        <div className="ritual-feature-grid">{group.items.map(index => {
+          const [title, description, example] = collaboration[index];
+          return <article className="ritual-feature" key={title}><h3>{title}</h3><p>{description}</p><p className="feature-example"><strong>Try it:</strong> {example}</p></article>;
+        })}</div>
+      </details>)}
     </div>
     <p>Examples above are illustrative, not customer data. Poll invitations, results, and shared reports are checked for delivery every 15 minutes. Shared records follow the workflow’s 7-, 30-, or 90-day retention; personal tasks use a separate 30-day period. <a href="/get-started">Read the full guide</a> or <a href="/privacy">review the privacy policy</a>.</p>
   </section>;

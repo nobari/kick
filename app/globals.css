@@ -72,9 +72,9 @@
     --radius-sm: .75rem;
     --radius-md: 1.25rem;
     --radius-lg: 2rem;
-    --section: clamp(5rem, 10vw, 9rem);
-    --sans: "Arial Rounded MT Bold", "Avenir Next", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --display: var(--sans);
+    --section: clamp(4rem, 7vw, 6rem);
+    --sans: "Avenir Next", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --display: "Arial Rounded MT Bold", "Avenir Next", ui-rounded, sans-serif;
   }
 
   html { background: var(--paper); scroll-padding-top: 6rem; }
@@ -98,7 +98,7 @@
     font-weight: 700;
     padding: .16em .42em;
   }
-  h1, h2, h3 { font-family: var(--display); font-weight: 800; letter-spacing: -.045em; line-height: 1.12; text-wrap: balance; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: .005em; line-height: 1.2; text-wrap: balance; }
   h1 { font-size: clamp(2.8rem, 5vw, 4.6rem); }
   h2 { font-size: clamp(2rem, 3.5vw, 3rem); }
   h3 { font-size: clamp(1.65rem, 2.8vw, 2.65rem); }
@@ -272,3 +272,90 @@
 .integration-details { max-width: 54rem; margin: 3rem auto 0; padding: 2rem; border: 1px solid var(--line); border-radius: 1.25rem; background: var(--paper); }
 .integration-details h3 { margin: 0 0 1rem; font-size: 1.4rem; }
 .integration-details p { line-height: 1.8; margin: 1rem 0 0; }
+
+/* Editorial layout: friendly display type, quiet surfaces, readable detail. */
+@layer components {
+  .brand, .steps h2, .steps h3, .faq-list summary, .legal-content h2,
+  .legal-content h3, .tour-content h4, .tour-stats strong { letter-spacing: .005em; }
+  .hero { gap: 2rem; padding-block: 5rem; grid-template-columns: 1fr 1fr; }
+  .hero h1 { font-size: clamp(2.8rem, 4.6vw, 4.25rem); line-height: 1.16; }
+  .hero-lede { font-size: 1.15rem; max-width: 34rem; }
+  .hero-actions { margin-top: 1.7rem; }
+  .trust-list { margin-top: 1.2rem; gap: 1.25rem; color: var(--ink-soft); }
+  .team-flow { margin: 0; }
+  .flow-art { animation: flow-arrive 1.4s cubic-bezier(.2,.7,.2,1) both; }
+  .flow-art svg { width: 100%; height: auto; overflow: visible; }
+  .flow-art text { font-family: var(--sans); fill: var(--ink); }
+  .flow-art text[fill] { fill: revert-layer; }
+  .flow-label { font-size: 14px; font-weight: 700; }
+  .flow-title { font-size: 17px; font-weight: 650; }
+  .flow-muted { font-size: 13px; }
+  .team-flow figcaption { text-align: center; font-size: .78rem; color: var(--ink-soft); margin-top: .75rem; }
+  .team-flow figcaption span { display: block; font-size: .7rem; margin-top: .2rem; }
+  @keyframes flow-arrive { from { opacity: 0; transform: translateY(18px) rotate(-2deg); } to { opacity: 1; transform: none; } }
+  .proof-strip { background: #f4f6fa; }
+  .proof-grid { min-height: 7.5rem; }
+  .proof-grid span { font-size: .88rem; }
+  .intro-section { padding-bottom: 2rem; }
+  .ritual-section { padding-top: 3rem; }
+  .ritual-tour { padding-bottom: 2rem; }
+  .ritual-tour #tour-preview { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(0,1fr); gap: 2.5rem; align-items: center; }
+  .ritual-tour .tour-copy { margin-top: 0; }
+  .tour-copy h3 { font-size: clamp(1.5rem,2.5vw,2rem); }
+  .tour-copy > p { margin-top: 1rem; font-size: 1rem; }
+  .tour-controls { gap: .4rem; }
+  .tour-controls button { border-radius: 2rem; font-size: .88rem; }
+  .tour-controls button:hover { border-color: var(--ink); }
+  .tour-figure figcaption { font-size: .75rem; line-height: 1.5; }
+  .release-notice { margin: 1.5rem 0 2rem; border-radius: .75rem; padding: 1.25rem 1.5rem; }
+  .feature-group { border-bottom: 1px solid var(--line); }
+  .feature-group summary { list-style: none; display: flex; justify-content: space-between; gap: 1.5rem; align-items: center; padding: 1.6rem 0; cursor: pointer; }
+  .feature-group summary::-webkit-details-marker { display: none; }
+  .feature-group summary strong { display: block; font-family: var(--display); font-size: clamp(1.2rem,2vw,1.5rem); line-height: 1.4; }
+  .feature-group summary span span { display: block; color: var(--ink-soft); font-size: .95rem; margin-top: .35rem; }
+  .group-toggle { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border-radius: 50%; background: #edf0f5; font-size: 1.5rem; transition: transform .2s; }
+  .feature-group[open] .group-toggle { transform: rotate(45deg); }
+  .feature-group[open] { padding-bottom: 1.5rem; }
+  .feature-group .ritual-feature-grid { padding: 0 1.5rem; background: #f4f6fa; border-radius: 1rem; }
+  .ritual-feature { border: 0; }
+  .ritual-feature h3 { font-family: var(--sans); font-weight: 700; font-size: 1.1rem; line-height: 1.4; }
+  .ritual-feature p { font-size: .95rem; }
+  .feature-availability:empty { display: none; }
+  .ritual-section > .section-heading:not(:first-child) { margin-top: 4rem; margin-bottom: 1.5rem; }
+  .feature-directory { margin-bottom: 2rem; }
+  .workflow-list { grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 3rem; }
+  .workflow-row, .workflow-row.reverse { display: flex; flex-direction: column; align-items: stretch; gap: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .workflow-row.reverse .workflow-copy, .workflow-row.reverse .workflow-visual { order: initial; }
+  .workflow-copy h3 { font-size: 1.65rem; }
+  .workflow-copy > p:not(.workflow-eyebrow) { font-size: 1rem; }
+  .workflow-visual { margin-top: auto; align-items: start; }
+  .workflow-visual img { max-height: 300px; width: auto; max-width: 100%; object-fit: contain; }
+  .faq-list summary { font-family: var(--sans); font-weight: 650; }
+  .final-cta { position: relative; padding-block: 5rem; }
+  .final-cta h2 { max-width: 800px; margin-inline: auto; line-height: 1.18; }
+  .privacy-section { padding-bottom: 1rem; }
+}
+.installation-disclosure { font-size: .82rem; color: var(--ink-soft); max-width: 32rem; }
+section.integration-details { width: min(1180px,calc(100% - 2.5rem)); max-width: none; margin: 0 auto 4rem; padding: clamp(1.5rem,4vw,3rem); background: #f4f6fa; border: 0; }
+section.integration-details h2 { max-width: 40rem; font-size: clamp(1.7rem,3vw,2.5rem); }
+section.integration-details p { max-width: 60rem; }
+@layer utilities {
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; padding-block: 3.5rem; gap: 2.5rem; }
+    .hero-visual { max-width: 540px; }
+    .ritual-tour #tour-preview { grid-template-columns: 1fr; gap: 1.5rem; }
+  }
+  @media (max-width: 700px) {
+    .section-shell, .nav-shell { width: calc(100% - 2.5rem); }
+    .hero-actions { flex-direction: row; justify-content: flex-start; gap: .75rem 1.2rem; }
+    .hero h1 { font-size: clamp(2.4rem,9vw,3.5rem); }
+    .hero-lede { font-size: 1.05rem; }
+    .trust-list { display: flex; font-size: .78rem; }
+    .workflow-list { grid-template-columns: 1fr; }
+    .ritual-feature-grid { grid-template-columns: 1fr; gap: 0; }
+    .feature-group .ritual-feature-grid { padding-inline: 1rem; }
+    .final-cta { padding: 3.5rem 1.5rem; }
+    .final-cta h2 { font-size: 2.5rem; }
+    .command-note { flex-direction: row; }
+  }
+}

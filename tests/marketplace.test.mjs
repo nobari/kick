@@ -75,9 +75,19 @@ test('combined command release is documented without claiming Slack publication'
     assert.ok(landing.includes(`/${name}`), name);
     assert.ok(guide.includes(`/${name}`), name);
   }
-  assert.ok(landing.includes('pending Slack registration and publication'));
+  assert.ok(landing.includes('await approval and publication'));
   assert.ok(guide.includes('New command rollout'));
   assert.ok(guide.includes('command-reference'));
+});
+
+test('redesign retains accessible feature disclosures and a labeled lightweight illustration', () => {
+  assert.equal((landing.match(/<details class="feature-group"/g) || []).length, 5);
+  assert.ok(landing.includes('aria-labelledby="flow-title flow-description"'));
+  assert.ok(landing.includes('Illustrative workflow.'));
+  const css = readFileSync('app/globals.css', 'utf8');
+  assert.ok(css.includes('prefers-reduced-motion: reduce'));
+  assert.ok(css.includes('animation: flow-arrive 1.4s'));
+  assert.ok(!css.includes('letter-spacing: -.045em'));
 });
 test('landing page links to a public getting-started guide with actionable instructions', () => {
   assert.ok(landing.includes('href="/get-started"'));
