@@ -61,6 +61,15 @@ test('coordination and issue sync have examples and disclose privacy, consent an
   for (const term of ['No source record is copied', 'not end-to-end encrypted', 'Linked issues', 'nothing synchronizes automatically', 'Disconnect workspace']) assert.ok(guide.includes(term), term);
   for (const term of ['encrypted agenda', 'designated approver', 'There is no background sync', 'expire after 90 days', 'single-use links']) assert.ok(privacy.includes(term), term);
 });
+test('combined command release is documented without claiming Slack publication', () => {
+  for (const name of ['todo', 'poll', 'report', 'plan', 'decision', 'handoff', 'approve', 'onboard', 'oneonone', 'leave']) {
+    assert.ok(landing.includes(`/${name}`), name);
+    assert.ok(guide.includes(`/${name}`), name);
+  }
+  assert.ok(landing.includes('pending Slack registration and publication'));
+  assert.ok(guide.includes('New command rollout'));
+  assert.ok(guide.includes('command-reference'));
+});
 test('landing page links to a public getting-started guide with actionable instructions', () => {
   assert.ok(landing.includes('href="/get-started"'));
   for (const term of ['Open your workspace', 'Share your first update', '/sync -r 7', 'href="/privacy"', 'href="/support"']) assert.ok(guide.includes(term), term);

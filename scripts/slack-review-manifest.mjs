@@ -1,5 +1,6 @@
 // Print a secret-free manifest for a SEPARATE staging app, never the published app.
 import { pathToFileURL } from 'node:url';
+import catalog from '../server/rituals/command-catalog.js';
 export function reviewManifest(origin) {
   const url = new URL(origin);
   if (url.protocol !== 'https:' || url.username || url.password || url.pathname !== '/' || url.search || url.hash || ['kick.bozmoz.com', 'slack-kickbot.vercel.app'].includes(url.hostname))
@@ -15,11 +16,7 @@ export function reviewManifest(origin) {
         { name: 'Report blocker', type: 'message', callback_id: 'kick_report_blocker', description: 'Review a message and record a blocker with a helper' },
         { name: 'Give kudos', type: 'message', callback_id: 'kick_give_kudos', description: 'Review a message and thank a teammate in the channel' },
       ],
-      slash_commands: [
-        ['tsync', 'Check in, view reports, or configure team rituals'],
-        ['tpick', 'Random pick or fair team rotation'],
-        ['tkudos', 'Thank a teammate'], ['tcoins', 'Give virtual recognition'],
-      ].map(([name, description]) => ({ command: `/${name}`, description, url: `${base}/api/slack/events`, usage_hint: '-h for help', should_escape: false })),
+      slash_commands: catalog.commands.map(({ name, description, usage }) => ({ command: `/t${name}`, description, url: `${base}/api/slack/events`, usage_hint: usage, should_escape: false })),
     },
     oauth_config: {
       redirect_urls: [`${base}/api/slack/oauth_redirect`],

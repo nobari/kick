@@ -39,11 +39,11 @@ function createCoordination(store, { access, authorize, clock = Date.now }) {
     if (kind === 'steps') await row(ctx, 'onboarding', r.onboarding, tx, c)
     return decode(kind, r)
   }
-  async function list(ctx, kind, offset = 0, parent) {
+  async function list(ctx, kind, offset = 0, parent, filter = '') {
     const c = await access(ctx)
     if (kind === 'notes') await row(ctx, 'meetings', parent, store, c)
     if (kind === 'steps') await row(ctx, 'onboarding', parent, store, c)
-    return (await store.coordinationPage(kind, c.team, c.id, ctx.user, clock(), page(offset), parent)).map(r => decode(kind, r))
+    return (await store.coordinationPage(kind, c.team, c.id, ctx.user, clock(), page(offset), parent, filter)).map(r => decode(kind, r))
   }
   async function create(ctx, kind, data, request) {
     if (!kinds.includes(kind)) throw new Error('Unknown coordination tool.')

@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "test": "node --test server/rituals/*.test.js server/integrations/*.test.js server/install-result.test.js tests/scheduler.test.mjs tests/review-manifest.test.mjs",
     "slack:review-manifest": "node scripts/slack-review-manifest.mjs",
+    "slack:command-config": "node scripts/slack-command-config.mjs",
     "test:ritual-db": "node --env-file=.env.planning.local --test --test-concurrency=1 tests/ritual-postgres.test.mjs tests/collaboration-postgres.test.mjs tests/productivity-postgres.test.mjs tests/planning-postgres.test.mjs tests/coordination-postgres.test.mjs tests/integrations-postgres.test.mjs",
     "test:db-handlers": "node --test tests/postgres-handlers.test.mjs",
     "test:db": "node --test tests/database-schema.test.mjs tests/installation-repository.test.mjs tests/database-connection.test.mjs tests/production-guard.test.mjs"

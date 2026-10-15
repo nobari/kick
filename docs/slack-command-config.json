@@ -1,0 +1,102 @@
+{
+  "slash_commands": [
+    {
+      "command": "/sync",
+      "description": "Share an update or manage team check-ins",
+      "usage_hint": "help | home | setup | checkin | preferences | -r 7",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/pick",
+      "description": "Choose teammates randomly or rotate fairly",
+      "usage_hint": "help | rotate",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/kudos",
+      "description": "Thank teammates for their contributions",
+      "usage_hint": "help | -r 7",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/coins",
+      "description": "Give virtual recognition points, not money",
+      "usage_hint": "help | -r 7",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/todo",
+      "description": "Manage private personal or shared channel tasks",
+      "usage_hint": "mine | new | channel | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/poll",
+      "description": "Create channel polls and view votes and results",
+      "usage_hint": "create | results | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/report",
+      "description": "Preview a comprehensive workflow report",
+      "usage_hint": "week | month | custom | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/plan",
+      "description": "View workload, capacity, goals and issue sync",
+      "usage_hint": "workload | capacity | goals | sync | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/decision",
+      "description": "Record proposals and find team decisions",
+      "usage_hint": "new | list | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/handoff",
+      "description": "Agree on handoffs between teams",
+      "usage_hint": "new | incoming | list | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/approve",
+      "description": "Request a decision or review pending requests",
+      "usage_hint": "request | pending | list | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/onboard",
+      "description": "Manage onboarding checklists and buddies",
+      "usage_hint": "new | active | list | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/oneonone",
+      "description": "Prepare private agendas and follow-up actions",
+      "usage_hint": "new | upcoming | list | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    },
+    {
+      "command": "/leave",
+      "description": "Request leave and view approved team coverage",
+      "usage_hint": "request | mine | coverage | help",
+      "url": "https://kick.bozmoz.com/api/slack/events",
+      "should_escape": false
+    }
+  ]
+}

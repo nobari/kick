@@ -71,7 +71,8 @@ function registerProductivity({ app, store, engine, service, ui }) {
     }
     if (action === 'report') {
       // Report access is also checked again at generation and sharing.
-      const today = new Date().toISOString().slice(0, 10), week = new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10)
+      const days = data.days === 30 ? 30 : 7
+      const today = new Date().toISOString().slice(0, 10), week = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10)
       await api.channel(ctx)
       return form('Comprehensive report', 'report', { c: ctx.config }, [section('Combine this workflow’s retained check-ins, blockers, channel to-dos, sprints, recognition, retrospectives, planning sessions and polls. Personal to-dos are always excluded.'), day('from', 'From (UTC)', week), day('to', 'Through (UTC)', today), context('Up to 90 days. Counts use creation dates and current status, not historical snapshots. Nothing is shared until you confirm.')], 'Build report')
     }

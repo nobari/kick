@@ -56,6 +56,14 @@ Terms: https://kick.bozmoz.com/terms
 - Issue sync is administrator-managed and organization-specific. Connect GitHub, Jira or Linear, select the provider organization/site and repository/project/team, and explicitly preview/import an issue title and status into a channel to-do. Later status changes are manual and confirmed in either direction, with stale-preview checks and conflict notices. There is no background sync, remote deletion, comment/attachment copying or private-record export. Provider consent and availability are required.
 - One-on-one titles and notes are encrypted at rest and participant-only in Kick, not end-to-end encrypted. New workflow records use 7/30/90-day retention. Provider connections expire after 90 days and may be disconnected sooner.
 
+## Command update awaiting Slack registration and publication
+
+- Ten new command names: /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /leave. Their underlying tools remain accessible from Kick Home while command rollout is pending.
+- All fourteen commands support help, -h and --help. Personal /todo mine needs no workflow; team tools require public-channel membership and select a workflow when multiple exist.
+- /report week and /report month prefill trailing inclusive 7/30-day UTC ranges. /approve pending is the designated approver's pending inbox; /oneonone upcoming shows active meetings today or later in UTC.
+- Native forms use date/time pickers, short radio choices, weekday checkboxes, clear sharing notices and draft-preserving validation. Newer modal alerts and Home task tables have section/button fallbacks when rejected by Slack.
+- Combined release and command reference: https://kick.bozmoz.com/get-started#command-reference
+
 ## Account and pricing
 
 Kick does not require a separate user account. Installation and identity are handled by Slack. Core workflows are free.

@@ -381,9 +381,9 @@ app.action('sync_click', async ({ body, ack, client, action, logger }) => {
  * @param {import("@slack/bolt").AckFn} ack
  */
 async function ACKFN(respond, ack) {
-  ack()
+  await ack()
   return respond({
-    text: "I'm working on your command :bow:",
+    text: 'Opening Kick… Review the form before submitting.',
     response_type: 'ephemeral'
   })
 }
@@ -1727,12 +1727,12 @@ function getSyncView(view_id, userID, channel_id, lastSync, isNew) {
       private_metadata: channel_id,
       close: {
         type: 'plain_text',
-        text: 'Close',
+        text: isNew ? 'Cancel' : 'Done',
         emoji: true
       },
       title: {
         type: 'plain_text',
-        text: 'Sync form',
+        text: 'Share an update',
         emoji: true
       },
       blocks
@@ -1780,7 +1780,7 @@ function getSyncView(view_id, userID, channel_id, lastSync, isNew) {
   } else {
     view.view.submit = {
       type: 'plain_text',
-      text: 'Submit',
+      text: 'Share update',
       emoji: true
     }
     blocks.push(
@@ -2027,12 +2027,12 @@ async function getKudosView(view_id, team, userID, channel_id, isCoin = false) {
       private_metadata: `${isCoin ? 'C' : 'K'}//${emoji}//${channel_id}`,
       close: {
         type: 'plain_text',
-        text: 'Close',
+        text: 'Cancel',
         emoji: true
       },
       title: {
         type: 'plain_text',
-        text: `${emoji} ${title}`,
+        text: isCoin ? 'Give recognition' : 'Thank teammates',
         emoji: true
       },
       blocks
@@ -2040,14 +2040,14 @@ async function getKudosView(view_id, team, userID, channel_id, isCoin = false) {
   }
   view.view.submit = {
     type: 'plain_text',
-    text: `Send ${emoji}`,
+    text: isCoin ? 'Send recognition' : 'Send kudos',
     emoji: true
   }
   blocks.push({
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `from <@${userID}>`
+      text: `Share appreciation with this channel. Review the recipients and reason before sending. Coins are virtual recognition, not money.`
     }
   })
   blocks.push(
@@ -2056,7 +2056,7 @@ async function getKudosView(view_id, team, userID, channel_id, isCoin = false) {
       block_id: 'k',
       label: {
         type: 'plain_text',
-        text: `${emoji} ${title} to`,
+        text: 'Teammates to thank',
         emoji: true
       },
       element: {
@@ -2070,7 +2070,7 @@ async function getKudosView(view_id, team, userID, channel_id, isCoin = false) {
       block_id: 'kr',
       label: {
         type: 'plain_text',
-        text: 'Why?',
+        text: 'What did they do well?',
         emoji: true
       },
       element: {
@@ -2079,7 +2079,7 @@ async function getKudosView(view_id, team, userID, channel_id, isCoin = false) {
         multiline: true,
         placeholder: {
           type: 'plain_text',
-          text: `any further explanation on why ${title + 'ing'}???`
+          text: 'Be specific: what helped, and why did it matter?'
         }
       },
       optional: false
@@ -2106,12 +2106,12 @@ function getPickView(view_id, channel_id, userID, initial_users) {
       },
       close: {
         type: 'plain_text',
-        text: 'Close',
+        text: 'Cancel',
         emoji: true
       },
       title: {
         type: 'plain_text',
-        text: 'Random Pick/Select',
+        text: 'Choose teammates',
         emoji: true
       },
       blocks: [
@@ -2120,7 +2120,7 @@ function getPickView(view_id, channel_id, userID, initial_users) {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `:wave: <@${userID}>`
+            text: 'Choose the candidate group and number of people. Submitting posts the result to this channel.'
           }
         },
         {
@@ -2131,7 +2131,7 @@ function getPickView(view_id, channel_id, userID, initial_users) {
           block_id: 'for',
           label: {
             type: 'plain_text',
-            text: 'Pick for',
+            text: 'Purpose (optional)',
             emoji: true
           },
           element: {
@@ -2140,7 +2140,7 @@ function getPickView(view_id, channel_id, userID, initial_users) {
             multiline: false,
             placeholder: {
               type: 'plain_text',
-              text: 'u may write any purpose or leave it blank'
+              text: 'For example: lead the next demo'
             },
             initial_value: 'standup'
           },
@@ -2151,7 +2151,7 @@ function getPickView(view_id, channel_id, userID, initial_users) {
           block_id: 'from',
           label: {
             type: 'plain_text',
-            text: 'From',
+            text: 'Candidate teammates',
             emoji: true
           },
           element: {
@@ -2174,7 +2174,7 @@ function getPickView(view_id, channel_id, userID, initial_users) {
               {
                 text: {
                   type: 'plain_text',
-                  text: ':question: Ask a random Question',
+                  text: 'Include a random icebreaker question',
                   emoji: true
                 },
                 value: 'q'
@@ -2195,7 +2195,8 @@ function getPickView(view_id, channel_id, userID, initial_users) {
             action_id: 'input',
             type: 'number_input',
             is_decimal_allowed: false,
-            initial_value: '1'
+            initial_value: '1',
+            min_value: '1'
           },
           label: {
             type: 'plain_text',

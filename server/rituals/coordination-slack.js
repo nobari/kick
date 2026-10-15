@@ -33,10 +33,12 @@ function registerCoordination({ app, store, service, member, ui }) {
     ])
     if (action === 'list') {
       const { kind } = data, offset = data.offset || 0
-      const rows = await api.list(ctx, kind, offset, data.parent)
-      const blocks = [section(`*${labels[kind]}*`), buttons(b('Create new', 'new', { ...scope, kind }))]
+      const rows = await api.list(ctx, kind, offset, data.parent, data.filter)
+      const filters = { pending: 'Awaiting your decision', incoming: 'Incoming to this workflow', active: 'Active only', upcoming: 'Active, today or later (UTC)', mine: 'Requested by you' }
+      const blocks = [section(`*${labels[kind]}*${data.filter ? `\n${filters[data.filter]}` : ''}`), buttons(b('Create new', 'new', { ...scope, kind }))]
       rows.slice(0, 8).forEach(r => blocks.push({ ...section(`*${escape(r.title || r.detail.slice(0, 120))}*\n${r.status} · <@${r.owner}> · ${r.due}`), accessory: b('Open', 'view', { ...scope, kind, id: r.id }) }))
-      if (!rows.length) blocks.push(section('Nothing here yet. Create a record to get started. Private lists include only records you participate in.'))
+      if (!rows.length) blocks.push(section(data.filter ? 'No records match this view. Use All records to browse other statuses. Private lists still include only your own conversations or requests.' : 'Nothing here yet. Create a record to get started. Private lists include only records you participate in.'))
+      if (data.filter) blocks.push(buttons(b('All records', 'list', { ...scope, kind })))
       const nav = []
       if (offset) nav.push(b('Previous', 'list', { ...data, offset: Math.max(0, offset - 8) }))
       if (rows.length > 8) nav.push(b('Next', 'list', { ...data, offset: offset + 8 }))

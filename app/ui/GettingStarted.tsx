@@ -1,4 +1,5 @@
 import { SlackButton } from "./SiteChrome";
+import CommandReference from "./CommandReference";
 
 export default function GettingStarted() {
   const scheduled = process.env.KICK_SCHEDULER_ENABLED === "true";
@@ -68,6 +69,7 @@ export default function GettingStarted() {
         <p>Already using Kick? This release adds no new permissions, so you do not need to reinstall just to use polls, to-dos, reports, or message shortcuts. Reopen Kick’s Home tab or run <code>/sync home</code> to refresh it. If Slack does not show a shortcut, look for it under More message shortcuts and confirm Kick is installed in this workspace. <a href="/support">Contact support</a> if it is still missing.</p>
         <p>Scheduled sends and explicitly queued recaps, corrections, and thanks are normally checked every 15 minutes. Pausing a workflow stops automatic check-in prompts; explicitly requested channel notices can still be delivered. Workflow records expire after 7, 30, or 90 days; linked child records may expire earlier with their parent.</p>
       </section>
+      <CommandReference />
       <section className="integration-details" aria-labelledby="try-next">
         <h2 id="try-next">Try your next team ritual</h2>
         <p><code>/kudos</code> thanks a teammate with a reason. <code>/coins</code> sends virtual recognition points—not money. <code>/pick</code> randomly selects eligible teammates. These workflows can post results visible to the channel.</p>

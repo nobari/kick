@@ -8,20 +8,26 @@ const { registerProductivity } = require('./productivity-slack')
 const { registerPlanning } = require('./planning-slack')
 const { registerCoordination } = require('./coordination-slack')
 const { registerIntegrations } = require('../integrations/slack')
+const { registerCommands } = require('./commands-slack')
+const { alert, sendView, restoreInputs, actionTable } = require('./presentation')
 const background = work => waitUntil(work().catch(e => console.error('Kick workflow failed:', e.data?.error || e.code || 'unknown_error')))
 const option = (label, value) => ({ text: text(label), value: String(value) })
 const input = (id, label, element, optional = false) => ({ type: 'input', block_id: id, label: text(label), optional, element: { action_id: 'value', ...element } })
-const field = (id, label, value = '', optional = false, multiline = false) => input(id, label, {
+const field = (id, label, value = '', optional = false, multiline = false) => ({ ...input(id, label, {
   type: 'plain_text_input', ...(value ? { initial_value: value } : {}), multiline, max_length: multiline ? 1500 : 150
-}, optional)
-const select = (id, label, values, value) => input(id, label, { type: 'static_select', options: values,
+}, optional), hint: text(multiline ? 'Up to 1,500 characters. Use short paragraphs or one item per line.' : 'Up to 150 characters.') })
+const select = (id, label, values, value) => input(id, label, { type: values.length <= 3 ? 'radio_buttons' : 'static_select', options: values,
   initial_option: values.find(o => o.value === String(value)) || values[0] })
 const read = (view, id) => {
   const v = view.state.values[id]?.value || {}
   return v.value ?? v.selected_time ?? v.selected_option?.value ?? v.selected_options?.map(o => o.value) ?? v.selected_users ?? v.selected_user ?? v.selected_conversation ?? v.selected_date ?? ''
 }
-const modal = (title, callback, channel, blocks, submit = 'Save') => ({ type: 'modal', callback_id: callback,
-  private_metadata: channel, title: text(title), close: text(submit ? 'Cancel' : 'Done'), ...(submit ? { submit: text(submit) } : {}), blocks })
+const modal = (title, callback, channel, blocks, submit = 'Save') => {
+  const first = blocks.find(b => b.type === 'input')
+  return { type: 'modal', callback_id: callback,
+    private_metadata: channel, title: text(title), close: text(submit ? 'Cancel' : 'Done'), ...(submit ? { submit: text(submit) } : {}),
+    blocks: blocks.map(b => b === first ? { ...b, element: { ...b.element, focus_on_load: true } } : b) }
+}
 const header = title => ({ type: 'header', text: text(title) })
 const context = value => ({ type: 'context', elements: [text(value)] })
 const divider = () => ({ type: 'divider' })
@@ -36,7 +42,7 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
       ? await client.views.update({ view_id: previous.id, view: loading() })
       : await client.views.open({ trigger_id: trigger, view: loading() })
     const viewId = result.view?.id || previous?.id
-    return { ...client, views: { ...client.views, open: ({ view }) => client.views.update({ view_id: viewId, view }) } }
+    return { ...client, views: { ...client.views, open: ({ view }) => sendView(args => client.views.update(args), { view_id: viewId, view }) } }
   }
   const app = {
     event: (pattern, fn) => bolt.event(pattern, async args => { background(() => fn(args)) }),
@@ -50,16 +56,10 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         let view = response.view
         if (response.response_action === 'errors') {
           // Restore the entered values after async validation rather than losing a draft.
-          const blocks = args.view.blocks.map(b => {
-            if (b.type !== 'input') return b
-            const v = args.view.state.values[b.block_id]?.value || {}, element = { ...b.element }
-            const mappings = { value: 'initial_value', selected_time: 'initial_time', selected_option: 'initial_option', selected_options: 'initial_options', selected_users: 'initial_users', selected_user: 'initial_user', selected_date: 'initial_date', selected_conversation: 'initial_conversation' }
-            for (const [source, target] of Object.entries(mappings)) if (v[source]) element[target] = v[source]
-            return { ...b, element }
-          })
-          view = modal(args.view.title.text, args.view.callback_id, args.view.private_metadata, [section(escape(Object.values(response.errors).join('\n'))), ...blocks], args.view.submit?.text || 'Save')
+          const blocks = restoreInputs(args.view.blocks.filter(b => b.block_id !== 'kick_validation'), args.view.state.values)
+          view = modal(args.view.title.text, args.view.callback_id, args.view.private_metadata, [{ ...alert(Object.values(response.errors).join('\n'), 'error'), block_id: 'kick_validation' }, ...blocks], args.view.submit?.text || 'Save')
         }
-        await args.client.views.update({ view_id: args.view.id, view })
+        await sendView(a => args.client.views.update(a), { view_id: args.view.id, view })
       } }))
     }),
     use: fn => bolt.use(fn)
@@ -97,9 +97,9 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
       header('Schedule'),
       select('enabled', 'Scheduled check-ins', [option('Enabled', 'yes'), option('Paused', 'no')], c.enabled ? 'yes' : 'no'),
       field('zone', 'IANA time zone (e.g. Asia/Tokyo)', c.zone),
-      input('time', 'Check-in opens', { type: 'timepicker', initial_time: c.time }),
-      input('digest', 'Digest (later on the same day)', { type: 'timepicker', initial_time: c.digestTime }),
-      input('days', 'Check-in days', { type: 'multi_static_select', options: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(option),
+      input('time', 'Check-in opens', { type: 'timepicker', initial_time: c.time, timezone: c.zone }),
+      input('digest', 'Digest (later on the same day)', { type: 'timepicker', initial_time: c.digestTime, timezone: c.zone }),
+      input('days', 'Check-in days', { type: 'checkboxes', options: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(option),
         initial_options: c.days.map(d => option(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d], d)) }),
       divider(), header('People and questions'),
       input('members', 'Participants (up to 50 channel members)', { type: 'multi_users_select', max_selected_items: 50,
@@ -147,7 +147,7 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
     }
     const c = accessible.find(c => c.id === chosen) || accessible.find(c => c.channel === chosen && c.workflowKey === 'default') || accessible.find(c => c.members.includes(user)) || accessible[0]
     const blocks = [header('Your team, in sync'), context('Kick · Check in. Unblock. Appreciate.'),
-      { type: 'actions', elements: [button('My personal to-dos', 'work_todos', '{}')] }]
+      { type: 'actions', elements: [button('My personal to-dos', 'work_todos', '{}'), button('Command guide', 'kick_command_help', '{}')] }]
     if (!c) blocks.push(
       section('*Welcome! Make room for better team habits.*\nSet up a public channel once. Choose the people, questions, and schedule that fit your team.'),
       { type: 'actions', elements: [primary('Set up a channel', 'ritual_choose', 'setup'), button('My preferences', 'ritual_preferences', 'home')] },
@@ -202,7 +202,8 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
       }
       const mine = (await store.list('actions', 'config', '==', c.id)).filter(a => a.owner === user && a.status === 'open' && a.expiresAt > Date.now())
       blocks.push(divider(), header('Your actions'), section(mine.length ? `${mine.length} open action${mine.length === 1 ? '' : 's'} in this workflow.` : 'No open actions assigned to you.'))
-      mine.slice(0, 3).forEach(a => blocks.push({ ...section(`Due ${a.due} · ${escape(a.detail).slice(0, 500)}`), accessory: button('Open action', 'collab_action', JSON.stringify({ c: c.id, id: a.id, edit: true })) }))
+      if (mine.length) blocks.push(actionTable(mine, c.id))
+      if (mine.length > 20) blocks.push(context('Showing 20 tasks here. Open Channel to-dos to browse the rest.'))
       blocks.push({ type: 'actions', elements: [primary('Open team workspace', 'collab_hub', JSON.stringify({ c: c.id })), button('Team planning', 'plan_hub', JSON.stringify({ c: c.id })), button('People & coordination', 'coord_hub', JSON.stringify({ c: c.id })), button('Add workflow', 'ritual_new_workflow', c.channel)] })
       const actions = [button('Refresh', 'ritual_refresh', `${c.id}:${tab}`), button('Set up a channel', 'ritual_choose', 'setup')]
       try { await manage(client, c, user); actions.push(button('Workflow settings', 'ritual_setup', c.id)) } catch { /* Hide owner-only controls. */ }
@@ -210,7 +211,7 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
     }
     blocks.push(context('Your Home view is personal. Channel updates and blockers remain visible to channel members.'),
       section('<https://kick.bozmoz.com/get-started|How to use Kick> · <https://kick.bozmoz.com/support|Get help> · <https://kick.bozmoz.com/privacy|Privacy & data requests>'))
-    await client.views.publish({ user_id: user, view: { type: 'home', blocks } })
+    await sendView(a => client.views.publish(a), { user_id: user, view: { type: 'home', blocks } })
   }
   async function open(client, trigger, view) { return client.views.open({ trigger_id: trigger, view }) }
   async function openError(client, trigger, error) {
@@ -388,7 +389,7 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
         ritual_blocker_save: 'The blocker is updated. Your team can see its latest status in Kick Home.',
         ritual_rotate_save: 'Your fair pick is queued for the channel. It will be delivered on the next scheduler run (normally within 15 minutes).'
       }
-      await ack({ response_action: 'update', view: modal('All set', 'ritual_done', '', [header('Saved successfully'), section(messages[view.callback_id] || 'Saved. Open Kick Home for the latest team information.')], null) })
+      await ack({ response_action: 'update', view: modal('All set', 'ritual_done', '', [alert('Saved successfully', 'success'), section(messages[view.callback_id] || 'Saved. Open Kick Home for the latest team information.')], null) })
       try { await home(client, team, user, ['ritual_checkin_save', 'ritual_rotate_save'].includes(view.callback_id) ? channel : undefined) } catch { /* A Home refresh must not invalidate a saved submission. */ }
     } catch (e) {
       const first = view.blocks.find(b => b.type === 'input')?.block_id
@@ -398,18 +399,21 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
   })
   const collaboration = registerCollaboration({ app, bolt, store, engine, member, manage, modalClient, background, canRemind, dmEnabled, schedulerEnabled,
     ui: { modal, section, button, input, field, select, option, text, read, context } })
-  registerProductivity({ app, store, engine, service: collaboration.service,
+  const productivity = registerProductivity({ app, store, engine, service: collaboration.service,
     ui: { modal, section, button, input, field, select, option, text, read, context } })
-  registerPlanning({ app, store, member, service: collaboration.service,
+  const planning = registerPlanning({ app, store, member, service: collaboration.service,
     ui: { modal, section, button, input, field, select, option, text, read, context } })
-  registerCoordination({ app, store, member, service: collaboration.service,
+  const coordination = registerCoordination({ app, store, member, service: collaboration.service,
     ui: { modal, section, button, input, field, select, option, text, read, context } })
-  registerIntegrations({ app, store, member, service: collaboration.service,
+  const integrations = registerIntegrations({ app, store, member, service: collaboration.service,
     ui: { modal, section, button, input, field, select, option, text, read, context } })
+  registerCommands({ app, store, member, modalClient, background,
+    tools: { work: productivity, plan: planning, coord: coordination, collab: collaboration, integ: integrations },
+    ui: { modal, section, button, select, option, read, context } })
   // Middleware intercepts only new subcommands; the legacy command handlers stay intact.
   app.use(async args => {
     const { body, next, ack, client: baseClient } = args
-    const command = body.command?.replace(/^\/t/, '/')
+    const command = process.env.TEST ? body.command?.replace(/^\/t/, '/') : body.command
     const sub = body.text?.trim()
     if (!((command === '/sync' && ['setup', 'preferences', 'checkin', 'home', 'workflows'].includes(sub)) || (command === '/pick' && sub === 'rotate'))) return next()
     await ack()

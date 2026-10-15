@@ -87,7 +87,7 @@ function createStore(database) {
       if (!['connections', 'mappings', 'issuelinks'].includes(kind)) throw new Error('Invalid integration removal')
       return (await database.query(`DELETE FROM ritual_${kind} WHERE workspace_id=$1 AND id=$2`, [team, id])).rowCount > 0
     },
-    async coordinationPage(kind, team, config, user, now, offset, parent) {
+    async coordinationPage(kind, team, config, user, now, offset, parent, filter = '') {
       const filters = {
         approvals: '(creator_id=$5 OR owner_id=$5)', leaves: '(creator_id=$5 OR owner_id=$5)',
         meetings: '(creator_id=$5 OR partner_id=$5)', onboarding: 'true',
@@ -95,11 +95,20 @@ function createStore(database) {
         handoffs: "(config_id=$2 OR (target_config_id=$2 AND (owner_id=$5 OR status IN ('accepted','completed'))))",
       }
       if (!Object.hasOwn(filters, kind)) throw new Error('Invalid coordination list')
+      const choices = {
+        approvals: { pending: "owner_id=$5 AND status='pending'" },
+        leaves: { mine: 'creator_id=$5' },
+        onboarding: { active: "status='active'" },
+        meetings: { upcoming: "status='active' AND meeting_date >= $8" },
+        handoffs: { incoming: 'target_config_id=$2' },
+      }
+      if (filter && !Object.hasOwn(choices[kind] || {}, filter)) throw new Error('Invalid coordination filter')
+      const extra = filter ? choices[kind][filter] : 'true'
       const scope = kind === 'handoffs' ? '' : 'AND config_id=$2'
       // All positional parameters are typed, including unused ones.
       const { rows } = await database.query(`SELECT * FROM ritual_${kind} WHERE workspace_id=$1 ${scope} AND expires_at>$3
-        AND ${filters[kind]} AND $5::text IS NOT NULL AND $6::int >= 0 AND $7::text IS NOT NULL
-        ORDER BY created_at DESC,id LIMIT 9 OFFSET $4`, [team, config, now, offset, user, 0, parent || ''])
+        AND ${filters[kind]} AND (${extra}) AND $5::text IS NOT NULL AND $6::int >= 0 AND $7::text IS NOT NULL AND $8::text IS NOT NULL
+        ORDER BY created_at DESC,id LIMIT 9 OFFSET $4`, [team, config, now, offset, user, 0, parent || '', new Date(now).toISOString().slice(0, 10)])
       return rows.map(r => decode(kind, r))
     },
     async coverage(team, config, now, from, to) {

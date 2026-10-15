@@ -1,6 +1,90 @@
 # Kick collaboration release — October 2026
 
-## Next release: team-management expansion
+## Combined submission — October 15: commands, Slack UI and all ten team-management features
+
+This is ONE combined update, including the October 10 planning, coordination and organization-sync increment below. The earlier publication confirmation covers the prior release, not this expansion. Deployment does not register or publish slash commands in Slack.
+
+### What is included
+
+- Ten new commands: `/todo`, `/poll`, `/report`, `/plan`, `/decision`, `/handoff`, `/approve`, `/onboard`, `/oneonone`, `/leave`.
+- Consistent help (`help`, `-h`, `--help`) for all fourteen commands, a Home command guide, private loading/error responses, channel workflow selection, explicit sharing and readable empty states. Existing four commands and their historical flags remain compatible. Legacy quick-post flags still post without a form.
+- The prior ten features: workload/capacity, objectives/key results, decision log, cross-team handoffs, private approvals, onboarding/buddies, private one-on-ones, leave/coverage, opt-in escalations and organization-specific GitHub/Jira/Linear manual status sync.
+- Form/UI improvements: plain-language labels and action buttons; native dates, time-zone-aware time pickers, weekday checkboxes, short radio choices, single-input focus, length hints, preserved drafts including cleared optional values, newer modal alerts and sortable/paginated Home task tables with actionable rows. New blocks fall back to ordinary sections/buttons if Slack rejects them. No AI, additional data export, file uploads or new scopes introduced.
+
+### Slack settings to update (app A044BL326B1)
+
+1. Open the app’s **unpublished edit mode**. Keep all existing scopes, events, shortcuts, interactivity and OAuth URLs. Do not replace the whole manifest with a command fragment.
+2. Open [the ready-to-copy command fragment](slack-command-config.json), or regenerate it with `pnpm slack:command-config`. Merge its `slash_commands` array into the existing manifest’s `features.slash_commands`, preserving unrelated configuration. Alternatively create the ten new commands below manually and update the descriptions/hints of the original four. All fourteen use `https://kick.bozmoz.com/api/slack/events`, with escaping disabled to preserve existing parsing. No `/t...` commands belong in production.
+3. Check for command-name conflicts in your test workspace. Slack names are not namespaced; another app can own the same visible command. Kick Home provides alternative access. Do not silently rename the approved list—resolve collisions before review.
+4. Save the draft and use Slack’s offered installation/update flow for the test workspace. Existing installations already have the `commands` scope, so this is not a new-scope consent request, but new command configuration must actually be installed/published to appear. A Vercel deploy alone is insufficient.
+5. Set Landing Page to `https://kick.bozmoz.com/`, Privacy to `/privacy`, Support to `/support` and Terms to `/terms` on that domain. Direct install remains `/api/slack/install`; Slack redirect remains `/api/slack/oauth_redirect`. Provider callbacks belong in their provider consoles, not Slack OAuth settings.
+6. Replace listing text with the copy below, add verified screenshots and a real demo-video URL, finish the acceptance checklist, run automated checks and submit this entire bundle once. Do not submit this document’s historical archived copy or placeholders.
+
+| Command | Supported entry points | Default |
+| --- | --- | --- |
+| `/todo` | `mine`, `new`, `channel`, `help` | Private personal list |
+| `/poll` | `create`, `results`, `help` | Channel polls |
+| `/report` | `week`, `month`, `custom`, `help` | Editable trailing 7-day report form |
+| `/plan` | `workload`, `capacity`, `goals`, `sync`, `help` | Planning hub |
+| `/decision` | `new`, `list`, `help` | Decision log |
+| `/handoff` | `new`, `incoming`, `list`, `help` | Accessible source/receiving handoffs |
+| `/approve` | `request`, `pending`, `list`, `help` | Participant-only requests |
+| `/onboard` | `new`, `active`, `list`, `help` | Onboarding records |
+| `/oneonone` | `new`, `upcoming`, `list`, `help` | Your two-person conversations |
+| `/leave` | `request`, `mine`, `coverage`, `help` | Requests you created |
+
+`incoming` means the selected receiving workflow, still respecting acceptance visibility. `pending` means you are the designated approver and no decision has been made; expired decision deadlines can still appear but cannot be approved. `upcoming` means active and dated today or later in UTC. `month` means the last 30 days inclusive, not a calendar month. Filters apply before database pagination. `/leave` All records also shows requests where you are the approver.
+
+### Listing short description
+
+Standups, tasks, polls, reports and team coordination—right in Slack.
+
+### Listing long description
+
+Kick helps teams coordinate everyday work without leaving Slack. Share standups, track blockers, assign channel tasks, keep private personal to-dos, run polls, and preview comprehensive team reports before sharing.
+
+Use native Slack forms and Home to plan workload, set objectives and key results, record decisions, agree on cross-team handoffs, request approvals, onboard teammates, prepare private one-on-ones, and arrange leave coverage. Scheduled check-ins, digests and escalation summaries are opt-in. Delivery checks run every 15 minutes; delivery may be delayed.
+
+Ten new slash commands bring these tools closer: /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /leave. Each offers help and focused forms. Existing /sync, /pick, /kudos and /coins remain available. Where a channel has multiple workflows, choose one before proceeding.
+
+Workspace admins can optionally connect their organization’s GitHub, Jira or Linear account, choose a repository/project/team, import selected issues and confirm status updates in either direction. Only the admin who supplied the connection can operate that provider account. Sync is manual, not background; private records, comments and attachments do not sync.
+
+Shared tools respect public-channel membership. Personal to-dos and one-on-ones have participant-only access; approval and leave details are limited to requester and approver. Approved coverage shares names, dates and proposed cover only. Polls and retrospectives are not anonymous. Retention and data requests are explained at https://kick.bozmoz.com/privacy. Kick is an independent integration, not affiliated with or endorsed by Slack.
+
+### Test Account Details — combined release
+
+Kick needs no separate account, paid subscription or trial. Install it in your own Slack test workspace, choose a public test channel with at least three consenting testers and invite Kick. Most tools work with a paused workflow. Optional GitHub, Jira and Linear sync requires your own provider account and a Slack administrator; no credentials to our workspace are needed or supplied. Contact kick.bot.help@gmail.com if installation is blocked. Use the supplied actual demo and acceptance instructions for the complete combined release.
+
+### Developer Notes / How to test changes — combined release
+
+This update bundles ten new slash commands, a consistent command guide and refreshed native Slack forms with the earlier ten-feature team-management expansion. It includes capacity, objectives/key results, decisions, handoffs, approvals, onboarding, private one-on-ones, leave/coverage, opt-in escalations and organization-specific manual issue status sync. Existing polls, personal/channel tasks, comprehensive reports and original commands remain supported. No new OAuth scopes or event subscriptions are requested. Website examples and privacy disclosures cover the entire bundle. Provider sync requires the reviewer’s own explicit consent; no provider secrets are included.
+
+1. Install the updated command configuration in a test workspace. Run `/sync setup` and save a public-channel workflow as Paused; add a second paused workflow in the same channel to test selection.
+2. Run each new command with no arguments, with `help`, and with an invalid argument. Help/errors must remain private, preserve no records and show usable next steps. Test all supported entry points in the command table. Check the original four commands and their help/report flags for regressions.
+3. In a DM, `/todo mine` and `/todo new` must work without a workflow. Create, edit, complete and delete a personal task; another tester cannot access it. `/todo channel` requires a public channel and opens shared tasks. Confirm the assignee can mark a shared task done.
+4. Use `/poll create`, cancel once, then confirm creation. Vote/change vote from two testers and close via the existing confirmation form. Creation/closing explicitly queues channel notices. `/poll results` opens the poll selector, not an unscoped cross-workspace report.
+5. `/report week` and `/report month` prefill inclusive UTC ranges of 7 and 30 days; `/report custom` lets you edit dates. Build and compare a preview, then cancel without sending. Share once in the dedicated test channel. No private tasks, approvals, leave details or one-on-ones may appear.
+6. Use `/plan workload`, `/plan capacity`, `/plan goals` and `/decision new`. Complete the detailed planning acceptance checks below. `/plan sync` opens the existing admin-only organization integration area.
+7. Use `/approve request` with tester B, then `/approve pending` as B and C. Only B should see it in that inbox. `/handoff incoming` must show only eligible receiving-workflow records, including the existing acceptance privacy rules. Exercise onboarding, upcoming meetings, leave requests and coverage using the detailed checks below.
+8. Verify the form controls, weekday checkboxes and radio choices on desktop and mobile. Submit invalid dates, correct them and confirm previously entered values—including cleared optional dates—are retained. Check modal errors, success states, keyboard focus and Home task-table navigation. Unsupported newer blocks have a section/button fallback; verify with the automated fallback tests and actual clients where available.
+9. Finish the October 10 multi-user privacy and provider round-trip checklist below, including revocation, disconnect and stale changes. Test opt-in escalation delivery only in a dedicated test workflow; never enable the existing team workflow solely for review.
+10. Attach actual screenshots and a real video of the registered commands, forms and provider flow. Use synthetic team data and hide credentials. If the production edit-mode commands cannot be installed for reviewers, provide a separate review app on an isolated deployment/database using `pnpm slack:review-manifest https://YOUR-REVIEW-ORIGIN`; it generates all fourteen prefixed commands. A channel link or homepage is not a review-app installation or demo-video URL.
+
+### Release gates — do not mark unperformed checks complete
+
+- [ ] New command configuration saved and installed in a test Slack workspace.
+- [ ] Human desktop/mobile walkthrough, multiple testers, command collisions and denial cases checked.
+- [ ] Live GitHub/Jira/Linear consent, import, push/pull, conflict and disconnect recorded; Jira distribution verified for external reviewer accounts.
+- [ ] Actual screenshots/demo supplied, no placeholders or secrets in submission.
+- [ ] Submit the combined app update through Slack’s review flow, then confirm publication and remove the website’s new-command rollout notice.
+
+Engineering test results do not certify the human acceptance gates above. No new schedules are enabled by deployment. No schema migration is required for this command increment.
+
+Engineering verification on October 15: 76 unit/UI/manifest tests, 13 generated-site checks, 8 isolated-Postgres coordination checks and 4 core database/legacy-handler checks passed. Lint and production build passed. Provider adapters use fixtures; this is not a recorded live provider round trip. The native alert/table fallback is covered automatically; actual modal/mobile acceptance remains on the checklist.
+
+References: [Slash commands](https://docs.slack.dev/interactivity/implementing-slash-commands/), [Marketplace review](https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide/), [native alert blocks](https://docs.slack.dev/reference/block-kit/blocks/alert-block/), [data tables](https://docs.slack.dev/reference/block-kit/blocks/data-table-block/).
+
+## Included October 10 increment: team-management expansion
 
 The ten-feature expansion is implemented. Do not submit the combined release until the human Slack walkthrough and real provider-consent/status round trips below are recorded. Automated tests use isolated Postgres and provider fixtures; they are not evidence of production provider consent.
 
