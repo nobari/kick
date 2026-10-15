@@ -132,8 +132,8 @@ function registerRituals(bolt, store, engine, { schedulerEnabled = process.env.K
     return modal('Team check-in', 'ritual_checkin_save', channel, [
       section(`Your answers will appear in the channel digest. Retained by Kick for ${c.retentionDays} days.`),
       ...run.questions.map((q, i) => field(`q${i}`, q, '', false, true)),
-      field('blocker', 'Anything blocking you? (optional)', '', true, true),
-      input('helper', 'Who could help? (optional)', { type: 'users_select' }, true)
+      field('blocker', 'Anything blocking you?', '', true, true),
+      input('helper', 'Who could help?', { type: 'users_select' }, true)
     ], 'Submit')
   }
   async function home(client, team, user, chosen, tab = 'overview') {

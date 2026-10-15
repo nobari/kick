@@ -29,6 +29,11 @@
       "file": "05-reports.png",
       "title": "COMPREHENSIVE REPORTS",
       "path": "Team workspace → Comprehensive report"
+    },
+    {
+      "file": "06-workload.png",
+      "title": "WORKLOAD & CAPACITY",
+      "path": "Team workspace → Team planning → View workload"
     }
   ]
 }
