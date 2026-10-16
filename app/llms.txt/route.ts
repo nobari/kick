@@ -8,7 +8,7 @@ Support: https://kick.bozmoz.com/support
 Privacy: https://kick.bozmoz.com/privacy
 Terms: https://kick.bozmoz.com/terms
 
-## Core workflows
+## Check-ins and recognition
 
 - /sync opens an async standup form for mood, yesterday, today, blockers, and optional kudos.
 - /sync -r 7 returns a report for the previous seven days; the range can be 1 to 30 days.
@@ -17,7 +17,7 @@ Terms: https://kick.bozmoz.com/terms
 - /pick randomly selects one or more eligible channel members and can include a random question.
 - Add -h to a command for current help in Slack.
 
-## Team-rituals release
+## Configurable team workflows
 
 - /sync setup configures a public-channel workflow with participants, weekdays, IANA time zone, template or custom questions, digest time, and 7/30/90-day workflow retention. It starts paused and requires preview and confirmation.
 - /sync checkin submits an update during the configured check-in window; blockers can have an assigned helper and be resolved.
@@ -36,7 +36,7 @@ Terms: https://kick.bozmoz.com/terms
 - My personal to-dos works directly from Home without channel setup. Tasks are private to their owner in Kick, have due dates and Open/Done status, can be deleted, and expire 30 days after creation. They never enter channel lists, shared search or reports.
 - Polls accept 2–10 choices and one changeable vote per current channel member. Example: Which day for the demo? Tuesday or Thursday. Creation queues an invitation; the creator/workflow owner closes voting and queues aggregate results. Votes are stored with Slack IDs, not anonymously.
 - Comprehensive report combines retained check-ins, blockers, channel to-dos, sprints, recognition, retrospectives, planning sessions and polls for the selected workflow over up to 90 UTC days. Preview then explicitly share. Counts use creation dates and current status, not historical snapshots. Personal to-dos, legacy command history, coin balances and hidden estimates are excluded.
-- Concrete examples for every feature: https://kick.bozmoz.com/#team-rituals
+- Interactive workflow examples: https://kick.bozmoz.com/#product-tour. Full instructions: https://kick.bozmoz.com/get-started
 - Authors can edit scheduled check-in responses before the digest closes. Later changes preserve the original and queue a labeled correction. Legacy /sync history is not editable through this feature.
 - Sprint goals have start/end dates, linked actions and workflow updates from the period. Finishing a sprint queues a factual recap of retained records.
 - Retrospectives support attributed topics, grouping, one vote per member per topic and conversion to actions. They are not anonymous.
@@ -44,7 +44,7 @@ Terms: https://kick.bozmoz.com/terms
 - Search filters the selected workflow's retained Kick updates, actions, blockers and recognition by text, person, UTC dates and status. It does not search Slack message history.
 - Owners/admins can skip a calendar date or override its times before that session opens; dates must be within the retention window.
 - Owners/admins can inspect installation connectivity, delivery failures and an audit, and retry failed, unleased deliveries. Slack delivery is not guaranteed exactly once.
-- Message shortcuts Track action, Report blocker and Give kudos require Slack configuration and publication. They preview selected message text and save only after confirmation.
+- Message shortcuts Track action, Report blocker and Give kudos preview selected message text and save only after confirmation.
 - All new collaboration records follow 7/30/90-day workflow retention. Child records can expire earlier with their parent. Channel notices are checked every 15 minutes and may be delayed.
 
 ## Planning and coordination
@@ -64,7 +64,7 @@ Terms: https://kick.bozmoz.com/terms
 - Native forms use date/time pickers, short radio choices, weekday checkboxes, clear sharing notices and draft-preserving validation. Newer modal alerts and Home task tables have section/button fallbacks when rejected by Slack.
 - Combined release and command reference: https://kick.bozmoz.com/get-started#command-reference
 - Reports also include decisions, objectives/key results, onboarding and outgoing handoff totals. Private approvals, leave requests and one-on-ones are excluded alongside personal tasks.
-- Six illustrative app images, including workload/capacity: https://kick.bozmoz.com/#product-tour. Rendered from Kick Block Kit with synthetic data, not live Slack captures or acceptance-test evidence.
+- The product tour uses six original SVG workflow illustrations with sample data, not Slack screenshots or acceptance-test evidence. Editorial illustrations are decorative, not customer photographs.
 
 ## Account and pricing
 

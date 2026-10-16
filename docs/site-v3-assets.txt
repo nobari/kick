@@ -1,0 +1,19 @@
+Kick website visual assets — October 2026
+
+Mode: built-in image generation tool; three original generated illustrations.
+Delivery: public/assets/site-v3/{teamwork,planning,people}.webp.
+Original PNGs were converted with Sharp to WebP, quality 84, without altering composition.
+The six other SVGs in this directory are newly authored vector workflow illustrations,
+with sample data. They are not Slack screenshots. No previous marketing screenshots
+are reused. The established Kick logo and official Slack installation button remain.
+
+Final prompt set
+
+teamwork:
+Use case: stylized-concept. Asset type: editorial illustration for Kick, a team coordination app for Slack. Create an exquisite tactile paper-cut and screen-print illustration of a small team collaboratively arranging large task cards on a shared board, two hands connecting orange threads between a checked task, a speech bubble and a simple ascending chart. Abstract friendly human figures, sophisticated geometric silhouettes, no faces requiring realism. Confident Swiss editorial composition, flat ultramarine, burnt orange, ink navy and white, tiny subtle paper grain, crisp large shapes, generous breathing room. Wide landscape 3:2. No text, no logos, no interface screenshots, no gradients, no glossy 3D, no sparkles. This is a brand editorial image, not an app screenshot.
+
+planning:
+Use case: stylized-concept. Asset type: editorial feature illustration for Kick team planning. Create an exquisite tactile cut-paper and screen-print still life: an orange bridge connecting two navy task cards, a blue calendar tile, a green checkmark and a small neatly balanced stack of blocks. Visual metaphor for clear handoffs and manageable workload. Sophisticated geometric silhouettes, flat ultramarine, burnt orange, ink navy, sage green and cool very light grey background, subtle real paper grain, crisp shapes, generous negative space. Landscape 3:2. No text, no logos, no UI screenshots, no gradients, no glossy 3D, no sparkles.
+
+people:
+Use case: stylized-concept. Asset type: editorial feature illustration for Kick people coordination and recognition. Create an exquisite tactile paper-cut and screen-print illustration: two friendly abstract human figures passing a vivid orange appreciation rosette across a navy tabletop, a small green sprout and two overlapping blue conversation bubbles. Visual metaphor for support, one-on-ones and recognition. Sophisticated geometric silhouettes, warm human feeling, flat ultramarine, burnt orange, ink navy, sage green and cool white background, subtle real paper grain, confident large shapes and generous breathing room. Landscape 3:2. No text, no logos, no UI screenshots, no gradients, no glossy 3D, no sparkles.

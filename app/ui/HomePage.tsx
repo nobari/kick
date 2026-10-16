@@ -1,317 +1,69 @@
 import Image from "next/image";
 import { SlackButton } from "./SiteChrome";
-import RitualFeatures from "./RitualFeatures";
-import TeamFlow from "./TeamFlow";
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://kick.bozmoz.com";
-
-const workflows = [
-  {
-    id: "sync",
-    eyebrow: "Async standups",
-    title: "Turn daily updates into team clarity.",
-    description:
-      "Kick collects yesterday, today, blockers, mood, and optional kudos in one focused Slack modal. Review recent updates whenever the team needs context.",
-    command: "/sync",
-    detail: "Use /sync -r 7 for a seven-day report.",
-    image: "/assets/img/features/sync.png",
-    imageWidth: 512,
-    imageHeight: 932,
-    alt: "Kick Sync form in Slack with fields for mood, yesterday, today, blockers, and kudos",
-  },
-  {
-    id: "kudos",
-    eyebrow: "Recognition",
-    title: "Make appreciation visible.",
-    description:
-      "Send specific kudos while the good work is still fresh. Teams can choose their own celebration emoji and look back at recent recognition.",
-    command: "/kudos",
-    detail: "Use /kudos -r 7 to review recent kudos.",
-    image: "/assets/img/features/kudos.png",
-    imageWidth: 512,
-    imageHeight: 407,
-    alt: "Kick Kudos form in Slack for selecting teammates and explaining why",
-  },
-  {
-    id: "pick",
-    eyebrow: "Fair participation",
-    title: "Pick people without the awkward pause.",
-    description:
-      "Randomly choose one or more eligible channel members for a task or question. For recurring responsibilities, /pick rotate uses least-recent selection in a configured team ritual.",
-    command: "/pick",
-    detail: "Choose the group, number of people, and optional question.",
-    image: "/assets/img/features/pick.png",
-    imageWidth: 512,
-    imageHeight: 514,
-    alt: "Kick random picker in Slack with selection count and random question option",
-  },
-  {
-    id: "coins",
-    eyebrow: "Team rewards",
-    title: "Create a lightweight reward ritual.",
-    description:
-      "Send a coin with a short explanation, then use reports to see the contributions your team has celebrated over time.",
-    command: "/coins",
-    detail: "Use /coins -s emoji=:sparkles: to set the team’s coin.",
-    image: "/assets/img/features/coins.png",
-    imageWidth: 512,
-    imageHeight: 414,
-    alt: "Kick Coins form in Slack for sending a coin with an explanation",
-  },
-] as const;
+import ProductExplorer from "./ProductExplorer";
+import WorkMotion from "./WorkMotion";
+import { commands } from "../../server/rituals/command-catalog";
+import styles from "./home.module.css";
 
 const faqs = [
-  {
-    question: "What is Kick Bot for Slack?",
-    answer:
-      "Kick is an independent Slack app for standups, tasks, polls, reports, recognition, planning, and team coordination. Use focused forms and Kick Home without a separate account or external dashboard. Optional GitHub, Jira and Linear connections require your own provider account and admin consent.",
-  },
-  {
-    question: "How do Slack standups work with Kick?",
-    answer:
-      "Run /sync in a public Slack channel. Kick opens a form for mood, yesterday’s work, today’s plan, blockers, and optional kudos. Use /sync -r followed by a number from 1 to 30 to review recent team updates.",
-  },
-  {
-    question: "Which Slack commands does Kick provide?",
-    answer:
-      "Kick provides fourteen published commands: /sync, /kudos, /coins, /pick, /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /timeoff. Open their tools directly or through Kick Home. Every command supports help.",
-  },
-  {
-    question: "Does Kick require a separate account?",
-    answer:
-      "No. Kick uses Slack’s installation and identity flow. Team members use it directly inside Slack without creating another login or sharing their email address with Kick.",
-  },
-  {
-    question: "Is Kick free?",
-    answer:
-      "Kick includes its core team workflows for free. There is no separate paid account required to install and try the app in a Slack workspace.",
-  },
-  {
-    question: "How do scheduled check-ins and private reminders work?",
-    answer:
-      "Use /sync setup to choose participants, questions, weekdays, a time zone, and a digest time. Review and confirm before enabling. Scheduled delivery is checked every 15 minutes when activated. Private reminders and helper follow-ups require permission granted to your installation and service activation.",
-  },
-  {
-    question: "Is a fair rotation the same as a random pick?",
-    answer:
-      "No. /pick selects randomly. /pick rotate selects the least recently chosen eligible participant from an enabled channel workflow. You can exclude people for one turn without removing them from the rotation. Rotation results are delivered on the next scheduler run.",
-  },
-  {
-    question: "What Slack data does Kick store?",
-    answer:
-      "Kick stores the workspace information and authorization needed to operate, plus workflow records such as submitted standups and recognition. It does not store team members’ email addresses. See the privacy policy for retention and deletion details.",
-  },
+  ["What can my team do with Kick?", "Run check-ins, manage personal and channel tasks, vote in polls, review reports, plan capacity and goals, record decisions, and coordinate handoffs, approvals, onboarding, one-on-ones and leave. Recognition and fair picks are included too. All fourteen commands are published in Slack."],
+  ["Do we need another account?", "No. Install Kick in your Slack workspace and use its commands or Home tab. Core workflows are free. Optional GitHub, Jira and Linear connections require your own provider account and administrator consent."],
+  ["Can we choose our own check-in questions?", "Yes. Use /sync setup to select a template or write one to five questions, choose participants and a time zone, and set the schedule. Preview and confirm before enabling. You can run up to ten named workflows in a public channel."],
+  ["Who can see our information?", "Shared workflow records are limited to current channel members. Personal tasks are private to their owner. One-on-ones are limited to their two participants; approval details to requester and approver. Private records are excluded from shared reports. Read the privacy policy for the full rules."],
+  ["How do reports and connected issues work?", "Reports summarize retained records for one workflow over a selected UTC date range of up to 90 days. Preview before sharing. Jira, Linear and GitHub issue imports and status changes are manual: an authorized administrator chooses the issue and confirms the direction. There is no background sync."],
+  ["When do scheduled messages arrive?", "Enabled scheduled workflows and queued notices are checked every 15 minutes; delivery can be delayed by outages or backlogs. Private reminders require installation consent and activation. Quiet hours, snooze, leave and opt-out preferences keep reminders under your control."],
+] as const;
+const groups = [
+  { title: "Keep everyone in the loop", items: [
+    ["Custom check-ins", "Ask your own questions, edit responses before the digest closes, or add a labeled correction afterward."],
+    ["Schedules & digests", "Pick weekdays and time zones, skip holidays, and bring responses into one channel summary."],
+    ["Blockers & reminders", "Choose a helper for a blocker. Use opt-in reminders and escalation summaries to follow through."],
+    ["Multiple workflows", "Keep daily standups and weekly reflections separate—even in the same public channel."],
+  ] },
+  { title: "Make work and decisions visible", items: [
+    ["Personal & channel to-dos", "Keep a private list or give shared work an assignee, due date and completion status."],
+    ["Polls & decision log", "Gather votes, close a poll, and record a decision with its rationale and review date."],
+    ["Sprints, retrospectives & planning poker", "Set a sprint goal, discuss attributed retrospective topics, and reveal estimates together."],
+    ["Workload & objectives", "Compare tasks with self-declared capacity and track measurable key results. No individual productivity scores."],
+  ] },
+  { title: "Support the people doing the work", items: [
+    ["Handoffs & approvals", "Agree on a handoff with its recipient or request a private decision from a designated approver."],
+    ["Onboarding & one-on-ones", "Build a newcomer’s checklist with a buddy; prepare participant-only agendas and follow-ups."],
+    ["Leave & coverage", "Request time off and show approved dates and proposed cover without sharing private reasons."],
+    ["Kudos, coins & fair picks", "Thank a teammate, send virtual recognition points, or use /pick rotate for least-recent selection."],
+  ] },
+  { title: "Connect the details", items: [
+    ["Comprehensive reports", "Review check-ins, tasks, blockers, recognition, planning and coordination records, then explicitly share."],
+    ["Jira, Linear & GitHub", "Connect your organization’s tracker. Preview selected issues and confirm imports or status changes."],
+    ["Search & message shortcuts", "Find retained Kick history, or turn selected public-channel message text into an action, blocker or thanks."],
+    ["Delivery operations", "Owners and admins can inspect configuration, audit entries and eligible delivery retries."],
+  ] },
 ] as const;
 
-function Icon({ name }: { name: "sync" | "kudos" | "pick" | "coins" | "shield" | "bolt" | "people" }) {
-  const paths = {
-    sync: <><path d="M6 8h12M6 12h8M6 16h10"/><path d="m16 15 2 2 4-5"/></>,
-    kudos: <><path d="M12 21s-7-4.6-7-11a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 6.4-7 11-7 11Z"/><path d="m8 3 .7 1.6L10 5.3l-1.3.7L8 7.5 7.3 6 6 5.3l1.3-.7L8 3Z"/></>,
-    pick: <><path d="M7 7h10v10H7z"/><path d="m4 4 3 3m10 10 3 3m0-16-3 3M7 17l-3 3"/></>,
-    coins: <><ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7"/><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></>,
-    shield: <><path d="M12 3 5 6v5c0 4.7 2.8 8 7 10 4.2-2 7-5.3 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></>,
-    bolt: <path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z"/>,
-    people: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></>,
-  };
-
-  return <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
-}
-
 export default function HomePage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": `${siteUrl}/#website`,
-        url: siteUrl,
-        name: "Kick Bot",
-        alternateName: "Kick Productivity Bot",
-        description: "An independent Slack app for standups, tasks, polls, reports, planning and team coordination, with opt-in schedules and an App Home.",
-      },
-      {
-        "@type": "SoftwareApplication",
-        "@id": `${siteUrl}/#app`,
-        name: "Kick Bot",
-        url: siteUrl,
-        image: `${siteUrl}/assets/img/logo.png`,
-        description: "Coordinate standups, tasks, polls, reports, recognition and team planning inside Slack. New command shortcuts await Marketplace publication; tools are accessible through Kick Home.",
-        applicationCategory: "BusinessApplication",
-        applicationSubCategory: "Team collaboration and productivity",
-        operatingSystem: "Slack",
-        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-        featureList: ["Async Slack standups", "Kudos and peer recognition", "Virtual team coins", "Random team member picker", "Guided workflow setup", "Custom check-in templates", "Blocker tracking", "Membership-aware App Home", "Aggregate team insights", "Channel to-dos with assignees and due dates", "Private personal to-dos", "Channel polls and results", "Comprehensive workflow reports", "Editable check-ins and late corrections", "Multiple workflows per channel", "Sprint goals and recaps", "Attributed retrospectives and voting", "Planning poker", "Search retained Kick history", "Calendar exceptions", "Delivery operations and audit", "Self-declared workload capacity", "Objectives and measurable key results", "Decision log", "Accepted cross-team handoffs", "Private single-approver requests", "Onboarding checklists and buddies", "Private two-person agendas", "Leave requests and team coverage", "Opt-in channel escalations", "Admin-authorized manual Jira, Linear and GitHub issue status sync"],
-        author: { "@type": "Organization", name: "Kick Bot" },
-      },
-      {
-        "@type": "FAQPage",
-        "@id": `${siteUrl}/#faq`,
-        mainEntity: faqs.map((faq) => ({
-          "@type": "Question",
-          name: faq.question,
-          acceptedAnswer: { "@type": "Answer", text: faq.answer },
-        })),
-      },
-    ],
-  };
-
-  return (
-    <main id="main-content">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
-
-      <section className="hero section-shell" aria-labelledby="hero-title">
-        <div className="hero-copy">
-          <h1 id="hero-title">Teamwork.<br/>Right in Slack.</h1>
-          <p className="hero-lede">Share standups, assign tasks, run polls, and see the week in one report. Plan work and coordinate your team with Kick, without another dashboard.</p>
-          <div className="hero-actions">
-            <SlackButton />
-            <a className="text-link" href="#team-rituals">See how Kick works</a>
-          </div>
-          <p className="installation-disclosure">Before installing, read our <a href="/privacy">Privacy policy</a> to learn what Slack data Kick collects, where it is stored, and how to request deletion. <a href="/support">Get support</a>.</p>
-          <ul className="trust-list" aria-label="Product highlights">
-            <li>Free core workflows</li>
-            <li>No separate account</li>
-          </ul>
-        </div>
-        <div className="hero-visual"><TeamFlow /></div>
-      </section>
-
-      <section className="proof-strip" aria-label="Kick’s core outcomes">
-        <div className="section-shell proof-grid">
-          <div><Icon name="bolt"/><strong>Less ceremony</strong><span>One command starts each workflow.</span></div>
-          <div><Icon name="people"/><strong>More participation</strong><span>Quiet teammates get an equal path in.</span></div>
-          <div><Icon name="shield"/><strong>Fewer tools</strong><span>Slack stays the home for team rituals.</span></div>
-        </div>
-      </section>
-
-      <section className="intro-section section-shell" aria-labelledby="why-kick">
-        <div className="section-heading">
-          <p className="kicker">Why Kick</p>
-          <h2 id="why-kick">Keep team updates in one place.</h2>
-        </div>
-        <div className="intro-copy">
-          <p>Team rituals are useful. Chasing updates, choosing a volunteer, and remembering to recognize good work are not.</p>
-          <p>Kick makes those moments consistent and lightweight, with clear prompts inside the place your team already works.</p>
-        </div>
-      </section>
-
-      <RitualFeatures />
-      <section className="integration-details" aria-labelledby="command-release">
-        <h2 id="command-release">Less navigating. More getting things done.</h2>
-        <p>Go straight to focused Slack forms with <code>/todo</code>, <code>/poll</code>, <code>/report</code>, <code>/plan</code>, <code>/decision</code>, <code>/handoff</code>, <code>/approve</code>, <code>/onboard</code>, <code>/oneonone</code> and <code>/timeoff</code>.</p>
-        <p>Try a private task with <code>/todo mine</code>, prepare a team report with <code>/report week</code>, or review requests with <code>/approve pending</code>. All fourteen commands are published. You can also open these tools from Kick Home.</p>
-        <p>The refreshed interface includes clear sharing notices, native date and time controls, visible status choices, weekday checkboxes, and paginated task tables where Slack supports them. <a href="/get-started#command-reference">See every command and how it works →</a></p>
-      </section>
-
-      <section id="workflows" className="workflows-section" aria-labelledby="workflows-title">
-        <div className="section-shell">
-          <div className="section-heading centered">
-            <p className="kicker">The familiar essentials</p>
-            <h2 id="workflows-title">Four commands for everyday teamwork.</h2>
-            <p>Every workflow opens a focused Slack experience and returns the result where the team can act on it.</p>
-          </div>
-          <div className="workflow-list">
-            {workflows.map((workflow, index) => (
-              <article className={`workflow-row${index % 2 ? " reverse" : ""}`} id={workflow.id} key={workflow.id}>
-                <div className="workflow-copy">
-                  <p className="workflow-eyebrow">{workflow.eyebrow}</p>
-                  <h3>{workflow.title}</h3>
-                  <p>{workflow.description}</p>
-                  <div className="command-note"><code>{workflow.command}</code><span>{workflow.detail}</span></div>
-                </div>
-                <div className={`workflow-visual ${workflow.id}`}>
-                  <Image src={workflow.image} width={workflow.imageWidth} height={workflow.imageHeight} alt={workflow.alt} sizes="(max-width: 700px) 88vw, 480px" />
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="how-it-works" className="how-section section-shell" aria-labelledby="how-title">
-        <div className="section-heading centered">
-          <p className="kicker">How it works</p>
-          <h2 id="how-title">Get started with Kick.</h2>
-        </div>
-        <ol className="steps">
-          <li><h3>Add Kick to Slack</h3><p>Choose your workspace and approve Slack’s permissions. After a successful installation, Kick shows a confirmation page with your next steps. No separate Kick account is required.</p></li>
-          <li><h3>Run a command</h3><p>Start with <code>/sync</code>, <code>/kudos</code>, <code>/coins</code>, or <code>/pick</code> in a public channel.</p></li>
-          <li><h3>Share with your team</h3><p>Fill in the form and submit it to post the result in your channel.</p></li>
-        </ol>
-        <div className="integration-details">
-          <h3>What happens inside your Slack workspace?</h3>
-          <p>Already installed? Follow our <a href="/get-started">step-by-step getting-started guide</a> to run your first command and troubleshoot setup.</p>
-          <p>After an authorized workspace member installs Kick through Slack’s permission screen, teammates can run <code>/sync</code> in a public channel. A Slack form collects yesterday’s work, today’s plan, blockers, mood, and optional kudos. Submitting it posts an update in that channel; <code>/sync -r 7</code> retrieves a seven-day report.</p>
-          <p><code>/kudos</code> and <code>/coins</code> let you select teammates and explain their contribution, then share the recognition in Slack. Coins are virtual recognition points, not money. <code>/pick</code> selects eligible channel members at random and posts the result for your team.</p>
-          <p>Kick uses Slack authorization and member/channel identifiers to connect each action to the correct workspace. Workflow records are stored in Postgres hosted by Neon, and the app runs on Vercel. There is no separate Kick login, external dashboard, or paid service account required for these core features.</p>
-          <p>Start in a test channel: submitted updates and recognition may be visible to other people in that conversation. Type <code>/sync -h</code> for help, or <a href="/support">contact support</a>. Read the <a href="/privacy">full privacy policy</a> before sharing personal or sensitive information.</p>
-        </div>
-      </section>
-
-      <section id="commands" className="commands-section" aria-labelledby="commands-title">
-        <div className="section-shell commands-grid">
-          <div className="commands-intro">
-            <p className="kicker light">Command reference</p>
-            <h2 id="commands-title">Find the command you need.</h2>
-            <p>Add <code>-h</code> to any command for contextual help in Slack.</p>
-          </div>
-          <table className="command-table">
-            <caption className="visually-hidden">Kick Slack command reference</caption>
-            <tbody>
-              <tr><th scope="row"><code>/sync</code></th><td>Submit a standup update</td></tr>
-              <tr><th scope="row"><code>/sync -r 7</code></th><td>Review the last seven days</td></tr>
-              <tr><th scope="row"><code>/sync setup</code></th><td>Configure, preview, and confirm a channel ritual</td></tr>
-              <tr><th scope="row"><code>/sync checkin</code></th><td>Answer the current ritual’s questions</td></tr>
-              <tr><th scope="row"><code>/sync home</code></th><td>Refresh your Kick Home tab</td></tr>
-              <tr><th scope="row"><code>/sync workflows</code></th><td>Refresh Home to choose or add a named workflow</td></tr>
-              <tr><th scope="row"><code>/sync preferences</code></th><td>Set quiet hours, leave, and reminder preferences</td></tr>
-              <tr><th scope="row"><code>/kudos</code></th><td>Recognize a teammate</td></tr>
-              <tr><th scope="row"><code>/coins</code></th><td>Send a team coin</td></tr>
-              <tr><th scope="row"><code>/pick</code></th><td>Choose one or more people fairly</td></tr>
-              <tr><th scope="row"><code>/pick rotate</code></th><td>Queue a least-recent team pick in an enabled ritual</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section id="privacy" className="privacy-section section-shell" aria-labelledby="privacy-title">
-        <div className="privacy-card">
-          <div className="privacy-copy">
-            <p className="kicker">Your Slack data</p>
-            <h2 id="privacy-title">Know what you share before you install.</h2>
-            <p>Kick processes Slack installation details, member and channel identifiers, and the updates you submit. Neon Postgres stores app records; Vercel hosts the service. Our English-language policy explains data use, storage, retention, recovery copies, and access or deletion requests.</p>
-            <a className="text-link dark" href="/privacy">Read the privacy policy <span aria-hidden="true">→</span></a>
-          </div>
-          <ul className="privacy-points">
-            <li><Icon name="shield"/><div><strong>No separate login</strong><span>Slack handles identity and installation.</span></div></li>
-            <li><Icon name="people"/><div><strong>No stored member emails</strong><span>Kick is built around Slack IDs, not email lists.</span></div></li>
-            <li><Icon name="bolt"/><div><strong>Clear deletion path</strong><span>Individuals and workspace owners can request access, an export, or deletion.</span></div></li>
-          </ul>
-        </div>
-      </section>
-
-      <section id="faq" className="faq-section section-shell" aria-labelledby="faq-title">
-        <div className="faq-heading">
-          <p className="kicker">Questions, answered</p>
-          <h2 id="faq-title">What teams ask before installing Kick.</h2>
-          <p>Need something else? <a href="/support">Visit support</a>.</p>
-        </div>
-        <div className="faq-list">
-          {faqs.map((faq, index) => (
-            <details key={faq.question} open={index === 0}>
-              <summary>{faq.question}<span aria-hidden="true"/></summary>
-              <p>{faq.answer}</p>
-            </details>
-          ))}
-        </div>
-      </section>
-
-      <section className="final-cta section-shell" aria-labelledby="cta-title">
-        <h2 id="cta-title">Try Kick with your team.</h2>
-        <p>Bring standups, recognition, and fair team decisions into Slack.</p>
-        <SlackButton variant="light" />
-      </section>
-    </main>
-  );
+  const structuredData = { "@context": "https://schema.org", "@graph": [
+    { "@type": "SoftwareApplication", name: "Kick Bot", url: "https://kick.bozmoz.com", applicationCategory: "BusinessApplication", operatingSystem: "Slack", description: "Team coordination in Slack: fourteen published commands for check-ins, tasks, polls, reports, planning and people workflows.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, featureList: groups.flatMap(group => group.items.map(item => item[0])), author: { "@type": "Organization", name: "Kick Bot" } },
+    { "@type": "FAQPage", mainEntity: faqs.map(([question, answer]) => ({ "@type": "Question", name: question, acceptedAnswer: { "@type": "Answer", text: answer } })) },
+  ] };
+  return <main id="main-content" className={styles.page}>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
+    <section className={`${styles.hero} ${styles.shell}`} aria-labelledby="hero-title">
+      <div className={styles.heroCopy}><p className={styles.eyebrow}>Your team. In sync.</p><h1 id="hero-title">Good teamwork.<br/><span>Less chasing.</span></h1><p className={styles.lede}>Plans, people, and progress—together in Slack. Kick turns everyday conversations into clear next steps, without another dashboard.</p><div className={styles.actions}><SlackButton/><a href="#product-tour">Take a closer look ↗</a></div><p className={styles.small}>Free core workflows. No separate account.<br/>Before you install, read our <a href="/privacy">privacy policy</a>.</p></div>
+      <div className={styles.heroArt}><Image src="/assets/site-v3/teamwork.webp" width={1536} height={1024} alt="Paper-cut illustration of teammates bringing tasks, conversations and progress together" sizes="(max-width: 800px) 100vw, 55vw" priority/><div className={styles.heroStamp}><span aria-hidden="true">↗</span><strong>A little more clarity.<br/>A lot less back-and-forth.</strong></div></div>
+    </section>
+    <section className={styles.motionBand} aria-label="From conversation to shared progress"><div className={styles.shell}><WorkMotion/></div></section>
+<section id="team-rituals" className={`${styles.section} ${styles.shell}`} aria-labelledby="product-title"><div id="product-tour" className={styles.sectionIntro}><div><p className={styles.eyebrow}>One app. The whole working week.</p><h2 id="product-title">From “any updates?”<br/>to “here’s the plan.”</h2></div><p>Start with the work in front of you. Kick’s focused forms and Home tab keep the details close to your team.</p></div><ProductExplorer/></section>
+    <section className={styles.editorial} aria-labelledby="planning-title"><div className={`${styles.shell} ${styles.editorialGrid}`}><div className={styles.artPanel}><Image src="/assets/site-v3/planning.webp" width={1536} height={1024} alt="An orange bridge connects tasks and a calendar, illustrating a clear handoff" sizes="(max-width: 800px) 100vw, 50vw"/></div><div className={styles.editorialCopy}><p className={styles.eyebrow}>Make the next step obvious</p><h2 id="planning-title">A plan people<br/>can work with.</h2><p>Give work an owner. See who has room. Keep the decision and the reason together, so the next conversation starts with context.</p><ul><li>Shared tasks, sprint goals and measurable objectives</li><li>Self-declared capacity—not productivity scores</li><li>Accepted handoffs and decisions with review dates</li></ul><a className={styles.arrowLink} href="/get-started#command-reference">Start with /plan ↗</a></div></div></section>
+    <section className={`${styles.section} ${styles.shell} ${styles.peopleGrid}`} aria-labelledby="people-title"><div className={styles.editorialCopy}><p className={styles.eyebrow}>Keep the human part human</p><h2 id="people-title">Better support.<br/>Not more admin.</h2><p>A thoughtful welcome. A useful one-on-one. A thank-you that doesn’t get forgotten. Make room for the moments that hold a team together.</p><ul><li>Onboarding checklists with a buddy</li><li>Private agendas, approvals and leave requests</li><li>Kudos, virtual coins and fair team rotations</li></ul><a className={styles.arrowLink} href="/get-started">Explore people workflows ↗</a></div><div className={styles.artPanel}><Image src="/assets/site-v3/people.webp" width={1536} height={1024} alt="Two paper-cut teammates exchange an appreciation rosette beside conversation bubbles" sizes="(max-width: 800px) 100vw, 50vw"/></div></section>
+    <section id="workflows" className={`${styles.directory} ${styles.shell}`} aria-labelledby="directory-title"><div className={styles.sectionIntro}><div><p className={styles.eyebrow}>Built for the way teams work</p><h2 id="directory-title">Pick what helps.<br/>Leave the rest.</h2></div><p>Use one workflow or connect several. Schedules are opt-in; your team chooses its own questions, participants and rhythm.</p></div><div className={styles.directoryGrid}>{groups.map(group => <details key={group.title}><summary>{group.title}<span aria-hidden="true">+</span></summary><dl>{group.items.map(([title, copy]) => <div key={title}><dt>{title}</dt><dd>{copy}</dd></div>)}</dl></details>)}</div><p className={styles.small}>Delivery is checked every 15 minutes for enabled schedules and queued notices. Private reminders require installation consent and activation. <a href="/get-started">Read the setup and availability guide</a>.</p></section>
+    <section id="commands" className={styles.commands} aria-labelledby="commands-title"><div className={styles.shell}><div className={styles.sectionIntro}><div><p className={styles.eyebrow}>Fourteen ways to get moving</p><h2 id="commands-title">A short command.<br/>A clear next step.</h2></div><p>All fourteen commands are published. Add <code>help</code> to any command, or open the same tools from Kick Home.</p></div><div className={styles.commandGrid}>{commands.map(command => <a key={command.name} href="/get-started#command-reference"><code>/{command.name}</code><span>{command.description}</span><span aria-hidden="true">↗</span></a>)}</div></div></section>
+    <section id="how-it-works" className={`${styles.section} ${styles.shell}`} aria-labelledby="setup-title"><div className={styles.sectionIntro}><div><p className={styles.eyebrow}>Start small</p><h2 id="setup-title">Your first useful minute.</h2></div><a className={styles.arrowLink} href="/get-started">Full getting-started guide ↗</a></div><div className={styles.setupGrid}>
+      <article><span className={styles.setupIcon} aria-hidden="true">↗</span><h3>Add Kick</h3><p>Choose your Slack workspace and approve the installation. A confirmation page explains what to do next.</p></article>
+      <article><span className={styles.setupIcon} aria-hidden="true">/</span><h3>Try something useful</h3><p>Make a private list with <code>/todo mine</code>. For shared work, run <code>/sync setup</code> in a public test channel and review the settings.</p></article>
+      <article><span className={styles.setupIcon} aria-hidden="true">✓</span><h3>Bring the team along</h3><p>Choose a workflow in Kick Home. Collect updates, assign an action or preview a report with <code>/report week</code>. Share only when you’re ready.</p></article>
+    </div></section>
+    <section id="privacy" className={`${styles.trust} ${styles.shell}`} aria-labelledby="trust-title"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><path d="M50 8 18 20v28c0 22 18 36 32 44 14-8 32-22 32-44V20L50 8Z" stroke="currentColor" strokeWidth="4"/><path d="m34 48 12 12 23-25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></svg><div><p className={styles.eyebrow}>Clear boundaries</p><h2 id="trust-title">Shared work stays shared.<br/>Private work stays separate.</h2><p>Kick stores Slack identifiers, authorization and the records you submit in Neon Postgres; Vercel hosts the app. Shared workflows use 7-, 30- or 90-day retention. Personal tasks use 30 days. Private tasks, approvals, leave details and one-on-ones stay out of shared reports.</p><a className={styles.arrowLink} href="/privacy">Read our privacy policy ↗</a><p className={styles.small}>Request access, an export or deletion at <a href="mailto:kick.bot.help@gmail.com">kick.bot.help@gmail.com</a>. <a href="/support">Get support</a>.</p></div></section>
+    <section id="faq" className={`${styles.section} ${styles.shell} ${styles.faq}`} aria-labelledby="faq-title"><div><p className={styles.eyebrow}>Good questions</p><h2 id="faq-title">A few things<br/>worth knowing.</h2><p className={styles.small}>More detail in the <a href="/get-started">guide</a> and <a href="/privacy">privacy policy</a>.</p></div><div>{faqs.map(([question, answer]) => <details key={question}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
+    <section className={`${styles.cta} ${styles.shell}`} aria-labelledby="cta-title"><svg viewBox="0 0 160 120" aria-hidden="true" fill="none"><path d="M10 100C75 100 55 20 140 20m-28-12 30 12-14 30" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/></svg><p className={styles.eyebrow}>Less chasing starts here</p><h2 id="cta-title">Give your team<br/>a little Kick.</h2><p>The work is already in Slack. Bring the next steps there, too.</p><SlackButton/><p className={styles.small}>Free core workflows · <a href="/privacy">Privacy policy</a></p></section>
+  </main>;
 }

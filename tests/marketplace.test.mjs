@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 
 // Run after pnpm build. Inspect prerendered HTML, not just component source.
-const landing = readFileSync('.next/server/app/index.html', 'utf8');
+const landing = readFileSync('.next/server/app/index.html', 'utf8').replace(/<!--.*?-->/g, '');
 const privacy = readFileSync('.next/server/app/privacy.html', 'utf8');
 const guide = readFileSync('.next/server/app/get-started.html', 'utf8');
 
@@ -14,16 +14,18 @@ test('all generated public pages and metadata omit personal-name attribution', (
 });
 
 test('landing page explicitly identifies Kick and its Slack integration', () => {
-  assert.match(landing, /<h1[^>]*>Teamwork\.<br\/>Right in Slack\./);
-  assert.ok(landing.includes('What happens inside your Slack workspace?'));
+  assert.match(landing, /<h1[^>]*>Good teamwork\.<br\/><span>Less chasing\./);
+  assert.ok(landing.includes('together in Slack'));
   for (const command of ['/sync', '/kudos', '/coins', '/pick']) assert.ok(landing.includes(command));
   assert.ok(landing.includes('Neon'));
 });
 test('release tour offers six examples and documents the published commands', () => {
-  assert.equal((landing.match(/aria-controls="tour-preview"/g) || []).length, 6);
-  assert.ok(landing.includes('Workload &amp; capacity'));
-  assert.ok(landing.includes('kick-slack-listing-images.zip'));
-  assert.ok(landing.includes('not live Slack captures'));
+  assert.equal((landing.match(/aria-controls="product-example"/g) || []).length, 6);
+  assert.ok(landing.includes('not a Slack screenshot'));
+  assert.doesNotMatch(landing, /assets\/img\/features|assets\/slack-marketplace|Four commands for everyday/);
+  for (const asset of ['teamwork.webp','planning.webp','people.webp','checkins.svg','tasks.svg','polls.svg','planning.svg','people.svg','reports.svg']) {
+    assert.ok(readFileSync(`public/assets/site-v3/${asset}`).length > 100, asset);
+  }
   assert.ok(landing.includes('All fourteen commands are published'));
   assert.ok(guide.includes('Published in Slack:'));
   for (const term of ['outgoing handoffs', 'key results', 'private approvals', 'one-on-ones']) assert.ok(guide.includes(term), term);
@@ -45,7 +47,7 @@ test('policy is English, product-specific, and has its own canonical URL', () =>
   assert.ok(privacy.includes('href="https://kick.bozmoz.com/privacy"'));
 });
 test('website explains the full release without claiming pending permissions are active', () => {
-  for (const term of ['/sync setup', '/pick rotate', '15 minutes', 'installation consent and activation', 'Illustrative app views', 'No individual productivity scores', 'Planning poker', 'Existing slash commands remain available']) assert.ok(landing.includes(term), term);
+  for (const term of ['/sync setup', '/pick rotate', '15 minutes', 'installation consent and activation', 'No individual productivity scores', 'planning poker', 'Schedules are opt-in']) assert.ok(landing.includes(term), term);
   assert.ok(!landing.includes('role="tab"'));
 });
 
@@ -55,44 +57,42 @@ test('collaboration data, visibility and retention are explained in policy and g
 });
 
 test('polls, private tasks and reports have concrete examples and accurate privacy limits', () => {
-  for (const term of ['Channel polls', 'Personal to-dos', 'Channel to-dos', 'Comprehensive reports', 'Which day for the demo?', 'Try it:', 'legacy command history']) assert.ok(landing.includes(term), term);
-  assert.equal((landing.match(/class="feature-example"/g) || []).length, 33);
+  for (const term of ['Personal &amp; channel to-dos', 'Comprehensive reports', '/todo mine', '/report week']) assert.ok(landing.includes(term), term);
+  const examples = readFileSync('app/ui/ProductExplorer.tsx', 'utf8');
+  for (const term of ['Which day for the demo?', 'legacy command history', 'not anonymous', 'Prepare the release demo']) assert.ok(examples.includes(term), term);
   for (const term of ['30 days after creation', 'not end-to-end encryption', 'ballots', 'personal to-dos', 'closing a report preview sends nothing']) assert.ok(privacy.includes(term), term);
   for (const term of ['Save vote', 'Share report', 'current status']) assert.ok(guide.includes(term), term);
 });
 test('team planning has concrete examples, scope and retention disclosures', () => {
-  for (const term of ['Workload and capacity', 'Objectives and key results', 'Decision log', '50% progress']) assert.ok(landing.includes(term), term);
+  for (const term of ['Workload &amp; objectives', 'measurable key results', 'decision log']) assert.ok(landing.includes(term), term);
   for (const term of ['Set my capacity', 'Proposed, Accepted or Superseded', 'no automatic reminders', 'Concurrent edits']) assert.ok(guide.includes(term), term);
   for (const term of ['self-declared weekly task limits', 'key-result baselines', 'not capacity limits or individual metric values']) assert.ok(privacy.includes(term), term);
 });
 test('coordination and issue sync have examples and disclose privacy, consent and manual operation', () => {
-  for (const term of ['Cross-team handoffs', 'Approvals with deadlines', 'Onboarding with a buddy', 'Private one-on-ones', 'Leave and team coverage', 'Opt-in escalations', 'Jira, Linear and GitHub issue sync']) assert.ok(landing.includes(term), term);
+  for (const term of ['Handoffs &amp; approvals', 'Onboarding &amp; one-on-ones', 'Leave &amp; coverage', 'Jira, Linear &amp; GitHub', 'There is no background sync']) assert.ok(landing.includes(term), term);
   for (const term of ['No source record is copied', 'not end-to-end encrypted', 'Linked issues', 'nothing synchronizes automatically', 'Disconnect workspace']) assert.ok(guide.includes(term), term);
   for (const term of ['encrypted agenda', 'designated approver', 'There is no background sync', 'expire after 90 days', 'single-use links']) assert.ok(privacy.includes(term), term);
 });
 test('combined command release is documented as published without stale review notices', () => {
-  for (const name of ['todo', 'poll', 'report', 'plan', 'decision', 'handoff', 'approve', 'onboard', 'oneonone', 'timeoff']) {
+  for (const name of ['sync', 'pick', 'kudos', 'coins', 'todo', 'poll', 'report', 'plan', 'decision', 'handoff', 'approve', 'onboard', 'oneonone', 'timeoff']) {
     assert.ok(landing.includes(`/${name}`), name);
     assert.ok(guide.includes(`/${name}`), name);
   }
   for (const content of [landing, guide, readFileSync('app/llms.txt/route.ts', 'utf8')]) {
-    assert.doesNotMatch(content, /unpublished|not yet published|await approval|pending Slack registration|New command rollout|approval and publication are pending/i);
+    assert.doesNotMatch(content, /unpublished|not yet published|await.*publication|pending Slack registration|New command rollout|approval and publication are pending/i);
   }
   assert.ok(guide.includes('command-reference'));
 });
 
-test('redesign retains accessible feature disclosures and a labeled lightweight illustration', () => {
-  assert.equal((landing.match(/<details class="feature-group"/g) || []).length, 5);
-  assert.ok(landing.includes('aria-labelledby="flow-title flow-description"'));
-  assert.ok(landing.includes('Illustrative workflow.'));
-  const css = readFileSync('app/globals.css', 'utf8');
-  assert.ok(css.includes('prefers-reduced-motion: reduce'));
-  assert.ok(css.includes('animation: flow-arrive 1.4s'));
-  assert.ok(css.includes('animation: flow-travel 9s linear infinite'));
-  assert.ok(css.includes('animation-play-state: paused'));
-  assert.ok(css.includes('.team-flow .flow-art * { animation: none !important; }'));
+test('new motion graphic supports pause and a static reduced-motion view', () => {
+  assert.ok(landing.includes('Illustrative sequence:'));
+  const css = readFileSync('app/ui/home.module.css', 'utf8');
+  assert.ok(css.includes('prefers-reduced-motion:reduce'));
+  assert.ok(css.includes('animation:handoff 8s ease-in-out infinite'));
+  assert.ok(css.includes('animation-play-state:paused'));
+  assert.ok(css.includes('.motion * { animation:none !important; }'));
   assert.ok(landing.includes('Pause animation'));
-  assert.ok(landing.includes('aria-controls="team-flow-art"'));
+  assert.ok(landing.includes('aria-controls="work-sequence"'));
   assert.ok(!css.includes('letter-spacing: -.045em'));
 });
 test('landing page links to a public getting-started guide with actionable instructions', () => {

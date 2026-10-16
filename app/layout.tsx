@@ -8,11 +8,11 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Kick Bot — Standups, Tasks & Team Coordination for Slack",
+    default: "Kick — Team Coordination in Slack, Without the Chasing",
     template: "%s | Kick Bot",
   },
   description:
-    "Manage standups, tasks, polls, reports and team coordination in Slack. Explore workload planning, approvals and private one-on-ones with Kick.",
+    "Bring plans, people and progress together in Slack. Kick offers 14 commands for check-ins, tasks, polls, reports, planning, approvals and more. Free core workflows.",
   applicationName: "Kick Bot",
   authors: [{ name: "Kick Bot" }],
   creator: "Kick Bot",
@@ -39,15 +39,15 @@ export const metadata: Metadata = {
     type: "website",
     url: siteUrl,
     siteName: "Kick Bot",
-    title: "Kick Bot — Teamwork, right in Slack",
+    title: "Kick — Good teamwork. Less chasing.",
     description:
-      "Standups, tasks, polls, reports and team coordination—without another dashboard.",
+      "Plans, people and progress, together in Slack. Fourteen commands. No separate account.",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Kick Bot for Slack" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kick Bot — Teamwork, right in Slack",
-    description: "Standups, tasks, polls, reports and team coordination—without another dashboard.",
+    title: "Kick — Good teamwork. Less chasing.",
+    description: "Plans, people and progress, together in Slack. Fourteen commands. No separate account.",
     images: ["/opengraph-image"],
   },
   robots: {
