@@ -1,0 +1,49 @@
+Kick Google Analytics 4
+Stream: kick / 16139275646
+Measurement ID: G-6EC7YHKCG9
+Production origin: https://kick.bozmoz.com
+
+Implemented
+- Basic, explicit opt-in: no Google script or analytics requests before acceptance.
+- Consent choice expires after 180 days; analytics cookies after 90 days, no renewal.
+- Equal allow/reject controls, persistent Cookie preferences, cross-tab changes,
+  consent expiry checks, Global Privacy Control respected, storage failure tolerated.
+- Only home, getting-started, privacy, support, terms are measured on the exact production origin.
+- Manual page_view on initial consent and route changes; repeated same-path renders deduplicated.
+- slack_install_click measures intent only, not installation success. Never delay navigation.
+- Canonical public URL and static title only; no query/hash/referrer, Slack IDs or form data
+  in application-authored events. No user_id, Google signals or ad personalization.
+- OAuth, installation results, APIs, private data, localhost and preview domains excluded.
+- Updated public privacy policy. No server-side Measurement Protocol secret required.
+
+Property settings verified/applied in Google Analytics on October 16, 2026
+- Property 559242827, account 411959484; stream ID and measurement ID matched.
+- Enhanced measurement OFF; zero connected site tags shown.
+- Email redaction ON and 19 identity/authentication query keys redacted.
+- Event and user retention both 2 months; reset on new user activity OFF, saved successfully.
+- Google signals and user-provided data collection OFF.
+- Ads personalization disallowed in all 307 regions, verified after applying.
+
+Maintenance and verification checklist
+1. Admin > Data streams > kick (16139275646): turn Enhanced measurement OFF.
+   We send page views manually. Google's history-based page views can otherwise duplicate
+   counts even with send_page_view:false. Automatic forms, outbound links and site-search
+   capture are not part of this integration and should not collect extra URL/form data.
+2. Data collection: leave Google signals, user-provided data collection and advertising
+   personalization disabled. Check that this tag has no unrelated destinations attached.
+3. Data retention: select 2 months for event/user data and disable reset on new activity
+   if offered. This is independent of cookie expiry and does not limit aggregate reports.
+   Update the privacy policy with the verified setting; do not claim it before confirming.
+4. Stream data redaction: enable email redaction and query-parameter redaction as additional
+   protection; the application already omits query parameters in its explicit events.
+5. Optionally mark slack_install_click as a key event (installation intent, not success).
+6. Realtime: visit production in a fresh browser, reject first (no gtag script or /g/collect),
+   allow via Cookie preferences, navigate public pages, then click Add to Slack.
+   Expect page_view and slack_install_click for G-6EC7YHKCG9. Do not complete installation
+   solely for analytics testing. Reject again: cookies removed, no later analytics events.
+7. Test GPC, cross-tab rejection, blocked storage, ad blocking and narrow-screen consent UI.
+   A blocked Google script must never affect installation or normal website navigation.
+
+Google references
+https://developers.google.com/tag-platform/security/guides/consent
+https://developers.google.com/analytics/devguides/collection/ga4/views

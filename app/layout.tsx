@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SiteFooter, SiteHeader } from "./ui/SiteChrome";
+import AnalyticsConsent from "./ui/AnalyticsConsent";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://kick.bozmoz.com";
@@ -82,6 +83,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <SiteHeader />
         {children}
         <SiteFooter />
+        <AnalyticsConsent />
       </body>
     </html>
   );

@@ -1,0 +1,11 @@
+.root { background:#172137; color:white; padding:0 24px 24px; text-align:center; }
+.preferences { border:0; background:transparent; color:inherit; text-decoration:underline; cursor:pointer; padding:12px; min-height:44px; font-size:.85rem; }
+.panel { position:fixed; z-index:100; bottom:18px; right:18px; width:min(540px,calc(100% - 36px)); max-height:calc(100dvh - 36px); overflow:auto; background:white; color:#172137; border:1px solid #ccd4e1; border-radius:18px; padding:24px; box-shadow:0 12px 50px #17213730; text-align:left; }
+.panel h2 { font-size:1.35rem; letter-spacing:normal; margin:0 0 12px; }
+.panel p { font-size:.88rem; line-height:1.6; margin-bottom:16px; }
+.panel a { text-decoration:underline; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; }
+.actions button { min-height:44px; padding:10px 16px; border:1px solid #2448ad; color:#2448ad; border-radius:8px; background:#fff; cursor:pointer; font-weight:650; }
+.actions button:hover { background:#eaf0ff; }
+.actions button:disabled { opacity:.55; cursor:not-allowed; }
+.root button:focus-visible { outline:3px solid #e87635; outline-offset:3px; }

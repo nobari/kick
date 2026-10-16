@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <main id="main-content" className="legal-main section-shell">
       <header className="legal-hero">
-        <p className="legal-date">Last updated October 10, 2026</p>
+        <p className="legal-date">Last updated October 16, 2026</p>
         <h1>Kick Bot privacy policy</h1>
         <p>This policy covers Kick Bot, an independent integration for Slack, and its website at kick.bozmoz.com. “We” and “our” refer to the team operating Kick Bot. It explains how we handle data received from Slack, people using Kick, and visitors to our website.</p>
       </header>
@@ -40,6 +40,10 @@ export default function PrivacyPage() {
             <p>Slack requests and diagnostic logs can contain command text, submitted fields, identifiers, timestamps, and error information. Our hosting services also process ordinary request information, such as IP addresses, browser details, requested URLs, and response status, to deliver and protect the website and app.</p>
             <h3>Installation cookies</h3>
             <p>After installation, Kick sets a secure, HTTP-only confirmation cookie that expires after ten minutes. It records an expiry time and whether the installation was organization-wide; it contains no Slack access token, workspace name, or member identifier and is not used for advertising. Slack’s OAuth flow also uses a temporary security cookie to validate the installation request.</p>
+            <h3 id="website-analytics">Optional website analytics</h3>
+            <p>Only after you allow analytics, we load Google Analytics 4 on public pages at kick.bozmoz.com to understand website visits and clicks on Add to Slack. Google receives a browser-generated identifier, public page information, event timestamps, browser/device information and network information needed to process the request. We do not deliberately send Slack identifiers, messages, team records, form contents, URL query strings or fragments, or referring URLs. Installation, authorization, confirmation and error pages are excluded. An installation-button click is not evidence of a completed installation.</p>
+            <p>Google processes this website analytics data separately from Kick’s Neon app database and may process it outside your country. Our integration disables Google signals and advertising personalization and denies advertising consent. See <a href="https://policies.google.com/privacy">Google’s privacy policy</a>. Analytics is optional and does not affect the Slack app.</p>
+<p>The analytics cookies (_ga and _ga_6EC7YHKCG9) are configured to expire after 90 days without automatic renewal. We remember your allow/reject choice in local browser storage for 180 days. Use Cookie preferences at the bottom of any public page to withdraw permission; this stops future tracking and removes this integration’s cookies from this domain. Browser Global Privacy Control keeps analytics off. Rejecting does not delete analytics already received by Google. The Google Analytics property is configured to retain user-level and event-level data for two months, without resetting retention on new activity. This does not limit Google’s standard aggregated reports. Contact us to request access, an export or deletion. For an analytics request, tell us the approximate visit date and, if available, your analytics cookie identifier; do not send Slack credentials.</p>
             <h3>Support requests</h3>
             <p>If you contact us, we receive your email address and the information you include. This is separate from Slack member information. Do not send passwords, Slack tokens, or other credentials in support email.</p>
           </section>

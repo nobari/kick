@@ -12,7 +12,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
-    "test": "node --test server/rituals/*.test.js server/integrations/*.test.js server/install-result.test.js tests/scheduler.test.mjs tests/review-manifest.test.mjs",
+    "test": "node --test server/rituals/*.test.js server/integrations/*.test.js server/install-result.test.js tests/scheduler.test.mjs tests/review-manifest.test.mjs tests/analytics.test.mjs",
     "slack:review-manifest": "node scripts/slack-review-manifest.mjs",
     "slack:command-config": "node scripts/slack-command-config.mjs",
     "slack:screenshots": "node scripts/capture-marketplace-screenshots.mjs",
