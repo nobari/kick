@@ -63,7 +63,7 @@ export default function RitualFeatures() {
   return <section id="team-rituals" className="ritual-section section-shell" aria-labelledby="ritual-title">
     <div className="section-heading centered"><p className="kicker">A closer look</p><h2 id="ritual-title">Updates, actions, and decisions. In Slack.</h2><p>Explore check-ins, shared and personal to-dos, polls, reports, and workload planning. Choose a feature to see an example and learn where to start.</p></div>
     <RitualTour />
-    <p>Prefer a command? <a href="/get-started#command-reference">See all fourteen commands and rollout status</a>. Ten new shortcuts are configured in an unpublished Slack draft; use Kick Home until the Marketplace update is approved and published.</p>
+    <p>Prefer a command? <a href="/get-started#command-reference">Explore all fourteen published commands</a>. Open a focused form directly from Slack, or find the same tools in Kick Home.</p>
     <aside className="release-notice" aria-label="Feature availability"><strong>Availability</strong><p>{scheduled ? "Scheduled delivery is checked every 15 minutes and requires explicit workflow setup. " : "Automatic delivery is not activated yet; setups can be saved as paused. "}Private reminders require permission granted to your installation and service activation. App Home requires the Home tab and event subscription. Existing slash commands remain available.</p></aside>
     <details className="feature-group">
       <summary><span><strong>Check-ins & team rituals</strong><span>Your questions, your schedule, your team’s rhythm.</span></span><span className="group-toggle" aria-hidden="true">+</span></summary>

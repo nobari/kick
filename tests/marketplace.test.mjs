@@ -19,13 +19,13 @@ test('landing page explicitly identifies Kick and its Slack integration', () => 
   for (const command of ['/sync', '/kudos', '/coins', '/pick']) assert.ok(landing.includes(command));
   assert.ok(landing.includes('Neon'));
 });
-test('release tour offers six examples and distinguishes draft commands from publication', () => {
+test('release tour offers six examples and documents the published commands', () => {
   assert.equal((landing.match(/aria-controls="tour-preview"/g) || []).length, 6);
   assert.ok(landing.includes('Workload &amp; capacity'));
   assert.ok(landing.includes('kick-slack-listing-images.zip'));
   assert.ok(landing.includes('not live Slack captures'));
-  assert.ok(landing.includes('unpublished Slack draft'));
-  assert.ok(guide.includes('not yet published to all workspaces'));
+  assert.ok(landing.includes('All fourteen commands are published'));
+  assert.ok(guide.includes('Published in Slack:'));
   for (const term of ['outgoing handoffs', 'key results', 'private approvals', 'one-on-ones']) assert.ok(guide.includes(term), term);
 });
 test('privacy policy is linked directly in navigation, hero, and footer', () => {
@@ -70,13 +70,14 @@ test('coordination and issue sync have examples and disclose privacy, consent an
   for (const term of ['No source record is copied', 'not end-to-end encrypted', 'Linked issues', 'nothing synchronizes automatically', 'Disconnect workspace']) assert.ok(guide.includes(term), term);
   for (const term of ['encrypted agenda', 'designated approver', 'There is no background sync', 'expire after 90 days', 'single-use links']) assert.ok(privacy.includes(term), term);
 });
-test('combined command release is documented without claiming Slack publication', () => {
+test('combined command release is documented as published without stale review notices', () => {
   for (const name of ['todo', 'poll', 'report', 'plan', 'decision', 'handoff', 'approve', 'onboard', 'oneonone', 'timeoff']) {
     assert.ok(landing.includes(`/${name}`), name);
     assert.ok(guide.includes(`/${name}`), name);
   }
-  assert.ok(landing.includes('await approval and publication'));
-  assert.ok(guide.includes('New command rollout'));
+  for (const content of [landing, guide, readFileSync('app/llms.txt/route.ts', 'utf8')]) {
+    assert.doesNotMatch(content, /unpublished|not yet published|await approval|pending Slack registration|New command rollout|approval and publication are pending/i);
+  }
   assert.ok(guide.includes('command-reference'));
 });
 
@@ -87,6 +88,11 @@ test('redesign retains accessible feature disclosures and a labeled lightweight 
   const css = readFileSync('app/globals.css', 'utf8');
   assert.ok(css.includes('prefers-reduced-motion: reduce'));
   assert.ok(css.includes('animation: flow-arrive 1.4s'));
+  assert.ok(css.includes('animation: flow-travel 9s linear infinite'));
+  assert.ok(css.includes('animation-play-state: paused'));
+  assert.ok(css.includes('.team-flow .flow-art * { animation: none !important; }'));
+  assert.ok(landing.includes('Pause animation'));
+  assert.ok(landing.includes('aria-controls="team-flow-art"'));
   assert.ok(!css.includes('letter-spacing: -.045em'));
 });
 test('landing page links to a public getting-started guide with actionable instructions', () => {

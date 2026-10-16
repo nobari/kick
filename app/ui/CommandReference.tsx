@@ -5,12 +5,12 @@ export default function CommandReference() {
     <section className="integration-details" aria-labelledby="command-reference">
       <h2 id="command-reference">A shorter path to your team’s work</h2>
       <p>Open a focused Slack form, review who can see the information, then confirm. Every command accepts <code>help</code>, <code>-h</code> and <code>--help</code>.</p>
-      <p><strong>New command rollout:</strong> the ten new commands are configured in Kick’s unpublished Slack draft. They are not yet published to all workspaces. Until the Marketplace update is approved and published, use the same tools in Kick → Home. The existing <code>/sync</code>, <code>/pick</code>, <code>/kudos</code> and <code>/coins</code> commands remain available.</p>
+      <p><strong>Published in Slack:</strong> all fourteen commands are available in Kick’s published app. Start with a command below or open the same tools in Kick → Home. If your workspace is missing a command, ask a Slack admin to check the Kick installation and any required app update permissions.</p>
       <dl>
         {commands.map(command => (
           <div key={command.name}>
             <dt><h3><code>{`/${command.name}`}</code> — {command.description}</h3></dt>
-            <dd><code>{`/${command.name} ${command.usage}`}</code>{command.legacy ? " · Existing command" : " · New command rollout"}</dd>
+            <dd><code>{`/${command.name} ${command.usage}`}</code></dd>
           </div>
         ))}
       </dl>

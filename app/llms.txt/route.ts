@@ -56,9 +56,9 @@ Terms: https://kick.bozmoz.com/terms
 - Issue sync is administrator-managed and organization-specific. Connect GitHub, Jira or Linear, select the provider organization/site and repository/project/team, and explicitly preview/import an issue title and status into a channel to-do. Later status changes are manual and confirmed in either direction, with stale-preview checks and conflict notices. There is no background sync, remote deletion, comment/attachment copying or private-record export. Provider consent and availability are required.
 - One-on-one titles and notes are encrypted at rest and participant-only in Kick, not end-to-end encrypted. New workflow records use 7/30/90-day retention. Provider connections expire after 90 days and may be disconnected sooner.
 
-## Command update configured in an unpublished Slack draft
+## Published Slack commands
 
-- Ten new command names: /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /timeoff. These are configured in the unpublished draft, not yet published to all workspaces. Their underlying tools remain accessible from Kick Home while Marketplace approval and publication are pending.
+- All fourteen commands are published: /sync, /pick, /kudos, /coins, /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /timeoff. Their tools are also accessible from Kick Home. If a workspace is missing commands, its Slack admin should check the Kick installation and required app update permissions.
 - All fourteen commands support help, -h and --help. Personal /todo mine needs no workflow; team tools require public-channel membership and select a workflow when multiple exist.
 - /report week and /report month prefill trailing inclusive 7/30-day UTC ranges. /approve pending is the designated approver's pending inbox; /oneonone upcoming shows active meetings today or later in UTC.
 - Native forms use date/time pickers, short radio choices, weekday checkboxes, clear sharing notices and draft-preserving validation. Newer modal alerts and Home task tables have section/button fallbacks when rejected by Slack.

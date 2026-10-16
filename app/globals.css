@@ -284,6 +284,19 @@
   .trust-list { margin-top: 1.2rem; gap: 1.25rem; color: var(--ink-soft); }
   .team-flow { margin: 0; }
   .flow-art { animation: flow-arrive 1.4s cubic-bezier(.2,.7,.2,1) both; }
+  .flow-motion-control { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; min-height: 44px; color: var(--ink-soft); font-size: .78rem; cursor: pointer; }
+  .flow-motion-control input { width: 1rem; height: 1rem; accent-color: var(--orange-dark); }
+  .flow-signal { stroke-dasharray: 4 100; animation: flow-travel 9s linear infinite; }
+  .flow-check, .flow-report { stroke-dasharray: 1; stroke-dashoffset: 0; }
+  .flow-check-update { animation: flow-update 9s ease-in-out infinite; }
+  .flow-check-task { animation: flow-task 9s ease-in-out infinite; }
+  .flow-report { animation: flow-summary 9s ease-in-out infinite; }
+  .team-flow:has(.flow-motion-control input:checked) .flow-art,
+  .team-flow:has(.flow-motion-control input:checked) .flow-art * { animation-play-state: paused; }
+  @keyframes flow-travel { 0%, 12% { stroke-dashoffset: 5; opacity: 0; } 15% { opacity: 1; } 75% { stroke-dashoffset: -95; opacity: 1; } 80%, 100% { stroke-dashoffset: -100; opacity: 0; } }
+  @keyframes flow-update { 0%, 4% { stroke-dashoffset: 1; } 13%, 90% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 1; } }
+  @keyframes flow-task { 0%, 36% { stroke-dashoffset: 1; } 46%, 90% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 1; } }
+  @keyframes flow-summary { 0%, 65% { stroke-dashoffset: 1; } 80%, 90% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 1; } }
   .flow-art svg { width: 100%; height: auto; overflow: visible; }
   .flow-art text { font-family: var(--sans); fill: var(--ink); }
   .flow-art text[fill] { fill: revert-layer; }
@@ -340,6 +353,10 @@ section.integration-details { width: min(1180px,calc(100% - 2.5rem)); max-width:
 section.integration-details h2 { max-width: 40rem; font-size: clamp(1.7rem,3vw,2.5rem); }
 section.integration-details p { max-width: 60rem; }
 @layer utilities {
+  @media (prefers-reduced-motion: reduce) {
+    .team-flow .flow-art, .team-flow .flow-art * { animation: none !important; }
+    .flow-signal, .flow-motion-control { display: none; }
+  }
   @media (max-width: 960px) {
     .hero { grid-template-columns: 1fr; padding-block: 3.5rem; gap: 2.5rem; }
     .hero-visual { max-width: 540px; }

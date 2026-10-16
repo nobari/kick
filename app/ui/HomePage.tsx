@@ -75,7 +75,7 @@ const faqs = [
   {
     question: "Which Slack commands does Kick provide?",
     answer:
-      "The published commands are /sync, /kudos, /coins and /pick. Ten more are configured in an unpublished Slack draft: /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /timeoff. Use their tools through Kick Home until the Marketplace update is approved and published. Every command supports help.",
+      "Kick provides fourteen published commands: /sync, /kudos, /coins, /pick, /todo, /poll, /report, /plan, /decision, /handoff, /approve, /onboard, /oneonone and /timeoff. Open their tools directly or through Kick Home. Every command supports help.",
   },
   {
     question: "Does Kick require a separate account?",
@@ -199,8 +199,8 @@ export default function HomePage() {
       <RitualFeatures />
       <section className="integration-details" aria-labelledby="command-release">
         <h2 id="command-release">Less navigating. More getting things done.</h2>
-        <p>Kick’s next command update brings <code>/todo</code>, <code>/poll</code>, <code>/report</code>, <code>/plan</code>, <code>/decision</code>, <code>/handoff</code>, <code>/approve</code>, <code>/onboard</code>, <code>/oneonone</code> and <code>/timeoff</code> to focused Slack forms.</p>
-        <p>Try a private task with <code>/todo mine</code>, prepare a team report with <code>/report week</code>, or review requests with <code>/approve pending</code>. These shortcuts are configured in an unpublished Slack draft and await approval and publication; their tools are already available in Kick Home.</p>
+        <p>Go straight to focused Slack forms with <code>/todo</code>, <code>/poll</code>, <code>/report</code>, <code>/plan</code>, <code>/decision</code>, <code>/handoff</code>, <code>/approve</code>, <code>/onboard</code>, <code>/oneonone</code> and <code>/timeoff</code>.</p>
+        <p>Try a private task with <code>/todo mine</code>, prepare a team report with <code>/report week</code>, or review requests with <code>/approve pending</code>. All fourteen commands are published. You can also open these tools from Kick Home.</p>
         <p>The refreshed interface includes clear sharing notices, native date and time controls, visible status choices, weekday checkboxes, and paginated task tables where Slack supports them. <a href="/get-started#command-reference">See every command and how it works →</a></p>
       </section>
 
